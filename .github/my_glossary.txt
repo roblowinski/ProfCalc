@@ -1,0 +1,7 @@
+POR: Period of Record - the span of dates for which data is available at a station.
+BMAP: Bathymetric Mapping and Analysis Program - a tool for processing coastal survey data.
+chunk: A subset of a larger data range, used to break up downloads into manageable pieces.
+parameter: A USGS water data variable, such as streamflow (00060), gage height (00065), etc.
+station: A USGS monitoring location identified by an 8-15 digit station ID.
+scan code: Review the entire file for the requested pattern or issue, not just the selected excerpt.
+progress bar: A visual indicator showing the percentage of completion for a task.
