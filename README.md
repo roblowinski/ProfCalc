@@ -18,6 +18,7 @@ This package includes tools for beach profile analysis, beachfill construction m
 To get started, clone the repository and install the required dependencies:
 
 ```bash
-git clone https://github.com/yourusername/profile_analysis.git
-cd profile_analysis
+git clone https://github.com/yourusername/profcalc.git
+cd profcalc
 pip install -r requirements.txt
+```

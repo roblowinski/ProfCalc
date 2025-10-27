@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+"""
+Profile Calculator - Main Entry Point
+
+This is the main executable for the Profile Calculator system.
+Run without arguments to launch the interactive menu, or use quick tool flags
+for command-line analysis.
+"""
+
+import sys
+from pathlib import Path
+
+# Add src directory to path if running as script
+if __name__ == "__main__":
+    script_dir = Path(__file__).parent
+    src_dir = script_dir / "src"
+    if src_dir.exists():
+        sys.path.insert(0, str(src_dir))
+
+from profile_analysis.cli import main
+
+if __name__ == "__main__":
+    main()

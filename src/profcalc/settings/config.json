@@ -1,0 +1,14 @@
+{
+    "version": "0.1.0",
+    "project_name": "profcalc",
+    "description": "Application-level configuration for profcalc project. Currently unused - placeholder for future expansion.",
+    "default_units": {
+      "horizontal": "feet",
+      "vertical": "feet"
+    },
+    "paths": {
+      "data": "./data/",
+      "output": "./output/"
+    },
+    "_comment": "Application configuration - project metadata and paths. Not currently used by production code."
+  }
