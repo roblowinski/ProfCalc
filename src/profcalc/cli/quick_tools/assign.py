@@ -1,397 +1,391 @@
 """
-Assign XYZ Points - Assign scattered XYZ points to profile lines.
+Assign Profile Names - Assign profile names to XYZ/CSV files missing profile IDs.
 
-Uses perpendicular distance calculations to assign survey points to their
-nearest profile baseline. Requires baseline data (origin coordinates and azimuths).
+Automatically groups points into profiles based on spatial clustering and assigns
+meaningful profile names. Useful for raw survey data without profile identification.
 """
 
 import argparse
-from typing import NamedTuple
+from pathlib import Path
+from typing import List
 
 import numpy as np
 import pandas as pd
 
+# Optional sklearn imports
+try:
+    from sklearn.cluster import DBSCAN
+    from sklearn.preprocessing import StandardScaler
 
-class ProfileBaseline(NamedTuple):
-    """Profile baseline definition."""
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
 
-    name: str
-    origin_x: float
-    origin_y: float
-    azimuth: float  # degrees from north
-
-
-class XYZPoint(NamedTuple):
-    """XYZ survey point."""
-
-    x: float
-    y: float
-    z: float
+from profcalc.common.bmap_io import Profile
 
 
 def execute_from_cli(args: list[str]) -> None:
     """
-    Execute XYZ point assignment from command line.
+    Execute profile name assignment from command line.
 
     Args:
         args: Command-line arguments (excluding the -a flag)
     """
     parser = argparse.ArgumentParser(
         prog="profcalc -a",
-        description="Assign XYZ points to profile lines using perpendicular distance",
+        description="Assign profile names to XYZ/CSV files missing profile IDs",
     )
-    parser.add_argument("xyz_file", help="XYZ data file (space or comma separated)")
     parser.add_argument(
-        "--baseline", required=True, help="Baseline CSV file (name,x,y,azimuth)"
+        "input_file", help="Input XYZ/CSV file without profile names"
     )
-    parser.add_argument("-o", "--output", required=True, help="Output BMAP file path")
     parser.add_argument(
-        "-t",
-        "--tolerance",
+        "-o", "--output", required=True, help="Output file path"
+    )
+    parser.add_argument(
+        "--method",
+        choices=["spatial", "distance"],
+        default="spatial",
+        help="Clustering method: spatial (DBSCAN) or distance-based (default: spatial)",
+    )
+    parser.add_argument(
+        "--eps",
         type=float,
-        default=10.0,
-        help="Maximum perpendicular distance in feet (default: 10.0)",
+        default=50.0,
+        help="DBSCAN epsilon parameter for spatial clustering (feet, default: 50.0)",
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Show detailed assignment info"
+        "--min-samples",
+        type=int,
+        default=5,
+        help="DBSCAN minimum samples parameter (default: 5)",
+    )
+    parser.add_argument(
+        "--prefix",
+        default="Profile",
+        help="Profile name prefix (default: 'Profile')",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show detailed clustering info",
     )
 
     parsed_args = parser.parse_args(args)
 
-    print(f"🔍 Reading XYZ points from: {parsed_args.xyz_file}")
-    print(f"📐 Reading baselines from: {parsed_args.baseline}")
-    print(f"📏 Tolerance: {parsed_args.tolerance} ft")
+    print(f"🔍 Reading points from: {parsed_args.input_file}")
+    print(f"📐 Clustering method: {parsed_args.method}")
+    if parsed_args.method == "spatial":
+        print(f"   DBSCAN eps: {parsed_args.eps} ft")
+        print(f"   DBSCAN min_samples: {parsed_args.min_samples}")
 
-    # Read data
-    xyz_points = read_xyz_points(parsed_args.xyz_file)
-    baselines = read_baseline_csv(parsed_args.baseline)
+    # Read input file
+    points_df = read_points_file(parsed_args.input_file)
+    print(f"   Found {len(points_df)} points")
 
-    print(f"   Found {len(xyz_points)} XYZ points")
-    print(f"   Found {len(baselines)} profile baseline(s)")
-
-    # Assign points to profiles
-    assignments = assign_points_to_profiles(
-        xyz_points, baselines, tolerance=parsed_args.tolerance
+    # Assign profiles using clustering
+    profiles = assign_profiles_by_clustering(
+        points_df,
+        method=parsed_args.method,
+        eps=parsed_args.eps,
+        min_samples=parsed_args.min_samples,
+        prefix=parsed_args.prefix,
+        verbose=parsed_args.verbose,
     )
 
-    # Generate report
+    print(f"\n📊 Created {len(profiles)} profiles")
+
+    # Write output
+    print(f"💾 Writing output: {parsed_args.output}")
+    write_output_with_profiles(
+        profiles, parsed_args.output, parsed_args.input_file
+    )
+
+    print("✅ Profile assignment complete!")
+
+
+def execute_from_menu() -> None:
+    """Execute profile name assignment from interactive menu."""
     print("\n" + "=" * 60)
-    print("ASSIGNMENT SUMMARY")
+    print("PROFILE NAME ASSIGNMENT")
     print("=" * 60)
+    print("Assign profile names to XYZ/CSV files missing profile IDs.")
+    print("Uses spatial clustering to group points into logical profiles.")
 
-    total_assigned = 0
-    for profile_name, points in assignments.items():
-        print(f"  {profile_name}: {len(points)} points")
-        total_assigned += len(points)
+    # Get user inputs
+    input_file = input("Enter input file path (XYZ/CSV): ").strip()
+    output_file = input("Enter output file path: ").strip()
 
-    unassigned = len(xyz_points) - total_assigned
-    if unassigned > 0:
-        print(f"  Unassigned: {unassigned} points (exceeded tolerance)")
+    method_choice = (
+        input("\nClustering method (spatial/distance) [spatial]: ")
+        .strip()
+        .lower()
+    )
+    method = "spatial" if method_choice != "distance" else "distance"
 
-    print(f"\nTotal: {total_assigned}/{len(xyz_points)} points assigned")
+    if method == "spatial":
+        eps_input = input(
+            "DBSCAN epsilon (spatial distance in feet) [50.0]: "
+        ).strip()
+        eps = float(eps_input) if eps_input else 50.0
 
-    # Convert to BMAP profiles and write
-    print(f"\n💾 Writing BMAP file: {parsed_args.output}")
-    profiles = convert_to_bmap_profiles(assignments, baselines)
-    write_bmap_output(profiles, parsed_args.output, source_file=parsed_args.xyz_file)
+        min_samples_input = input("DBSCAN minimum samples [5]: ").strip()
+        min_samples = int(min_samples_input) if min_samples_input else 5
+    else:
+        eps = 50.0
+        min_samples = 5
 
-    print("✅ Assignment complete!")
+    prefix = input("Profile name prefix [Profile]: ").strip()
+    prefix = prefix if prefix else "Profile"
 
+    verbose = (
+        input("Show detailed clustering info? (y/n) [n]: ").strip().lower()
+        == "y"
+    )
 
-def read_xyz_points(file_path: str) -> list[XYZPoint]:
-    """
-    Read XYZ points from file.
+    try:
+        print(f"\n🔍 Reading points from: {input_file}")
 
-    Supports space or comma separated format:
-    X Y Z
-    or
-    X,Y,Z
+        # Read input file
+        points_df = read_points_file(input_file)
+        print(f"   Found {len(points_df)} points")
 
-    Args:
-        file_path: Path to XYZ file
-
-    Returns:
-        List of XYZPoint objects
-    """
-    points = []
-
-    with open(file_path) as f:
-        for line_num, line in enumerate(f, 1):
-            line = line.strip()
-            if not line or line.startswith("#") or line.startswith(">"):
-                continue
-
-            # Replace commas with spaces and split
-            parts = line.replace(",", " ").split()
-
-            try:
-                if len(parts) >= 3:
-                    x, y, z = float(parts[0]), float(parts[1]), float(parts[2])
-                    points.append(XYZPoint(x, y, z))
-            except ValueError:
-                print(f"Warning: Skipping invalid line {line_num}: {line}")
-                continue
-
-    return points
-
-
-def read_baseline_csv(file_path: str) -> list[ProfileBaseline]:
-    """
-    Read profile baseline data from CSV.
-
-    Expected format:
-    profile_name,origin_x,origin_y,azimuth
-
-    Args:
-        file_path: Path to baseline CSV file
-
-    Returns:
-        List of ProfileBaseline objects
-    """
-    baselines = []
-
-    df = pd.read_csv(file_path, thousands=",")
-
-    # Normalize column names (handle case variations and Origin_X vs origin_x)
-    df.columns = df.columns.str.lower().str.replace("origin_", "origin")
-
-    # Check for required columns (flexible naming)
-    name_col = None
-    x_col = None
-    y_col = None
-    az_col = None
-
-    for col in df.columns:
-        if "name" in col:
-            name_col = col
-        elif col in ["originx", "origin_x", "x"]:
-            x_col = col
-        elif col in ["originy", "origin_y", "y"]:
-            y_col = col
-        elif "azimuth" in col or col == "az":
-            az_col = col
-
-    if not all([name_col, x_col, y_col, az_col]):
-        raise ValueError(
-            f"Baseline CSV must have columns for: profile_name, origin_x, origin_y, azimuth\n"
-            f"Found: {', '.join(df.columns)}"
+        # Assign profiles
+        profiles = assign_profiles_by_clustering(
+            points_df,
+            method=method,
+            eps=eps,
+            min_samples=min_samples,
+            prefix=prefix,
+            verbose=verbose,
         )
 
-    # Type assertions for mypy
-    assert name_col is not None
-    assert x_col is not None
-    assert y_col is not None
-    assert az_col is not None
+        print(f"\n📊 Created {len(profiles)} profiles")
 
-    for _, row in df.iterrows():
-        baselines.append(
-            ProfileBaseline(
-                name=str(row[name_col]),
-                origin_x=float(row[x_col]),
-                origin_y=float(row[y_col]),
-                azimuth=float(row[az_col]),
+        # Write output
+        print(f"💾 Writing output: {output_file}")
+        write_output_with_profiles(profiles, output_file, input_file)
+
+        print("\n✅ Profile assignment complete!")
+        print(f"   Output saved to: {output_file}")
+
+    except FileNotFoundError:
+        print(f"\n❌ Error: Input file not found: {input_file}")
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+
+    input("\nPress Enter to continue...")
+
+
+def read_points_file(file_path: str) -> pd.DataFrame:
+    """
+    Read XYZ or CSV file containing point data.
+
+    Args:
+        file_path: Path to input file
+
+    Returns:
+        DataFrame with columns: x, y, z (and any extra columns)
+    """
+    path = Path(file_path)
+
+    if path.suffix.lower() == ".csv":
+        df = pd.read_csv(file_path)
+        # Try to detect coordinate columns
+        coord_cols = []
+        for col in df.columns:
+            col_lower = col.lower()
+            if "x" in col_lower and "coord" not in col_lower:
+                coord_cols.append(("x", col))
+            elif "y" in col_lower and "coord" not in col_lower:
+                coord_cols.append(("y", col))
+            elif (
+                "z" in col_lower or "elev" in col_lower or "depth" in col_lower
+            ):
+                coord_cols.append(("z", col))
+
+        if len(coord_cols) < 3:
+            raise ValueError("Could not identify X, Y, Z columns in CSV file")
+
+        # Rename to standard names
+        rename_dict = {col: name for name, col in coord_cols}
+        df = df.rename(columns=rename_dict)
+
+    else:
+        # Assume XYZ format (space/comma separated)
+        df = pd.read_csv(file_path, sep=r"\s+|,", engine="python", header=None)
+        if df.shape[1] < 3:
+            raise ValueError("XYZ file must have at least 3 columns (X, Y, Z)")
+
+        df.columns = pd.Index(
+            ["x", "y", "z"] + [f"extra_{i}" for i in range(df.shape[1] - 3)]
+        )
+
+    # Ensure numeric types
+    for col in ["x", "y", "z"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    df = df.dropna(subset=["x", "y", "z"])
+
+    return df
+
+
+def assign_profiles_by_clustering(
+    points_df: pd.DataFrame,
+    method: str = "spatial",
+    eps: float = 50.0,
+    min_samples: int = 5,
+    prefix: str = "Profile",
+    verbose: bool = False,
+) -> List[Profile]:
+    """
+    Assign profile names using spatial clustering.
+
+    Args:
+        points_df: DataFrame with x, y, z columns
+        method: Clustering method ("spatial" or "distance")
+        eps: DBSCAN epsilon parameter
+        min_samples: DBSCAN minimum samples parameter
+        prefix: Profile name prefix
+        verbose: Show detailed info
+
+    Returns:
+        List of Profile objects with assigned names
+    """
+    if method == "spatial":
+        if not SKLEARN_AVAILABLE:
+            print(
+                "❌ Error: sklearn required for spatial clustering. Install with: pip install scikit-learn"
             )
-        )
+            raise ImportError("sklearn not available")
 
-    return baselines
+        # Use DBSCAN for spatial clustering
+        coords = points_df[["x", "y"]].values
+        scaler = StandardScaler()
+        coords_scaled = scaler.fit_transform(coords)
 
+        dbscan = DBSCAN(eps=eps / 1000.0, min_samples=min_samples)  # Scale eps
+        clusters = dbscan.fit_predict(coords_scaled)
 
-def assign_points_to_profiles(
-    points: list[XYZPoint],
-    baselines: list[ProfileBaseline],
-    tolerance: float = 10.0,
-) -> dict[str, list[tuple[float, float]]]:
-    """
-    Assign XYZ points to profiles using perpendicular distance.
+        if verbose:
+            n_clusters = len(set(clusters)) - (1 if -1 in clusters else 0)
+            n_noise = list(clusters).count(-1)
+            print(
+                f"   DBSCAN found {n_clusters} clusters, {n_noise} noise points"
+            )
 
-    For each point, calculates the perpendicular distance to each profile
-    baseline and assigns to the nearest profile if within tolerance.
+    else:
+        # Simple distance-based clustering (group by Y coordinate ranges)
+        y_coords = points_df["y"].values
+        y_sorted = np.sort(np.array(y_coords))  # Convert to numpy array first
+        y_diffs = np.diff(y_sorted)
 
-    Args:
-        points: List of XYZ points to assign
-        baselines: List of profile baselines
-        tolerance: Maximum perpendicular distance in feet
+        # Find gaps larger than eps
+        gap_indices = np.where(y_diffs > eps)[0] + 1
+        cluster_bounds = np.concatenate([[0], gap_indices, [len(y_sorted)]])
 
-    Returns:
-        Dictionary mapping profile names to lists of (along_profile_distance, elevation) tuples
-    """
-    assignments: dict[str, list[tuple[float, float]]] = {
-        baseline.name: [] for baseline in baselines
-    }
+        clusters = np.zeros(len(points_df), dtype=int)
+        for i, (start, end) in enumerate(
+            zip(cluster_bounds[:-1], cluster_bounds[1:])
+        ):
+            # Use end-1 to avoid index out of bounds, since end can equal len(y_sorted)
+            upper_bound = (
+                y_sorted[end - 1]
+                if end < len(y_sorted)
+                else y_sorted[-1] + eps
+            )
+            mask = (y_coords >= y_sorted[start]) & (y_coords <= upper_bound)
+            clusters[mask] = i
 
-    for point in points:
-        best_profile = None
-        best_distance = float("inf")
-        best_along_dist = 0.0
+        if verbose:
+            n_clusters = len(set(clusters))
+            print(f"   Distance-based clustering found {n_clusters} profiles")
 
-        # Find nearest profile
-        for baseline in baselines:
-            perp_dist, along_dist = calculate_distances(point, baseline)
-
-            if abs(perp_dist) < abs(best_distance):
-                best_distance = perp_dist
-                best_profile = baseline.name
-                best_along_dist = along_dist
-
-        # Assign if within tolerance
-        if best_profile and abs(best_distance) <= tolerance:
-            assignments[best_profile].append((best_along_dist, point.z))
-
-    return assignments
-
-
-def calculate_distances(
-    point: XYZPoint, baseline: ProfileBaseline
-) -> tuple[float, float]:
-    """
-    Calculate perpendicular and along-profile distances.
-
-    Uses coordinate transformation to rotate the point into the profile's
-    local coordinate system where the profile runs along the X-axis.
-
-    Args:
-        point: XYZ point
-        baseline: Profile baseline
-
-    Returns:
-        Tuple of (perpendicular_distance, along_profile_distance)
-    """
-    # Convert azimuth to radians (measured clockwise from North)
-    # In standard math, angles are counterclockwise from East
-    # Azimuth: 0° = North, 90° = East, 180° = South, 270° = West
-    # We need to convert to standard mathematical angle
-    math_angle = np.radians(90 - baseline.azimuth)
-
-    # Translate point to baseline origin
-    dx = point.x - baseline.origin_x
-    dy = point.y - baseline.origin_y
-
-    # Rotate to profile coordinate system
-    cos_theta = np.cos(math_angle)
-    sin_theta = np.sin(math_angle)
-
-    # Along-profile distance (X' in rotated system)
-    along_dist = dx * cos_theta + dy * sin_theta
-
-    # Perpendicular distance (Y' in rotated system)
-    perp_dist = -dx * sin_theta + dy * cos_theta
-
-    return perp_dist, along_dist
-
-
-def convert_to_bmap_profiles(
-    assignments: dict[str, list[tuple[float, float]]], baselines: list[ProfileBaseline]
-) -> list:
-    """
-    Convert assigned points to BMAP Profile objects.
-
-    Args:
-        assignments: Dictionary of profile assignments
-        baselines: List of profile baselines (for ordering)
-
-    Returns:
-        List of Profile objects
-    """
-    from profcalc.common.bmap_io import Profile
-
+    # Create profiles from clusters
     profiles = []
+    unique_clusters = sorted(set(clusters))
 
-    # Process in baseline order
-    for baseline in baselines:
-        points = assignments.get(baseline.name, [])
-
-        if not points:
+    for cluster_id in unique_clusters:
+        if cluster_id == -1:  # Noise points
             continue
 
-        # Sort by along-profile distance
-        points.sort(key=lambda p: p[0])
+        mask = clusters == cluster_id
+        cluster_points = points_df[mask]
 
-        # Extract coordinates
-        x_coords = np.array([p[0] for p in points])
-        z_coords = np.array([p[1] for p in points])
+        # Sort by x coordinate
+        cluster_points = cluster_points.sort_values("x")
 
-        profiles.append(
-            Profile(
-                name=baseline.name,
-                date=None,
-                description="Assigned from XYZ",
-                x=x_coords,
-                z=z_coords,
-            )
+        profile_name = f"{prefix}_{cluster_id + 1:03d}"
+
+        # Create Profile object
+        profile = Profile(
+            name=profile_name,
+            date=None,
+            description=f"Auto-assigned profile {cluster_id + 1}",
+            x=cluster_points["x"].values,
+            z=cluster_points["z"].values,
+            metadata={"y": cluster_points["y"].values},
         )
+
+        profiles.append(profile)
+
+        if verbose:
+            print(f"   {profile_name}: {len(cluster_points)} points")
 
     return profiles
 
 
-def write_bmap_output(profiles: list, output_file: str, source_file: str | None = None) -> None:
+def write_output_with_profiles(
+    profiles: List[Profile], output_file: str, source_file: str
+) -> None:
     """
-    Write profiles to BMAP format file.
+    Write profiles to output file in appropriate format.
 
     Args:
         profiles: List of Profile objects
         output_file: Output file path
-        source_file: Optional source XYZ filename for date extraction
+        source_file: Original input file path
     """
-    from profcalc.common.bmap_io import write_bmap_profiles
+    output_path = Path(output_file)
 
-    write_bmap_profiles(profiles, output_file, source_filename=source_file)
+    if output_path.suffix.lower() == ".csv":
+        # Write as CSV
+        all_data = []
+        for profile in profiles:
+            for i in range(len(profile.x)):
+                row = {
+                    "profile": profile.name,
+                    "x": profile.x[i],
+                    "y": profile.metadata.get("y", [0.0] * len(profile.x))[i]
+                    if profile.metadata
+                    else 0.0,
+                    "z": profile.z[i],
+                }
+                all_data.append(row)
 
+        df = pd.DataFrame(all_data)
+        df.to_csv(output_file, index=False)
 
-def execute_from_menu() -> None:
-    """Execute XYZ point assignment from interactive menu."""
-    print("\n" + "=" * 60)
-    print("ASSIGN XYZ POINTS TO PROFILES")
-    print("=" * 60)
+    elif output_path.suffix.lower() in [".xyz", ""]:
+        # Write as XYZ format
+        lines = []
+        for profile in profiles:
+            lines.append(f"> {profile.name}")
+            for i in range(len(profile.x)):
+                y_val = (
+                    profile.metadata.get("y", [0.0] * len(profile.x))[i]
+                    if profile.metadata
+                    else 0.0
+                )
+                lines.append(
+                    f"{profile.x[i]:.2f} {y_val:.2f} {profile.z[i]:.2f}"
+                )
 
-    # Get user inputs
-    xyz_file = input("Enter XYZ data file path: ").strip()
-    baseline_file = input("Enter baseline CSV file path: ").strip()
-    output_file = input("Enter output BMAP file path: ").strip()
+        output_path.write_text("\n".join(lines))
 
-    tolerance_input = input("Maximum perpendicular distance (ft) [10.0]: ").strip()
-    tolerance = float(tolerance_input) if tolerance_input else 10.0
+    else:
+        # Default to BMAP format
+        from profcalc.common.bmap_io import write_bmap_profiles
 
-    try:
-        print("\n🔄 Processing point assignments...")
-
-        # Read data
-        xyz_points = read_xyz_points(xyz_file)
-        baselines = read_baseline_csv(baseline_file)
-
-        print(f"   Found {len(xyz_points)} XYZ points")
-        print(f"   Found {len(baselines)} profile baseline(s)")
-
-        # Assign points
-        assignments = assign_points_to_profiles(xyz_points, baselines, tolerance)
-
-        # Show summary
-        print("\n" + "=" * 60)
-        print("ASSIGNMENT SUMMARY")
-        print("=" * 60)
-
-        total_assigned = 0
-        for profile_name, points in assignments.items():
-            print(f"  {profile_name}: {len(points)} points")
-            total_assigned += len(points)
-
-        unassigned = len(xyz_points) - total_assigned
-        if unassigned > 0:
-            print(f"  Unassigned: {unassigned} points (exceeded tolerance)")
-
-        print(f"\nTotal: {total_assigned}/{len(xyz_points)} points assigned")
-
-        # Write output
-        profiles = convert_to_bmap_profiles(assignments, baselines)
-        write_bmap_output(profiles, output_file, source_file=xyz_file)
-
-        print(f"\n✅ BMAP file written to: {output_file}")
-
-    except FileNotFoundError as e:
-        print(f"\n❌ Error: {e}")
-    except ValueError as e:
-        print(f"\n❌ Error: {e}")
-    except Exception as e:
-        print(f"\n❌ Unexpected error: {e}")
-
-    input("\nPress Enter to continue...")
-
+        write_bmap_profiles(profiles, output_file, source_filename=source_file)

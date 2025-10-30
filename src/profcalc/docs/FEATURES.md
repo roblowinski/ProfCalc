@@ -143,7 +143,7 @@ Calculate real-world coordinates from cross-shore distances:
 
 **Calculation:**
 
-```
+``` code
 real_x = origin_x + distance * cos(azimuth)
 real_y = origin_y + distance * sin(azimuth)
 ```
@@ -218,7 +218,7 @@ pytest src/profcalc/tests/ -v
 
 ### BMAP Format
 
-```
+``` input
 OC 117
 5
 0.0 5.67
@@ -238,7 +238,7 @@ OC117,50.0,2000.0,5.12,2024-10-26
 
 ### XYZ Format
 
-```
+``` input
 # Profile: OC 117
 # Date: 2024-10-26
 0.0 2000.0 5.67

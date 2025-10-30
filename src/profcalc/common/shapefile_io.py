@@ -17,6 +17,8 @@ import math
 from pathlib import Path
 from typing import List, Optional
 
+import numpy as np
+
 from profcalc.common.bmap_io import Profile
 
 try:
@@ -414,3 +416,190 @@ def validate_shapefile_export_requirements(
 
     return issues
 
+
+def read_point_shapefile(shapefile_path: Path) -> List[Profile]:
+    """
+    Read point shapefile and convert to Profile objects.
+
+    Supports Point and PointZ geometries. For Point geometries, Z values
+    are taken from a 'Z' or 'z' attribute field if available.
+
+    Parameters:
+        shapefile_path (Path): Path to the shapefile (.shp file)
+
+    Returns:
+        List[Profile]: List of Profile objects
+
+    Raises:
+        ImportError: If geopandas is not available
+        FileNotFoundError: If shapefile does not exist
+        ValueError: If shapefile format is invalid
+    """
+    _check_geopandas()
+
+    if not shapefile_path.exists():
+        raise FileNotFoundError(f"Shapefile not found: {shapefile_path}")
+
+    # Read shapefile
+    gdf = gpd.read_file(shapefile_path)
+
+    if gdf.empty:
+        raise ValueError("Shapefile contains no features")
+
+    # Check geometry type
+    geom_types = gdf.geometry.type.unique()
+    if not all(t in ["Point", "PointZ"] for t in geom_types):
+        raise ValueError(
+            f"Unsupported geometry types: {geom_types}. Only Point and PointZ are supported."
+        )
+
+    # Group by profile identifier
+    profile_column = None
+    possible_profile_cols = [
+        "profile",
+        "profile_name",
+        "profile_id",
+        "id",
+        "name",
+    ]
+
+    for col in possible_profile_cols:
+        if col in gdf.columns:
+            profile_column = col
+            break
+
+    if profile_column is None:
+        # If no profile column found, treat all points as one profile
+        profile_column = "profile"
+        gdf[profile_column] = "Profile_1"
+
+    profiles = []
+
+    for profile_name, group in gdf.groupby(profile_column):
+        points = []
+
+        for _, row in group.iterrows():
+            geom = row.geometry
+            if geom is None:
+                continue
+
+            # Get coordinates
+            if hasattr(geom, "z") and geom.z is not None:
+                # PointZ geometry
+                x, y, z = geom.x, geom.y, geom.z
+            else:
+                # Point geometry - try to get Z from attributes
+                x, y = geom.x, geom.y
+                z = row.get(
+                    "Z",
+                    row.get(
+                        "z", row.get("elevation", row.get("Elevation", 0.0))
+                    ),
+                )
+
+            points.append((x, y, z))
+
+        if not points:
+            continue
+
+        # Sort points by X coordinate (assuming profile direction)
+        points.sort(key=lambda p: p[0])
+
+        # Extract coordinates
+        x_coords = [p[0] for p in points]
+        y_coords = [p[1] for p in points]
+        z_coords = [p[2] for p in points]
+
+        # Create profile
+        profile = Profile(
+            name=str(profile_name),
+            date=None,
+            description=None,
+            x=np.array(x_coords),
+            z=np.array(z_coords),
+            metadata={"y": y_coords},
+        )
+
+        profiles.append(profile)
+
+    return profiles
+
+
+def read_line_shapefile(shapefile_path: Path) -> List[Profile]:
+    """
+    Read line shapefile and convert to Profile objects.
+
+    Supports LineString and LineStringZ geometries. For LineString geometries,
+    Z values are taken from a 'Z' or 'z' attribute field if available.
+
+    Parameters:
+        shapefile_path (Path): Path to the shapefile (.shp file)
+
+    Returns:
+        List[Profile]: List of Profile objects
+
+    Raises:
+        ImportError: If geopandas is not available
+        FileNotFoundError: If shapefile does not exist
+        ValueError: If shapefile format is invalid
+    """
+    _check_geopandas()
+
+    if not shapefile_path.exists():
+        raise FileNotFoundError(f"Shapefile not found: {shapefile_path}")
+
+    # Read shapefile
+    gdf = gpd.read_file(shapefile_path)
+
+    if gdf.empty:
+        raise ValueError("Shapefile contains no features")
+
+    # Check geometry type
+    geom_types = gdf.geometry.type.unique()
+    if not all(t in ["LineString", "LineStringZ"] for t in geom_types):
+        raise ValueError(
+            f"Unsupported geometry types: {geom_types}. Only LineString and LineStringZ are supported."
+        )
+
+    profiles = []
+
+    for idx, row in gdf.iterrows():
+        geom = row.geometry
+        if geom is None:
+            continue
+
+        # Get profile name
+        profile_name = row.get(
+            "profile",
+            row.get("profile_name", row.get("name", f"Profile_{idx + 1}")),
+        )
+
+        # Extract coordinates
+        coords = list(geom.coords)
+
+        if hasattr(geom, "has_z") and geom.has_z:
+            # LineStringZ
+            x_coords = [c[0] for c in coords]
+            y_coords = [c[1] for c in coords]
+            z_coords = [c[2] for c in coords]
+        else:
+            # LineString - try to get Z from attributes or set to 0
+            x_coords = [c[0] for c in coords]
+            y_coords = [c[1] for c in coords]
+            z_coords = [
+                row.get("Z", row.get("z", row.get("elevation", 0.0)))
+            ] * len(coords)
+
+        # Create profile
+        profile = Profile(
+            name=str(profile_name),
+            date=None,
+            description=None,
+            x=np.array(x_coords),
+            z=np.array(z_coords),
+            metadata={"y": y_coords},
+        )
+
+        profiles.append(profile)
+
+    return profiles

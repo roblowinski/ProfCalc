@@ -29,6 +29,8 @@ from .error_handler import (
     get_logger,
     validate_array_properties,
 )
+from .file_parser import ParsedFile
+from .file_parser import parse_file as parse_file_centralized
 
 
 def extract_date_from_filename(filename: str) -> Optional[str]:
@@ -461,12 +463,35 @@ def read_bmap_profiles(file_path: str | Path, config: dict[str, Any] | None = No
 def is_header_line(line: str) -> bool:
     """
     Returns True if a line likely marks the start of a new profile block.
-    (First token is non-numeric, typically profile name like '334+00' or 'MA001'.)
+
+    Improved logic to correctly identify headers vs coordinates:
+    - Headers: Multi-part lines (profile name + optional date/description)
+    - Count lines: Single integer numbers
+    - Coordinate lines: Two numeric values (X Z coordinates)
     """
     if not line.strip():
         return False
-    first = line.strip().split()[0]
-    return not re.match(r"^[+-]?\d", first)
+
+    parts = line.strip().split()
+
+    # If only one part, check if it's a count (single integer)
+    if len(parts) == 1:
+        return not parts[
+            0
+        ].isdigit()  # If it's not a digit, it might be a header
+
+    # If exactly two parts, check if they're both numeric (coordinate pair)
+    if len(parts) == 2:
+        try:
+            float(parts[0])
+            float(parts[1])
+            return False  # Two numbers = coordinate line, not header
+        except ValueError:
+            pass  # Not numeric, could be header
+
+    # Multi-part lines are likely headers (unless they're all numbers)
+    # Headers typically have profile names that may include numbers but also text
+    return True
 
 
 def parse_header(line: str):
@@ -539,66 +564,78 @@ def parse_header(line: str):
     return name, date, desc
 
 
+def _convert_parsed_file_to_profiles(parsed_file: ParsedFile) -> List[Profile]:
+    """
+    Convert a ParsedFile object to the legacy Profile format expected by existing tools.
+
+    Args:
+        parsed_file: ParsedFile from the centralized parser
+
+    Returns:
+        List of Profile objects in the legacy format
+    """
+    profiles = []
+
+    for profile_dict in parsed_file.profiles:
+        # Extract profile name/ID
+        name = profile_dict.get("profile_id", "UNKNOWN")
+
+        # Extract date if available
+        date = profile_dict.get("date")
+
+        # Create description from available metadata
+        desc_parts = []
+        if profile_dict.get("purpose"):
+            desc_parts.append(profile_dict["purpose"])
+        if profile_dict.get("raw_header"):
+            desc_parts.append(profile_dict["raw_header"])
+        desc = " ".join(desc_parts) if desc_parts else None
+
+        # Extract coordinates
+        coordinates = profile_dict.get("coordinates", [])
+        if coordinates:
+            # Convert coordinate dicts to separate x, z arrays
+            x_vals = []
+            z_vals = []
+
+            for coord in coordinates:
+                if "x" in coord and "y" in coord:
+                    x_vals.append(coord["x"])
+                    # For BMAP format, we typically use Y as Z (elevation)
+                    z_vals.append(coord.get("z", coord.get("y", 0)))
+                elif "x" in coord and "z" in coord:
+                    x_vals.append(coord["x"])
+                    z_vals.append(coord["z"])
+
+            if x_vals and z_vals:
+                profiles.append(
+                    Profile(
+                        name=name,
+                        date=date,
+                        description=desc,
+                        x=np.array(x_vals, dtype=float),
+                        z=np.array(z_vals, dtype=float),
+                        metadata=profile_dict.get("metadata"),
+                    )
+                )
+
+    return profiles
+
+
 def read_bmap_freeformat(file_path: str) -> List[Profile]:
     """
     Reads a BMAP Free Format file with one or more profiles.
     Automatically corrects for mismatched point counts.
+
+    Now uses the centralized format detection and parsing system.
     """
-    logger = get_logger(LogComponent.FILE_IO)
-    profiles: List[Profile] = []
-    with open(file_path, "r") as f:
-        lines = [ln.rstrip() for ln in f if ln.strip()]
+    # Use the centralized parser
+    parsed_file = parse_file_centralized(
+        Path(file_path), skip_confirmation=True
+    )
 
-    i = 0
-    while i < len(lines):
-        # Skip to next header
-        if not is_header_line(lines[i]):
-            i += 1
-            continue
-
-        header_line = lines[i]
-        name, date, desc = parse_header(header_line)
-        i += 1
-        if i >= len(lines):
-            break
-
-        # Try to read declared point count
-        n_declared = None
-        if re.match(r"^\d+$", lines[i].strip()):
-            n_declared = int(lines[i].strip())
-            i += 1
-
-        # Read until next header or EOF
-        x_vals, z_vals = [], []
-        skipped_lines = 0
-        while i < len(lines) and not is_header_line(lines[i]):
-            parts = lines[i].split()
-            if len(parts) >= 2:
-                try:
-                    x_vals.append(float(parts[0]))
-                    z_vals.append(float(parts[1]))
-                except ValueError as e:
-                    logger.warning(
-                        f"Skipping invalid coordinate line {i + 1} in {file_path}: '{lines[i].strip()}' - {e}"
-                    )
-                    skipped_lines += 1
-            i += 1
-
-        # Report skipped lines for this profile
-        if skipped_lines > 0:
-            logger.warning(
-                f"Skipped {skipped_lines} invalid coordinate lines in profile '{name}' from {file_path}"
-            )
-
-        # Fix if declared count mismatched
-        if n_declared is not None and n_declared != len(x_vals):
-            print(f"??  Profile {name}: declared {n_declared} points, found {len(x_vals)}. Using actual count.")
-
-        if x_vals and name is not None:
-            profiles.append(Profile(name, date, desc,
-                                    np.array(x_vals, dtype=float),
-                                    np.array(z_vals, dtype=float)))
-    return profiles
+    # Convert to legacy Profile format
+    return _convert_parsed_file_to_profiles(parsed_file)
 
 
 def write_bmap_profiles(

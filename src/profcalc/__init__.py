@@ -12,5 +12,8 @@ Primary namespaces:
 
 __version__ = "0.9.0"
 __author__ = "U.S. Army Corps of Engineers, Philadelphia District"
-__all__ = ["common", "tools", "docs"]
+__all__ = ["common", "tools", "docs", "main"]
+
+# Import main CLI entry point
+from .cli import main
 

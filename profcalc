@@ -17,7 +17,12 @@ if __name__ == "__main__":
     if src_dir.exists():
         sys.path.insert(0, str(src_dir))
 
-from profile_analysis.cli import main
-
-if __name__ == "__main__":
-    main()
+    try:
+        from main import main
+        main()
+    except ImportError:
+        print("Error: Could not import main module. Make sure 'main.py' exists in the src directory.")
+        print(f"Script directory: {script_dir}")
+        print(f"Src directory: {src_dir}")
+        print(f"Src directory exists: {src_dir.exists()}")
+        sys.exit(1)

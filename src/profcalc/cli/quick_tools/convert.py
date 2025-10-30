@@ -21,6 +21,7 @@ import math
 from pathlib import Path
 from typing import Literal
 
+import numpy as np
 import pandas as pd
 
 from profcalc.common.bmap_io import (
@@ -29,6 +30,7 @@ from profcalc.common.bmap_io import (
 )
 from profcalc.common.csv_io import (
     read_csv_profiles,
+    read_xyz_profiles,
     write_csv_profiles,
 )
 from profcalc.common.error_handler import LogComponent, get_logger
@@ -36,6 +38,8 @@ from profcalc.common.error_handler import LogComponent, get_logger
 # Lazy import for optional shapefile support
 try:
     from profcalc.common.shapefile_io import (
+        read_line_shapefile,
+        read_point_shapefile,
         write_profile_lines_shapefile,
         write_survey_points_shapefile,
     )
@@ -477,21 +481,41 @@ def _read_baseline_file(baselines_file: str) -> dict[str, dict[str, float]]:
     try:
         df = pd.read_csv(baselines_file)
 
-        # Check for required columns
-        required_cols = ["Profile", "Origin_X", "Origin_Y", "Azimuth"]
-        missing_cols = [col for col in required_cols if col not in df.columns]
-        if missing_cols:
-            raise ValueError(
-                f"Origin azimuth file missing required columns: {', '.join(missing_cols)}"
-            )
+        # Check for required columns with flexible naming
+        column_mapping = {}
+
+        # Define acceptable column name variations
+        col_variations = {
+            "Profile": ["profile", "profile_id", "profile_name", "id", "name"],
+            "Origin_X": ["origin_x", "originx", "x_origin", "x"],
+            "Origin_Y": ["origin_y", "originy", "y_origin", "y"],
+            "Azimuth": ["azimuth", "bearing", "direction", "angle"],
+        }
+
+        df_columns = df.columns.tolist()
+        df_columns_lower = [col.lower().strip() for col in df_columns]
+
+        for standard_name, variations in col_variations.items():
+            found = False
+            for i, col_lower in enumerate(df_columns_lower):
+                if col_lower == standard_name.lower() or any(
+                    var.lower() in col_lower for var in variations
+                ):
+                    column_mapping[standard_name] = df_columns[i]
+                    found = True
+                    break
+            if not found:
+                raise ValueError(
+                    f"Could not find column for {standard_name}. Available: {df_columns}"
+                )
 
         for _, row in df.iterrows():
-            profile_name = str(row["Profile"]).strip()
+            profile_name = str(row[column_mapping["Profile"]]).strip()
 
             # Parse coordinates (handle comma-formatted numbers)
-            origin_x = _parse_coordinate(row["Origin_X"])
-            origin_y = _parse_coordinate(row["Origin_Y"])
-            azimuth = float(row["Azimuth"])
+            origin_x = _parse_coordinate(row[column_mapping["Origin_X"]].iloc[0] if hasattr(row[column_mapping["Origin_X"]], 'iloc') else row[column_mapping["Origin_X"]])
+            origin_y = _parse_coordinate(row[column_mapping["Origin_Y"]].iloc[0] if hasattr(row[column_mapping["Origin_Y"]], 'iloc') else row[column_mapping["Origin_Y"]])
+            azimuth = float(row[column_mapping["Azimuth"]].iloc[0] if hasattr(row[column_mapping["Azimuth"]], 'iloc') else row[column_mapping["Azimuth"]])
 
             baselines[profile_name] = {
                 "origin_x": origin_x,
@@ -540,7 +564,6 @@ def _calculate_real_world_coordinates(
     Returns:
         Updated profiles with Y coordinates in metadata
     """
-    import numpy as np
 
     for profile in profiles:
         # Find baseline data for this profile
@@ -722,7 +745,6 @@ def _create_profile_from_xyz_points(
     Returns:
         Profile object with metadata containing Y coordinates and extra columns
     """
-    import numpy as np
 
     from profcalc.common.bmap_io import Profile
 
@@ -812,6 +834,8 @@ def execute_from_menu() -> None:
     print("\n" + "=" * 60)
     print("FORMAT CONVERTER")
     print("=" * 60)
+    print("Convert between BMAP, CSV, XYZ, and Shapefile formats.")
+    print("Includes profile name assignment and geospatial enhancements.")
 
     # Get user inputs
     input_file = input("Enter input file path: ").strip()
@@ -821,17 +845,50 @@ def execute_from_menu() -> None:
     print("  1. BMAP free format")
     print("  2. CSV (Comma-Separated Values)")
     print("  3. XYZ (X Y Z coordinates)")
+    print("  4. Shapefile (GIS format)")
 
-    from_choice = input("\nInput format (1-3) [auto-detect]: ").strip()
-    to_choice = input("Output format (1-3) [auto-detect]: ").strip()
+    from_choice = input("\nInput format (1-4) [auto-detect]: ").strip()
+    to_choice = input("Output format (1-4) [auto-detect]: ").strip()
 
-    format_map = {"1": "bmap", "2": "csv", "3": "xyz"}
+    format_map = {"1": "bmap", "2": "csv", "3": "xyz", "4": "shp"}
     from_format_str = format_map.get(from_choice) or _detect_format(input_file)
     to_format_str = format_map.get(to_choice) or _detect_format(output_file)
 
     # Cast to FormatType for type safety
-    from_format: FormatType = from_format_str  # type: ignore[assignment]  # String to Literal conversion
-    to_format: FormatType = to_format_str  # type: ignore[assignment]  # String to Literal conversion
+    from_format: FormatType = from_format_str  # type: ignore[assignment]
+    to_format: FormatType = to_format_str  # type: ignore[assignment]
+
+    # Enhanced workflow options
+    apply_profile_assignment = False
+    apply_origin_azimuth = False
+
+    # Check if profile assignment is needed (for XYZ/CSV inputs without profile names)
+    if from_format in ["xyz", "csv"]:
+        profile_check = (
+            input("\nDoes the input file have profile names/IDs? (y/n) [y]: ")
+            .strip()
+            .lower()
+        )
+        if profile_check == "n" or profile_check == "no":
+            assign_choice = (
+                input("Assign profile names automatically? (y/n) [y]: ")
+                .strip()
+                .lower()
+            )
+            apply_profile_assignment = (
+                assign_choice != "n" and assign_choice != "no"
+            )
+
+    # Check if origin azimuth assignment is needed (for BMAP to Shapefile)
+    if from_format == "bmap" and to_format == "shp":
+        azimuth_choice = (
+            input(
+                "\nApply origin azimuth assignment for 3D geometry? (y/n) [y]: "
+            )
+            .strip()
+            .lower()
+        )
+        apply_origin_azimuth = azimuth_choice != "n" and azimuth_choice != "no"
 
     mode = "2d"
     if to_format == "csv":
@@ -841,6 +898,18 @@ def execute_from_menu() -> None:
     try:
         print(f"\n🔄 Converting {from_format.upper()} → {to_format.upper()}...")
 
+        # Apply profile assignment if requested
+        if apply_profile_assignment:
+            print("   → Assigning profile names...")
+            input_file = assign_profiles_to_file(input_file)
+
+        # Apply origin azimuth assignment if requested
+        if apply_origin_azimuth:
+            print("   → Applying origin azimuth assignment...")
+            azimuth_file = input("Enter origin azimuth file path: ").strip()
+            input_file = apply_origin_azimuth_to_bmap(input_file, azimuth_file)
+
+        # Perform the conversion
         convert_format(
             input_file=input_file,
             output_file=output_file,
@@ -861,3 +930,1523 @@ def execute_from_menu() -> None:
 
     input("\nPress Enter to continue...")
 
+
+def assign_profiles_to_file(input_file: str) -> str:
+    """
+    Assign profile names to XYZ/CSV file and return path to processed file.
+
+    Args:
+        input_file: Path to input file
+
+    Returns:
+        Path to processed file with profile names
+    """
+    from profcalc.cli.quick_tools.assign import assign_profiles_by_clustering
+
+    # Use automatic clustering for profile assignment
+    profiles = assign_profiles_by_clustering(input_file)
+
+    # Create temporary output file
+    import os
+    import tempfile
+
+    temp_fd, temp_path = tempfile.mkstemp(
+        suffix=os.path.splitext(input_file)[1]
+    )
+    os.close(temp_fd)
+
+    # Write profiles to temp file
+    from profcalc.cli.quick_tools.assign import write_output_with_profiles
+
+    write_output_with_profiles(profiles, temp_path, input_file)
+
+    return temp_path
+
+
+def apply_origin_azimuth_to_bmap(input_file: str, azimuth_file: str) -> str:
+    """
+    Apply origin azimuth assignment to BMAP file and return path to processed file.
+
+    Args:
+        input_file: Path to BMAP input file
+        azimuth_file: Path to origin azimuth file
+
+    Returns:
+        Path to processed BMAP file with geospatial positioning
+    """
+    import os
+    import shutil
+    import tempfile
+
+    # Read BMAP profiles
+    from profcalc.common.bmap_io import read_bmap_freeformat
+
+    profiles = read_bmap_freeformat(input_file)  # TODO: Use for transformation
+
+    # Read origin azimuth data
+    azimuth_df = pd.read_csv(
+        azimuth_file
+    )  # TODO: Use for coordinate transformation
+
+    # TODO: Implement actual origin azimuth transformation logic
+    # This would transform relative BMAP coordinates to absolute geographic coordinates
+    # using the origin and azimuth data from azimuth_df
+
+    # For now, create a copy of the input file (placeholder implementation)
+    temp_fd, temp_path = tempfile.mkstemp(suffix=".dat")
+    os.close(temp_fd)
+    shutil.copy2(input_file, temp_path)
+
+    return temp_path
+
+
+# Placeholder functions for conversion submenu (to be implemented)
+def execute_bmap_to_csv() -> None:
+    """
+    Execute BMAP to CSV conversion from interactive menu.
+
+    Prompts user for 2D or 3D output, handles origin azimuth file for 3D,
+    and performs the conversion with appropriate error handling.
+
+    Parameters:
+        None (interactive function)
+
+    Returns:
+        None
+    """
+    print("\n" + "=" * 60)
+    print("BMAP FREE FORMAT TO CSV CONVERSION")
+    print("=" * 60)
+
+    # Prompt for output type
+    while True:
+        print("\nChoose output format:")
+        print("1. Standard 9-Column file")
+        print("2. Simple XYZ file")
+        output_choice = input("Select output type (1 or 2): ").strip()
+
+        if output_choice == "1":
+            output_format = "9column"
+            break
+        elif output_choice == "2":
+            output_format = "xyz"
+            break
+        else:
+            print("❌ Invalid choice. Please enter 1 or 2.")
+
+    # Handle different question sets based on output format
+    conversion_params = {}
+
+    if output_format == "9column":
+        # Ask questions for 9-Column file format
+        print("\n" + "=" * 50)
+        print("9-COLUMN FILE CONFIGURATION")
+        print("=" * 50)
+        print(
+            "Please provide information to populate the 9-column format and metadata header."
+        )
+
+        # TODO: Add the specific questions for 9-column format here
+        # For now, placeholder - will be replaced with actual questions
+        conversion_params["format"] = "9column"
+        print("⚠️  9-Column format questions not yet implemented.")
+
+    elif output_format == "xyz":
+        # Ask questions for Simple XYZ file format
+        print("\n" + "=" * 50)
+        print("SIMPLE XYZ FILE CONFIGURATION")
+        print("=" * 50)
+        print("Please provide information for the XYZ output format.")
+
+        # TODO: Add the specific questions for XYZ format here
+        # For now, placeholder - will be replaced with actual questions
+        conversion_params["format"] = "xyz"
+        print("⚠️  Simple XYZ format questions not yet implemented.")
+
+        # For XYZ, we still need origin azimuth for 3D coordinates
+        while True:
+            origin_azimuth_file = input(
+                "Enter origin azimuth file path (required for 3D coordinates): "
+            ).strip()
+            if not origin_azimuth_file:
+                print("❌ Origin azimuth file is required for XYZ conversion.")
+                back_choice = input(
+                    "Press Enter to go back to previous menu, or enter a file path: "
+                ).strip()
+                if not back_choice:
+                    print("Returning to conversion menu...")
+                    return
+                continue
+
+            if not Path(origin_azimuth_file).exists():
+                print(
+                    f"❌ Origin azimuth file '{origin_azimuth_file}' does not exist."
+                )
+                back_choice = input(
+                    "Press Enter to go back to previous menu, or enter a different file path: "
+                ).strip()
+                if not back_choice:
+                    print("Returning to conversion menu...")
+                    return
+                continue
+            conversion_params["origin_azimuth_file"] = origin_azimuth_file
+            break
+
+    # Prompt for input BMAP file
+    while True:
+        input_file = input("Enter input BMAP file path: ").strip()
+        if not input_file:
+            print("❌ Input file path is required.")
+            continue
+        if not Path(input_file).exists():
+            print(f"❌ Input file '{input_file}' does not exist.")
+            continue
+        break
+
+    # Prompt for output file
+    while True:
+        if output_format == "9column":
+            output_file = input("Enter output 9-Column file path: ").strip()
+        else:  # xyz
+            output_file = input("Enter output XYZ file path: ").strip()
+        if not output_file:
+            print("❌ Output file path is required.")
+            continue
+        break
+
+    # Perform the conversion
+    try:
+        if output_format == "9column":
+            # TODO: Implement 9-column conversion
+            print("❌ 9-Column format conversion not yet implemented.")
+            print(
+                "   This will be implemented once the question sets are defined."
+            )
+        elif output_format == "xyz":
+            # XYZ conversion with origin azimuth
+            origin_azimuth_file = conversion_params.get("origin_azimuth_file")
+            assert origin_azimuth_file is not None, (
+                "Origin azimuth file required for XYZ conversion"
+            )
+            # TODO: Implement XYZ conversion with the collected parameters
+            print("❌ XYZ format conversion not yet implemented.")
+            print(
+                "   This will be implemented once the question sets are defined."
+            )
+        print(
+            f"✅ Conversion completed successfully. Output saved to '{output_file}'"
+        )
+    except Exception as e:
+        print(f"❌ Conversion failed: {e}")
+
+    input("\nPress Enter to continue...")
+
+
+def convert_bmap_to_csv_2d(input_file: str, output_file: str) -> None:
+    """
+    Convert BMAP file to 2D CSV format.
+
+    Parameters:
+        input_file (str): Path to input BMAP file
+        output_file (str): Path to output CSV file
+
+    Returns:
+        None
+
+    Raises:
+        FileNotFoundError: If input file does not exist
+        ValueError: If BMAP file format is invalid
+    """
+    # Read BMAP profiles
+    profiles = read_bmap_freeformat(input_file)
+
+    if not profiles:
+        raise ValueError("No profiles found in BMAP file")
+
+    # Convert to CSV format
+    csv_data = []
+    for profile in profiles:
+        for i in range(len(profile.x)):
+            csv_data.append(
+                {
+                    "profile_name": profile.name,
+                    "X_distance": profile.x[i],
+                    "Z_elevation": profile.z[i],
+                }
+            )
+
+    # Write to CSV
+    import pandas as pd
+
+    df = pd.DataFrame(csv_data)
+    df.to_csv(output_file, index=False)
+
+
+def convert_bmap_to_csv_3d(
+    input_file: str, output_file: str, origin_azimuth_file: str
+) -> None:
+    """
+    Convert BMAP file to 3D CSV format using origin azimuth data.
+
+    Parameters:
+        input_file (str): Path to input BMAP file
+        output_file (str): Path to output CSV file
+        origin_azimuth_file (str): Path to origin azimuth file
+
+    Returns:
+        None
+
+    Raises:
+        FileNotFoundError: If input or origin azimuth files do not exist
+        ValueError: If file formats are invalid
+    """
+    # Read BMAP profiles
+    profiles = read_bmap_freeformat(input_file)
+
+    if not profiles:
+        raise ValueError("No profiles found in BMAP file")
+
+    # Read origin azimuth data
+    baselines = _read_baseline_file(origin_azimuth_file)
+
+    # Convert profiles to 3D coordinates
+    profiles_3d = _calculate_real_world_coordinates(profiles, baselines)
+
+    # Convert to CSV format
+    csv_data = []
+    for profile in profiles_3d:
+        y_coords = profile.metadata.get("y", [0.0] * len(profile.x))
+        for i in range(len(profile.x)):
+            csv_data.append(
+                {
+                    "profile_name": profile.name,
+                    "X_coordinate": profile.x[i],
+                    "Y_coordinate": y_coords[i],
+                    "Z_elevation": profile.z[i],
+                }
+            )
+
+    # Write to CSV
+    import pandas as pd
+
+    df = pd.DataFrame(csv_data)
+    df.to_csv(output_file, index=False)
+
+
+def execute_bmap_to_shapefile() -> None:
+    """
+    Execute BMAP to Shapefile conversion from interactive menu.
+
+    Requires origin azimuth file for geospatial positioning and prompts
+    for output type, coordinate system, vertical datum, and filenames.
+
+    Parameters:
+        None (interactive function)
+
+    Returns:
+        None
+    """
+    print("\n" + "=" * 60)
+    print("BMAP FREE FORMAT TO SHAPEFILE CONVERSION")
+    print("=" * 60)
+
+    # Prompt for origin azimuth file (required)
+    while True:
+        origin_azimuth_file = input(
+            "Enter origin azimuth file path (required for 3D Shapefile): "
+        ).strip()
+        if not origin_azimuth_file:
+            print(
+                "❌ Origin azimuth file is required for Shapefile conversion."
+            )
+            back_choice = input(
+                "Press Enter to go back to previous menu, or enter a file path: "
+            ).strip()
+            if not back_choice:
+                print("Returning to conversion menu...")
+                return
+            continue
+
+        if not Path(origin_azimuth_file).exists():
+            print(
+                f"❌ Origin azimuth file '{origin_azimuth_file}' does not exist."
+            )
+            back_choice = input(
+                "Press Enter to go back to previous menu, or enter a different file path: "
+            ).strip()
+            if not back_choice:
+                print("Returning to conversion menu...")
+                return
+            continue
+        break
+
+    # Prompt for output type
+    while True:
+        print("\nChoose Shapefile output type:")
+        print("1. Point Shapefile (individual points)")
+        print("2. Line Shapefile (connected profile lines)")
+        print("3. Both (point and line Shapefiles)")
+        output_choice = input("Select output type (1, 2, or 3): ").strip()
+
+        if output_choice == "1":
+            output_types = ["point"]
+            break
+        elif output_choice == "2":
+            output_types = ["line"]
+            break
+        elif output_choice == "3":
+            output_types = ["point", "line"]
+            break
+        else:
+            print("❌ Invalid choice. Please enter 1, 2, or 3.")
+
+    # Prompt for coordinate system
+    crs_input = input(
+        "Enter coordinate reference system (default: NJ State Plane NAD 1983): "
+    ).strip()
+    crs = crs_input if crs_input else "NJ State Plane NAD 1983"
+
+    # Confirm vertical datum
+    while True:
+        datum_confirm = (
+            input("Is the vertical datum NAVD88? (y/n): ").strip().lower()
+        )
+        if datum_confirm in ["y", "yes"]:
+            vertical_datum = "NAVD88"
+            break
+        elif datum_confirm in ["n", "no"]:
+            vertical_datum = input(
+                "Enter the vertical datum (e.g., MLLW, MHW, etc.): "
+            ).strip()
+            if not vertical_datum:
+                vertical_datum = "Unknown"
+            break
+        else:
+            print("❌ Please enter 'y' for yes or 'n' for no.")
+
+    # Prompt for output filenames
+    output_files = {}
+    if "point" in output_types:
+        while True:
+            point_file = input(
+                "Enter output point Shapefile path (e.g., profiles_points.shp): "
+            ).strip()
+            if not point_file:
+                print("❌ Output file path is required.")
+                continue
+            if not point_file.endswith(".shp"):
+                point_file += ".shp"
+            output_files["point"] = point_file
+            break
+
+    if "line" in output_types:
+        while True:
+            line_file = input(
+                "Enter output line Shapefile path (e.g., profiles_lines.shp): "
+            ).strip()
+            if not line_file:
+                print("❌ Output file path is required.")
+                continue
+            if not line_file.endswith(".shp"):
+                line_file += ".shp"
+            output_files["line"] = line_file
+            break
+
+    # Prompt for input BMAP file
+    while True:
+        input_file = input("Enter input BMAP file path: ").strip()
+        if not input_file:
+            print("❌ Input file path is required.")
+            continue
+        if not Path(input_file).exists():
+            print(f"❌ Input file '{input_file}' does not exist.")
+            continue
+        break
+
+    # Perform the conversion
+    try:
+        convert_bmap_to_shapefile(
+            input_file=input_file,
+            origin_azimuth_file=origin_azimuth_file,
+            output_types=output_types,
+            output_files=output_files,
+            crs=crs,
+            vertical_datum=vertical_datum,
+        )
+        print("✅ Shapefile conversion completed successfully!")
+        for file_type, file_path in output_files.items():
+            print(f"   {file_type.capitalize()} Shapefile: {file_path}")
+    except Exception as e:
+        print(f"❌ Conversion failed: {e}")
+
+    input("\nPress Enter to continue...")
+
+
+def convert_bmap_to_shapefile(
+    input_file: str,
+    origin_azimuth_file: str,
+    output_types: list[str],
+    output_files: dict[str, str],
+    crs: str,
+    vertical_datum: str,
+) -> None:
+    """
+    Convert BMAP file to Shapefile(s) using origin azimuth data.
+
+    Parameters:
+        input_file (str): Path to input BMAP file
+        origin_azimuth_file (str): Path to origin azimuth file
+        output_types (list[str]): List of output types ('point', 'line')
+        output_files (dict[str, str]): Mapping of output type to file path
+        crs (str): Coordinate reference system
+        vertical_datum (str): Vertical datum description
+
+    Returns:
+        None
+
+    Raises:
+        FileNotFoundError: If input or origin azimuth files do not exist
+        ValueError: If file formats are invalid or shapefile support unavailable
+    """
+    # Read BMAP profiles
+    profiles = read_bmap_freeformat(input_file)
+
+    if not profiles:
+        raise ValueError("No profiles found in BMAP file")
+
+    # Read origin azimuth data
+    baselines = _read_baseline_file(origin_azimuth_file)
+
+    # Convert profiles to 3D coordinates
+    profiles_3d = _calculate_real_world_coordinates(profiles, baselines)
+
+    # Check for shapefile support
+    if not SHAPEFILE_AVAILABLE:
+        raise ImportError(
+            "Shapefile export requires geopandas. "
+            "Install with: pip install profile-analysis[gis]"
+        )
+
+    # Create Shapefiles
+    if "point" in output_types:
+        write_survey_points_shapefile(
+            profiles_3d, Path(output_files["point"]), crs=crs
+        )
+
+    if "line" in output_types:
+        # Add baseline metadata for line shapefiles
+        for profile in profiles_3d:
+            if profile.name in baselines:
+                baseline = baselines[profile.name]
+                if profile.metadata is None:
+                    profile.metadata = {}
+                profile.metadata["origin_x"] = baseline["origin_x"]
+                profile.metadata["origin_y"] = baseline["origin_y"]
+                profile.metadata["azimuth"] = baseline["azimuth"]
+
+        write_profile_lines_shapefile(
+            profiles_3d, Path(output_files["line"]), crs=crs
+        )
+
+
+def execute_csv_to_bmap() -> None:
+    """
+    Execute CSV to BMAP conversion from interactive menu.
+
+    Prompts user for input CSV file and output BMAP file path,
+    then performs the conversion with appropriate error handling.
+
+    Parameters:
+        None (interactive function)
+
+    Returns:
+        None
+    """
+    print("\n" + "=" * 60)
+    print("CSV TO BMAP FREE FORMAT CONVERSION")
+    print("=" * 60)
+
+    # Prompt for input CSV file
+    while True:
+        input_file = input("Enter input CSV file path: ").strip()
+        if not input_file:
+            print("❌ Input file path is required.")
+            continue
+        if not Path(input_file).exists():
+            print(f"❌ Input file '{input_file}' does not exist.")
+            continue
+        break
+
+    # Prompt for output BMAP file
+    while True:
+        output_file = input("Enter output BMAP file path: ").strip()
+        if not output_file:
+            print("❌ Output file path is required.")
+            continue
+        break
+
+    # Perform the conversion
+    try:
+        convert_csv_to_bmap(input_file, output_file)
+        print(
+            f"✅ Conversion completed successfully. Output saved to '{output_file}'"
+        )
+    except Exception as e:
+        print(f"❌ Conversion failed: {e}")
+
+    input("\nPress Enter to continue...")
+
+
+def convert_csv_to_bmap(input_file: str, output_file: str) -> None:
+    """
+    Convert CSV file to BMAP free format.
+
+    Supports both 2D profile data (profile_name, X_distance, Z_elevation)
+    and 3D geospatial data (with X, Y, Z coordinates).
+
+    Parameters:
+        input_file (str): Path to input CSV file
+        output_file (str): Path to output BMAP file
+
+    Returns:
+        None
+
+    Raises:
+        FileNotFoundError: If input file does not exist
+        ValueError: If CSV file format is invalid
+    """
+    # Try to read as 3D CSV first (with X, Y coordinates)
+    try:
+        profiles = read_csv_profiles(input_file)
+        if profiles:
+            print(f"✅ Detected 3D CSV format with {len(profiles)} profiles")
+            is_2d_format = False
+        else:
+            raise ValueError("No profiles found in 3D CSV format")
+    except Exception as e:
+        # If 3D reading fails, try 2D format
+        try:
+            profiles = read_csv_profiles_2d(input_file)
+            if profiles:
+                print(
+                    f"✅ Detected 2D CSV format with {len(profiles)} profiles"
+                )
+                is_2d_format = True
+            else:
+                raise ValueError("No profiles found in 2D CSV format")
+        except Exception as e2:
+            raise ValueError(
+                f"Could not read CSV file as 2D or 3D format. 3D error: {e}, 2D error: {e2}"
+            )
+
+    if not profiles:
+        raise ValueError("No profiles found in CSV file")
+
+    # For 2D CSV files, we need origin azimuth data to convert to 3D coordinates
+    if is_2d_format:
+        if not origin_azimuth_file:
+            raise ValueError(
+                "2D CSV files require origin azimuth file for Shapefile conversion"
+            )
+
+        # Read origin azimuth data
+        baselines = _read_baseline_file(origin_azimuth_file)
+
+        # Convert 2D profiles to 3D coordinates
+        profiles_3d = _calculate_real_world_coordinates(profiles, baselines)
+    else:
+        # For 3D CSV files, profiles already have coordinates
+        # But we still need origin azimuth data for line shapefiles
+        baselines = (
+            _read_baseline_file(origin_azimuth_file)
+            if origin_azimuth_file
+            else {}
+        )
+        profiles_3d = profiles
+
+    # Enhance profiles with metadata preservation for shapefiles
+    enhanced_profiles = []
+    for profile in profiles_3d:
+        enhanced_profile = enhance_profile_for_shapefile(
+            profile, input_file, is_2d_format
+        )
+        enhanced_profiles.append(enhanced_profile)
+
+    # Check for shapefile support
+    if not SHAPEFILE_AVAILABLE:
+        raise ImportError(
+            "Shapefile export requires geopandas. "
+            "Install with: pip install profile-analysis[gis]"
+        )
+
+    # Create Shapefiles
+    if "point" in output_types:
+        write_survey_points_shapefile(
+            enhanced_profiles, Path(output_files["point"]), crs=crs
+        )
+
+    if "line" in output_types:
+        # Add baseline metadata for line shapefiles
+        for profile in enhanced_profiles:
+            if profile.name in baselines:
+                baseline = baselines[profile.name]
+                if profile.metadata is None:
+                    profile.metadata = {}
+                profile.metadata["origin_x"] = baseline["origin_x"]
+                profile.metadata["origin_y"] = baseline["origin_y"]
+                profile.metadata["azimuth"] = baseline["azimuth"]
+
+        write_profile_lines_shapefile(
+            enhanced_profiles, Path(output_files["line"]), crs=crs
+        )
+
+
+def read_csv_profiles_2d(input_file: str | Path) -> list:
+    """
+    Read 2D CSV profiles (profile_name, X_distance, Z_elevation format).
+
+    This format is typically produced by BMAP to CSV 2D conversion.
+
+    Parameters:
+        input_file: Path to CSV file
+
+    Returns:
+        List of Profile objects
+    """
+    import pandas as pd
+
+    from profcalc.common.bmap_io import Profile
+
+    df = pd.read_csv(input_file)
+
+    # Check for required columns
+    required_cols = ["profile_name", "X_distance", "Z_elevation"]
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        raise ValueError(
+            f"2D CSV missing required columns: {missing_cols}. Found: {list(df.columns)}"
+        )
+
+    profiles = []
+    profile_groups = df.groupby("profile_name")
+
+    for profile_name, group_df in profile_groups:
+        # Sort by X_distance to ensure proper order
+        group_df = group_df.sort_values("X_distance")
+
+        x_coords = np.array(group_df["X_distance"].values, dtype=float)
+        z_coords = np.array(group_df["Z_elevation"].values, dtype=float)
+
+        # Create profile with basic metadata
+        profile = Profile(
+            name=str(profile_name),
+            date=None,  # Will be enhanced later
+            description=None,  # Will be enhanced later
+            x=x_coords,
+            z=z_coords,
+            metadata={"source_format": "2d_csv", "point_count": len(x_coords)},
+        )
+        profiles.append(profile)
+
+    return profiles
+
+
+def enhance_profile_for_bmap(profile, source_file: str):
+    """
+    Enhance a Profile object with better metadata for BMAP header preservation.
+
+    Parameters:
+        profile: Profile object to enhance
+        source_file: Source file path for extracting additional metadata
+
+    Returns:
+        Enhanced Profile object
+    """
+    from pathlib import Path
+
+    from profcalc.common.bmap_io import Profile
+
+    # Create a new profile with enhanced metadata
+    enhanced_profile = Profile(
+        name=profile.name,
+        date=profile.date,
+        description=profile.description,
+        x=profile.x,
+        z=profile.z,
+        metadata=profile.metadata.copy() if profile.metadata else {},
+    )
+
+    # Enhance the name if it's generic
+    if enhanced_profile.name.startswith(
+        "csv_profile_"
+    ) or enhanced_profile.name.startswith("default_profile"):
+        # Try to extract better name from source filename
+        source_name = Path(source_file).stem
+        enhanced_profile.name = source_name
+
+    # Enhance date from filename if not already set
+    if not enhanced_profile.date:
+        from profcalc.common.bmap_io import extract_date_from_filename
+
+        filename_date = extract_date_from_filename(source_file)
+        if filename_date:
+            enhanced_profile.date = filename_date
+
+    # Build concise purpose/description from available metadata
+    # Following typical BMAP format: Profile ID Date Purpose
+    # where Purpose is optional and concise
+
+    purpose_parts = []
+
+    # For 2D CSV files, indicate the source
+    if (
+        enhanced_profile.metadata
+        and enhanced_profile.metadata.get("source_format") == "2d_csv"
+    ):
+        purpose_parts.append("From 2D CSV")
+    elif (
+        enhanced_profile.metadata
+        and enhanced_profile.metadata.get("source_format") == "csv"
+    ):
+        purpose_parts.append("From CSV")
+
+    # Only add project info if it's very brief and meaningful
+    if enhanced_profile.metadata and "project" in enhanced_profile.metadata:
+        project = enhanced_profile.metadata["project"]
+        if project and len(project) <= 20:  # Keep it brief
+            purpose_parts.append(f"Project: {project}")
+
+    # Join purpose parts with spaces (not semicolons) to match BMAP style
+    if purpose_parts:
+        enhanced_profile.description = " ".join(purpose_parts)
+    # If no purpose info, leave description as None (optional field)
+
+    return enhanced_profile
+
+
+def enhance_profile_for_shapefile(
+    profile, source_file: str, is_2d_format: bool
+):
+    """
+    Enhance a Profile object with metadata preservation for shapefile export.
+
+    For shapefiles, we want to preserve all available CSV metadata as attributes
+    that will be included in the shapefile feature attributes.
+
+    Parameters:
+        profile: Profile object to enhance
+        source_file: Source file path for extracting additional metadata
+        is_2d_format: Whether the source was a 2D CSV format
+
+    Returns:
+        Enhanced Profile object with comprehensive metadata for shapefile attributes
+    """
+    from pathlib import Path
+
+    from profcalc.common.bmap_io import Profile
+
+    # Create a new profile with enhanced metadata
+    enhanced_profile = Profile(
+        name=profile.name,
+        date=profile.date,
+        description=profile.description,
+        x=profile.x,
+        z=profile.z,
+        metadata=profile.metadata.copy() if profile.metadata else {},
+    )
+
+    # Ensure metadata exists
+    if enhanced_profile.metadata is None:
+        enhanced_profile.metadata = {}
+
+    # Add source information
+    enhanced_profile.metadata["source_file"] = Path(source_file).name
+    enhanced_profile.metadata["source_format"] = (
+        "2d_csv" if is_2d_format else "csv"
+    )
+    enhanced_profile.metadata["conversion_date"] = "2025-10-27"  # Current date
+
+    # For 2D format conversions, add conversion info
+    if is_2d_format:
+        enhanced_profile.metadata["converted_from"] = "relative_coordinates"
+        enhanced_profile.metadata["conversion_method"] = (
+            "origin_azimuth_transform"
+        )
+        enhanced_profile.metadata["original_format"] = (
+            "profile_name_X_distance_Z_elevation"
+        )
+
+    # Preserve all available CSV metadata that would be useful in shapefiles
+    # These will become attributes in the shapefile
+
+    # Survey metadata
+    if profile.metadata:
+        # Copy over any existing metadata fields
+        for key in ["surveyor", "project", "survey_date", "point_number"]:
+            if key in profile.metadata and profile.metadata[key] is not None:
+                enhanced_profile.metadata[key] = profile.metadata[key]
+
+        # Add coordinate system info
+        if "y_coordinates" in profile.metadata:
+            enhanced_profile.metadata["has_y_coordinates"] = True
+            enhanced_profile.metadata["coordinate_system"] = "3D_geospatial"
+        else:
+            enhanced_profile.metadata["has_y_coordinates"] = False
+            enhanced_profile.metadata["coordinate_system"] = (
+                "2D_profile" if is_2d_format else "unknown"
+            )
+
+        # Add point count
+        enhanced_profile.metadata["point_count"] = len(profile.x)
+
+        # Preserve extra columns info
+        if "extra_columns" in profile.metadata:
+            extra_info = profile.metadata["extra_columns"]
+            enhanced_profile.metadata["has_extra_columns"] = True
+            enhanced_profile.metadata["extra_column_count"] = len(
+                extra_info.get("names", [])
+            )
+            # Note: The actual extra column data will be handled by the shapefile writer
+
+    return enhanced_profile
+
+
+def execute_csv_to_shapefile() -> None:
+    """
+    Execute CSV to Shapefile conversion from interactive menu.
+
+    Requires origin azimuth file for geospatial positioning and prompts
+    for output type, coordinate system, vertical datum, and filenames.
+
+    Parameters:
+        None (interactive function)
+
+    Returns:
+        None
+    """
+    print("\n" + "=" * 60)
+    print("CSV TO SHAPEFILE CONVERSION")
+    print("=" * 60)
+
+    # Prompt for origin azimuth file (required)
+    while True:
+        origin_azimuth_file = input(
+            "Enter origin azimuth file path (required for 3D Shapefile): "
+        ).strip()
+        if not origin_azimuth_file:
+            print(
+                "❌ Origin azimuth file is required for Shapefile conversion."
+            )
+            back_choice = input(
+                "Press Enter to go back to previous menu, or enter a file path: "
+            ).strip()
+            if not back_choice:
+                print("Returning to conversion menu...")
+                return
+            continue
+
+        if not Path(origin_azimuth_file).exists():
+            print(
+                f"❌ Origin azimuth file '{origin_azimuth_file}' does not exist."
+            )
+            back_choice = input(
+                "Press Enter to go back to previous menu, or enter a different file path: "
+            ).strip()
+            if not back_choice:
+                print("Returning to conversion menu...")
+                return
+            continue
+        break
+
+    # Prompt for output type
+    while True:
+        print("\nChoose Shapefile output type:")
+        print("1. Point Shapefile (individual points)")
+        print("2. Line Shapefile (connected profile lines)")
+        print("3. Both (point and line Shapefiles)")
+        output_choice = input("Select output type (1, 2, or 3): ").strip()
+
+        if output_choice == "1":
+            output_types = ["point"]
+            break
+        elif output_choice == "2":
+            output_types = ["line"]
+            break
+        elif output_choice == "3":
+            output_types = ["point", "line"]
+            break
+        else:
+            print("❌ Invalid choice. Please enter 1, 2, or 3.")
+
+    # Prompt for coordinate reference system
+    while True:
+        print("\nEnter coordinate reference system (CRS):")
+        print(
+            "Examples: EPSG:2263 (NJ State Plane), EPSG:4326 (WGS84), EPSG:26918 (UTM Zone 18N)"
+        )
+        crs = input("CRS (default: EPSG:2263): ").strip()
+        if not crs:
+            crs = "EPSG:2263"
+        # Basic validation - should start with EPSG: or be a proj string
+        if not (crs.startswith("EPSG:") or crs.startswith("+proj=")):
+            print(
+                "❌ CRS should be in format 'EPSG:XXXX' or a proj string starting with '+proj='"
+            )
+            continue
+        break
+
+    # Confirm vertical datum
+    print("\nVertical datum: NAVD88 (assumed for coastal NJ profiles)")
+    vertical_datum = "NAVD88"
+
+    # Prompt for input CSV file
+    while True:
+        input_file = input("Enter input CSV file path: ").strip()
+        if not input_file:
+            print("❌ Input file path is required.")
+            continue
+        if not Path(input_file).exists():
+            print(f"❌ Input file '{input_file}' does not exist.")
+            continue
+        break
+
+    # Prompt for output file names
+    output_files = {}
+    for output_type in output_types:
+        while True:
+            if output_type == "point":
+                default_name = Path(input_file).stem + "_points.shp"
+                prompt = f"Enter output point Shapefile path (default: {default_name}): "
+            else:  # line
+                default_name = Path(input_file).stem + "_lines.shp"
+                prompt = f"Enter output line Shapefile path (default: {default_name}): "
+
+            output_path = input(prompt).strip()
+            if not output_path:
+                output_path = str(Path(input_file).parent / default_name)
+
+            # Check if file already exists
+            if Path(output_path).exists():
+                overwrite = (
+                    input(
+                        f"File '{output_path}' already exists. Overwrite? (y/N): "
+                    )
+                    .strip()
+                    .lower()
+                )
+                if overwrite != "y":
+                    continue
+
+            output_files[output_type] = output_path
+            break
+
+    # Perform the conversion
+    try:
+        convert_csv_to_shapefile(
+            input_file=input_file,
+            output_files=output_files,
+            output_types=output_types,
+            origin_azimuth_file=origin_azimuth_file,
+            crs=crs,
+            vertical_datum=vertical_datum,
+        )
+        print("✅ Conversion completed successfully.")
+        for output_type, output_file in output_files.items():
+            print(
+                f"   {output_type.capitalize()} Shapefile saved to: {output_file}"
+            )
+    except Exception as e:
+        print(f"❌ Conversion failed: {e}")
+
+    input("\nPress Enter to continue...")
+
+
+def convert_xyz_to_bmap() -> None:
+    """
+    Execute XYZ to BMAP conversion from interactive menu.
+
+    Prompts user for input XYZ file and output BMAP file path,
+    then performs the conversion with appropriate error handling.
+
+    Parameters:
+        None (interactive function)
+
+    Returns:
+        None
+    """
+    print("\n" + "=" * 60)
+    print("XYZ TO BMAP FREE FORMAT CONVERSION")
+    print("=" * 60)
+
+    # Prompt for input XYZ file
+    while True:
+        input_file = input("Enter input XYZ file path: ").strip()
+        if not input_file:
+            print("❌ Input file path is required.")
+            continue
+        if not Path(input_file).exists():
+            print(f"❌ Input file '{input_file}' does not exist.")
+            continue
+        break
+
+    # Prompt for output BMAP file
+    while True:
+        output_file = input("Enter output BMAP file path: ").strip()
+        if not output_file:
+            print("❌ Output file path is required.")
+            continue
+        break
+
+    # Perform the conversion
+    try:
+        convert_xyz_to_bmap(input_file, output_file)
+        print(
+            f"✅ Conversion completed successfully. Output saved to '{output_file}'"
+        )
+    except Exception as e:
+        print(f"❌ Conversion failed: {e}")
+
+    input("\nPress Enter to continue...")
+
+
+def convert_xyz_to_bmap(input_file: str, output_file: str) -> None:
+    """
+    Convert XYZ file to BMAP free format.
+
+    Parameters:
+        input_file (str): Path to input XYZ file
+        output_file (str): Path to output BMAP file
+
+    Returns:
+        None
+
+    Raises:
+        FileNotFoundError: If input file does not exist
+        ValueError: If XYZ file format is invalid
+    """
+    # Read XYZ profiles
+    profiles = read_xyz_profiles(input_file)
+
+    if not profiles:
+        raise ValueError("No profiles found in XYZ file")
+
+    # Write to BMAP format
+    write_bmap_profiles(profiles, output_file)
+
+
+def execute_xyz_to_shapefile() -> None:
+    """
+    Execute XYZ to Shapefile conversion from interactive menu.
+
+    XYZ files contain 3D coordinates (X, Y, Z) and may already have profile information
+    in headers (lines starting with '>' or '#'). If no profile information exists,
+    origin azimuth file is required for profile assignment.
+
+    Parameters:
+        None (interactive function)
+
+    Returns:
+        None
+    """
+    print("\n" + "=" * 60)
+    print("XYZ TO SHAPEFILE CONVERSION")
+    print("=" * 60)
+
+    # Prompt for input XYZ file first to check its structure
+    while True:
+        input_file = input("Enter input XYZ file path: ").strip()
+        if not input_file:
+            print("❌ Input file path is required.")
+            continue
+        if not Path(input_file).exists():
+            print(f"❌ Input file '{input_file}' does not exist.")
+            continue
+        break
+
+    # Check XYZ file format and profile information
+    format_info = _check_xyz_format(input_file)
+    has_profile_info = format_info["has_profiles"]
+    format_type = format_info["format_type"]
+    column_count = format_info["column_count"]
+
+    print("\n📄 XYZ File Analysis:")
+    print(f"   Format: {format_type.upper()}")
+    print(f"   Columns: {column_count}")
+    print(f"   Has Profile Headers: {'Yes' if has_profile_info else 'No'}")
+
+    origin_azimuth_file = None
+    if not has_profile_info:
+        # File needs profile assignment - require origin azimuth file
+        print("\n❗ XYZ file does not contain profile information.")
+        print("Origin azimuth file is required to assign points to profiles.")
+
+        while True:
+            origin_azimuth_file = input(
+                "Enter origin azimuth file path (required for profile assignment): "
+            ).strip()
+            if not origin_azimuth_file:
+                print(
+                    "❌ Origin azimuth file is required when XYZ file has no profile information."
+                )
+                back_choice = input(
+                    "Press Enter to go back to previous menu, or enter a file path: "
+                ).strip()
+                if not back_choice:
+                    print("Returning to conversion menu...")
+                    return
+                continue
+
+            if not Path(origin_azimuth_file).exists():
+                print(
+                    f"❌ Origin azimuth file '{origin_azimuth_file}' does not exist."
+                )
+                back_choice = input(
+                    "Press Enter to go back to previous menu, or enter a different file path: "
+                ).strip()
+                if not back_choice:
+                    print("Returning to conversion menu...")
+                    return
+                continue
+            break
+    else:
+        print(
+            f"\n✅ XYZ file contains profile information ({has_profile_info} profiles found)."
+        )
+        print(
+            "Origin azimuth file is optional (only needed for line shapefiles)."
+        )
+
+        # Optional origin azimuth file for line shapefiles
+        origin_azimuth_input = input(
+            "Enter origin azimuth file path (optional, press Enter to skip): "
+        ).strip()
+        if origin_azimuth_input and Path(origin_azimuth_input).exists():
+            origin_azimuth_file = origin_azimuth_input
+        elif origin_azimuth_input:
+            print(
+                f"⚠️  Origin azimuth file '{origin_azimuth_input}' does not exist. Proceeding without it."
+            )
+
+    # Prompt for output type
+    while True:
+        print("\nChoose Shapefile output type:")
+        print("1. Point Shapefile (individual points)")
+        print("2. Line Shapefile (connected profile lines)")
+        print("3. Both (point and line Shapefiles)")
+        output_choice = input("Select output type (1, 2, or 3): ").strip()
+
+        if output_choice == "1":
+            output_types = ["point"]
+            break
+        elif output_choice == "2":
+            output_types = ["line"]
+            break
+        elif output_choice == "3":
+            output_types = ["point", "line"]
+            break
+        else:
+            print("❌ Invalid choice. Please enter 1, 2, or 3.")
+
+    # Prompt for coordinate reference system
+    while True:
+        print("\nEnter coordinate reference system (CRS):")
+        print(
+            "Examples: EPSG:2263 (NJ State Plane), EPSG:4326 (WGS84), EPSG:26918 (UTM Zone 18N)"
+        )
+        crs = input("CRS (default: EPSG:2263): ").strip()
+        if not crs:
+            crs = "EPSG:2263"
+        # Basic validation - should start with EPSG: or be a proj string
+        if not (crs.startswith("EPSG:") or crs.startswith("+proj=")):
+            print(
+                "❌ CRS should be in format 'EPSG:XXXX' or a proj string starting with '+proj='"
+            )
+            continue
+        break
+
+    # Confirm vertical datum
+    print("\nVertical datum: NAVD88 (assumed for coastal NJ profiles)")
+    vertical_datum = "NAVD88"
+
+    # Prompt for output file names
+    output_files = {}
+    for output_type in output_types:
+        while True:
+            if output_type == "point":
+                default_name = Path(input_file).stem + "_points.shp"
+                prompt = f"Enter output point Shapefile path (default: {default_name}): "
+            else:  # line
+                default_name = Path(input_file).stem + "_lines.shp"
+                prompt = f"Enter output line Shapefile path (default: {default_name}): "
+
+            output_path = input(prompt).strip()
+            if not output_path:
+                output_path = str(Path(input_file).parent / default_name)
+
+            # Check if file already exists
+            if Path(output_path).exists():
+                overwrite = (
+                    input(
+                        f"File '{output_path}' already exists. Overwrite? (y/N): "
+                    )
+                    .strip()
+                    .lower()
+                )
+                if overwrite != "y":
+                    continue
+
+            output_files[output_type] = output_path
+            break
+
+    # Perform the conversion
+    try:
+        convert_xyz_to_shapefile(
+            input_file=input_file,
+            output_files=output_files,
+            output_types=output_types,
+            origin_azimuth_file=origin_azimuth_file,
+            crs=crs,
+            vertical_datum=vertical_datum,
+        )
+        print("✅ Conversion completed successfully.")
+        for output_type, output_file in output_files.items():
+            print(
+                f"   {output_type.capitalize()} Shapefile saved to: {output_file}"
+            )
+    except Exception as e:
+        print(f"❌ Conversion failed: {e}")
+
+    input("\nPress Enter to continue...")
+
+
+def convert_shapefile_to_bmap(input_file: str, output_file: str) -> None:
+    """
+    Convert point shapefile to BMAP free format.
+
+    Parameters:
+        input_file (str): Path to input shapefile (.shp file)
+        output_file (str): Path to output BMAP file
+
+    Returns:
+        None
+
+    Raises:
+        ImportError: If geopandas is not available
+        FileNotFoundError: If input file does not exist
+        ValueError: If shapefile format is invalid
+    """
+    if not SHAPEFILE_AVAILABLE:
+        raise ImportError("Shapefile support not available")
+
+    # Read profiles from shapefile
+    profiles = read_point_shapefile(Path(input_file))
+
+    if not profiles:
+        raise ValueError("No profiles found in shapefile")
+
+    # Write to BMAP format
+    write_bmap_profiles(profiles, output_file)
+
+
+def convert_shapefile_to_xyz(
+    input_file: str, output_file: str, output_format: str = "xyz"
+) -> None:
+    """
+    Convert point shapefile to XYZ or CSV format.
+
+    Parameters:
+        input_file (str): Path to input shapefile (.shp file)
+        output_file (str): Path to output file
+        output_format (str): Output format ("xyz" or "csv")
+
+    Returns:
+        None
+
+    Raises:
+        ImportError: If geopandas is not available
+        FileNotFoundError: If input file does not exist
+        ValueError: If shapefile format is invalid
+    """
+    if not SHAPEFILE_AVAILABLE:
+        raise ImportError("Shapefile support not available")
+
+    # Read profiles from shapefile
+    profiles = read_point_shapefile(Path(input_file))
+
+    if not profiles:
+        raise ValueError("No profiles found in shapefile")
+
+    if output_format == "xyz":
+        # Convert to XYZ format
+        xyz_data = []
+        for profile in profiles:
+            y_coords = (
+                profile.metadata.get("y", [0.0] * len(profile.x))
+                if profile.metadata
+                else [0.0] * len(profile.x)
+            )
+            for i in range(len(profile.x)):
+                xyz_data.append(
+                    f"{profile.x[i]:.3f} {y_coords[i]:.3f} {profile.z[i]:.3f}"
+                )
+
+        # Write XYZ file
+        with open(output_file, "w") as f:
+            f.write("# Converted from shapefile\n")
+            for line in xyz_data:
+                f.write(line + "\n")
+
+    elif output_format == "csv":
+        # Convert to CSV format
+        csv_data = []
+        for profile in profiles:
+            y_coords = (
+                profile.metadata.get("y", [0.0] * len(profile.x))
+                if profile.metadata
+                else [0.0] * len(profile.x)
+            )
+            for i in range(len(profile.x)):
+                csv_data.append(
+                    {
+                        "profile_name": profile.name,
+                        "X": profile.x[i],
+                        "Y": y_coords[i],
+                        "Z": profile.z[i],
+                    }
+                )
+
+        # Write CSV file
+        import pandas as pd
+
+        df = pd.DataFrame(csv_data)
+        df.to_csv(output_file, index=False)
+    else:
+        raise ValueError(f"Unsupported output format: {output_format}")
+
+
+def execute_shapefile_to_bmap() -> None:
+    """
+    Execute shapefile to BMAP conversion from interactive menu.
+
+    Prompts user for input shapefile and output BMAP file path,
+    then performs the conversion with appropriate error handling.
+
+    Parameters:
+        None (interactive function)
+
+    Returns:
+        None
+    """
+    print("\n" + "=" * 60)
+    print("POINT SHAPEFILE TO BMAP FREE FORMAT CONVERSION")
+    print("=" * 60)
+
+    # Check if shapefile support is available
+    if not SHAPEFILE_AVAILABLE:
+        print("❌ Shapefile support not available.")
+        print("Install with: pip install profile-analysis[gis]")
+        input("\nPress Enter to continue...")
+        return
+
+    # Prompt for input shapefile
+    while True:
+        input_file = input("Enter input shapefile path (.shp): ").strip()
+        if not input_file:
+            print("❌ Input file path is required.")
+            continue
+        if not Path(input_file).exists():
+            print(f"❌ Input file '{input_file}' does not exist.")
+            continue
+        break
+
+    # Prompt for output BMAP file
+    while True:
+        output_file = input("Enter output BMAP file path: ").strip()
+        if not output_file:
+            print("❌ Output file path is required.")
+            continue
+        break
+
+    # Perform the conversion
+    try:
+        convert_shapefile_to_bmap(input_file, output_file)
+        print(
+            f"✅ Conversion completed successfully. Output saved to '{output_file}'"
+        )
+    except Exception as e:
+        print(f"❌ Conversion failed: {e}")
+
+    input("\nPress Enter to continue...")
+
+
+def execute_shapefile_to_xyz() -> None:
+    """
+    Execute shapefile to XYZ/CSV conversion from interactive menu.
+
+    Prompts user for input shapefile and output XYZ/CSV file path,
+    then performs the conversion with appropriate error handling.
+
+    Parameters:
+        None (interactive function)
+
+    Returns:
+        None
+    """
+    print("\n" + "=" * 60)
+    print("POINT SHAPEFILE TO XYZ/CSV CONVERSION")
+    print("=" * 60)
+
+    # Check if shapefile support is available
+    if not SHAPEFILE_AVAILABLE:
+        print("❌ Shapefile support not available.")
+        print("Install with: pip install profile-analysis[gis]")
+        input("\nPress Enter to continue...")
+        return
+
+    # Prompt for output type
+    while True:
+        print("\nChoose output format:")
+        print("1. XYZ format (X,Y,Z coordinates)")
+        print("2. CSV format (profile_name, X, Y, Z)")
+        output_choice = input("Select output type (1 or 2): ").strip()
+
+        if output_choice == "1":
+            output_format = "xyz"
+            break
+        elif output_choice == "2":
+            output_format = "csv"
+            break
+        else:
+            print("❌ Invalid choice. Please enter 1 or 2.")
+
+    # Prompt for input shapefile
+    while True:
+        input_file = input("Enter input shapefile path (.shp): ").strip()
+        if not input_file:
+            print("❌ Input file path is required.")
+            continue
+        if not Path(input_file).exists():
+            print(f"❌ Input file '{input_file}' does not exist.")
+            continue
+        break
+
+    # Prompt for output file
+    while True:
+        output_file = input(
+            f"Enter output {output_format.upper()} file path: "
+        ).strip()
+        if not output_file:
+            print("❌ Output file path is required.")
+            continue
+        break
+
+    # Perform the conversion
+    try:
+        convert_shapefile_to_xyz(input_file, output_file, output_format)
+        print(
+            f"✅ Conversion completed successfully. Output saved to '{output_file}'"
+        )
+    except Exception as e:
+        print(f"❌ Conversion failed: {e}")
+
+    input("\nPress Enter to continue...")

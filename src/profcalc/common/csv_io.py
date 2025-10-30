@@ -29,6 +29,8 @@ from .error_handler import (
     get_logger,
     validate_array_properties,
 )
+from .file_parser import ParsedFile
+from .file_parser import parse_file as parse_file_centralized
 
 
 class CSVImportError(Exception):
@@ -459,6 +461,72 @@ class CSVParser:
         )
 
 
+def _convert_parsed_file_to_profiles(parsed_file: ParsedFile) -> List[Profile]:
+    """
+    Convert a ParsedFile object to the legacy Profile format expected by existing tools.
+
+    Args:
+        parsed_file: ParsedFile from the centralized parser
+
+    Returns:
+        List of Profile objects in the legacy format
+    """
+    profiles = []
+
+    for profile_dict in parsed_file.profiles:
+        # Extract profile name/ID
+        name = profile_dict.get("profile_id", "UNKNOWN")
+
+        # Extract date if available
+        date = profile_dict.get("date")
+
+        # Create description from available metadata
+        desc_parts = []
+        if profile_dict.get("purpose"):
+            desc_parts.append(profile_dict["purpose"])
+        desc = " ".join(desc_parts) if desc_parts else None
+
+        # Extract coordinates
+        coordinates = profile_dict.get("coordinates", [])
+        if coordinates:
+            # Convert coordinate dicts to separate x, z arrays
+            x_vals = []
+            z_vals = []
+
+            for coord in coordinates:
+                if "x" in coord and "z" in coord:
+                    x_vals.append(coord["x"])
+                    z_vals.append(coord["z"])
+                elif "x" in coord and "y" in coord:
+                    # For CSV, Y might be elevation
+                    x_vals.append(coord["x"])
+                    z_vals.append(coord.get("z", coord.get("y", 0)))
+
+            if x_vals and z_vals:
+                # Validate arrays
+                x_validation = validate_array_properties(
+                    np.array(x_vals), "x_coordinates", allow_nan=False
+                )
+                z_validation = validate_array_properties(
+                    np.array(z_vals), "z_coordinates", allow_nan=False
+                )
+
+                if (
+                    not x_validation and not z_validation
+                ):  # No validation errors
+                    profiles.append(
+                        Profile(
+                            name=name,
+                            date=date,
+                            description=desc,
+                            x=np.array(x_vals, dtype=float),
+                            z=np.array(z_vals, dtype=float),
+                        )
+                    )
+
+    return profiles
+
+
 def read_csv_profiles(file_path: str | Path, config: dict[str, Any] | None = None) -> List[Profile]:
     """Read beach profile data from a CSV file.
 
@@ -469,11 +537,16 @@ def read_csv_profiles(file_path: str | Path, config: dict[str, Any] | None = Non
     Returns:
         List of Profile objects
 
-    Raises:
-        BeachProfileError: If reading fails
+    Note:
+        Now uses the centralized format detection and parsing system.
     """
-    parser = CSVParser(config)
-    return parser.parse_file(file_path)
+    # Use the centralized parser
+    parsed_file = parse_file_centralized(
+        Path(file_path), skip_confirmation=True
+    )
+
+    # Convert to legacy Profile format
+    return _convert_parsed_file_to_profiles(parsed_file)
 
 
 def write_csv_profiles(profiles: List[Profile], file_path: str | Path, config: dict[str, Any] | None = None) -> None:
@@ -735,7 +808,32 @@ def _load_profile_origin_azimuths(
         # Read origin azimuth data
         df = pd.read_csv(origin_azimuth_file)
 
-        # Validate expected columns
+        # Handle different possible column name formats
+        column_mapping = {}
+
+        # Map expected column names to actual column names
+        possible_names = {
+            "profile_id": ["profile_id", "profile_name", "Profile", "profile"],
+            "azimuth": ["azimuth", "Azimuth", "az", "AZIMUTH"],
+            "origin_x": ["origin_x", "Origin_X", "x0", "X0", "originx"],
+            "origin_y": ["origin_y", "Origin_Y", "y0", "Y0", "originy"],
+        }
+
+        for expected_col, possible_cols in possible_names.items():
+            for actual_col in possible_cols:
+                if actual_col in df.columns:
+                    column_mapping[expected_col] = actual_col
+                    break
+            else:
+                raise BeachProfileError(
+                    f"Could not find column for '{expected_col}'. Expected one of: {possible_cols}",
+                    category=ErrorCategory.VALIDATION,
+                )
+
+        # Rename columns to expected format
+        df = df.rename(columns={v: k for k, v in column_mapping.items()})
+
+        # Ensure we have the expected columns
         expected_columns = ["profile_id", "azimuth", "origin_x", "origin_y"]
         if not all(col in df.columns for col in expected_columns):
             raise BeachProfileError(
