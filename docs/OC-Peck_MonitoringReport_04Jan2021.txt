@@ -1,0 +1,1105 @@
+Coastal Storm Risk Management
+Great Egg Harbor and Peck Beach, NJ
+Annual Inspection Report - FY2020
+
+U.S. Army Corps of Engineers,
+Philadelphia District 
+
+January 2021
+
+
+
+
+Great Egg Harbor and Peck Beach, NJ
+Annual Inspection Report FY2020 Fact Sheets
+I. Project Performance Summary
+	I-1. Cumulative Project Volume Change
+Volume Relative to Sept. 2007 Survey (cy)Volume Change from 2017 to 2020 (cy)Entire Active Profile3,287,000215,000Above MHW981,000198,000
+	I-2. Project Condition vs. Design Template – August 2020
+Excess Above Template (cy)Net Deficit Below Template (cy)DuneN/AN/ABerm (Above MHW)1,858,000-55,000Profile (Below MHW)N/A-160,000Total Project1,858,000-205,000
+	I-3. Shoreline Position vs. Design Template – August 2020
+Minimum (ft.)-107.62 @ Seabright Rd.Maximum (ft.)455.50 @ 25th St.Average (ft.)208.02Percent of Project Seaward of Design Template89%
+	I-4. Projected Fill Quantity Required next Renourishment (FY 2023) 
+TemplateNot CalculatedNot CalculatedProjected Erosion and Advance NourishmentNot CalculatedNot CalculatedTotal Fill RequirementsNot CalculatedNot Calculated
+	I-5. Survey Dates
+Annual Project Condition ExaminationJuly 2017Pre-Construction Conditional Survey 2017 FCCE BeachfillOctober 2017Post-Construction Conditional Survey 2017 FCCE BeachfillDecember 2017Annual Project Condition ExaminationAugust 2018Annual Project Condition ExaminationAugust 2019Pre-Construction Conditional Survey 8th Beachfill NourishmentJune 2020Annual Project Condition ExaminationAugust 2020Post-Construction Conditional Survey 8th Beachfill NourishmentSeptember 2020
+	I-6. Great Egg Harbor Borrow Area
+Authorized Dredging Depth          (ft. NAVD 88)
+Latest Hydrographic Survey
+Available Material in Borrow Area Above Permitted Depth, cy-23 ft. NAVD 88Most Recent Hydrographic SurveyAugust 2020Available Material in Permitted Borrow Area Above Authorized Dredging Depth9,860,000 cyAvailable Material in Original Borrow Area (Nourishments 1-5) Above Authorized Dredging Depth4,137,000 cy
+II. Project Design Parameters
+Dune ElevationN/ADune Crest WidthN/ADune Height Above BermN/ADune SlopeN/ABerm Elevation6.75 ft. NAVD 88Berm Slope1V:30H to MLW then 1V:50HMinimum Berm Width100 ft.II. Project Design Parameters (Continued)
+Estimated Renourishment Interval3 yearsShoreline Elevation+ 4.0 ft. NAVD 88MHW Elevation+1.58 ft. NAVD 88MLW Elevation-2.45 ft. NAVD 88
+III. Project Management Information 
+Congressional InterestRep. Van Drew (NJ 2)Business ProgramFlood and Coastal Storm Risk ManagementProject ManagerDwight Pakan
+IV. Cumulative Project Volume Change Since September 2007 
+
+V. Borrow Area Available Material Since August 2013
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TABLE OF CONTENTS
+	
+
+1.  Introduction	1
+	1.1.  Project Description	1
+	1.2.  Project Status	3
+	1.3.  Purpose of Report	4
+2.  Coastal Monitoring Data Collection	6
+	2.1.  Coastal Monitoring Program Description	6
+	2.2.  Beach Profile Data Collection	7
+	2.3.  Shoreline Data Collection	7
+	2.4.  Borrow Areas Bathymetry	7
+	2.5.  Other Data Collection Efforts	7
+3.  Data Analysis	9
+	3.1.  Beach Profiles	9
+	3.2.  Shorelines	12
+	3.3.  Borrow Areas	12
+4.  Project Condition Evaluation	13
+	4.1.  Summary of Project Condition	13
+	4.2.  Recommendations	20
+5.  References	22
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+APPENDICES
+APPENDIX A – BEACH PROFILE NETWORK	A-1
+APPENDIX B – BEACH PROFILE LOCATIONS	B-1
+APPENDIX C – BEACH PROFILE SURVEY HISTORY	C-1
+APPENDIX D – BEACH PROFILE PLOTS	D-1
+APPENDIX E – BEACH PROFILE CROSS-SECTIONAL AREA AND VOLUMETRIC CHANGES	E-1
+APPENDIX F – EXCESS AND DEFICIT CROSS-SECTIONAL AREAS AND QUANTITIES VERSUS DESIGN TEMPLATE	F-1
+APPENDIX G – SHORELINE POSITION PLOTS	G-1
+APPENDIX H – SHORELINE POSITION TABLES	H-1
+APPENDIX I – GREAT EGG HARBOR INLET ANNUAL BATHYMETRIC CHANGES	I-1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+LIST OF TABLES
+
+
+Table 1. Beachfills Placed Within the Great Egg Harbor and Peck Beach, NJ Project	4
+Table 2. Collected Survey Data from July 2017 to September 2020	6
+Table 3. Volumetric Changes Above MHW After 2017 FCCE Beachfill	14
+Table 4. Infilling Analysis for the Permitted Great Egg Harbor Borrow Area	18
+Table 5. Infilling Analysis for the Original Great Egg Harbor Borrow Area	19
+
+
+
+Figure 1. Location Map	2
+ Figure 2. Nourishment History from 1994 to 2020 for the Great Egg Harbor and Peck Beach, NJ Project	3
+Figure 3. Typical Hydrographic Survey Coverage for Great Egg Harbor Inlet	8
+Figure 4. Cross-Sectional Area Changes for September 2017 to August 2018	9
+Figure 5. Cross-Sectional Area Changes for August 2018 to August 2019	10
+Figure 6. Cross-Sectional Area Changes for August 2019 to August 2020	10
+Figure 7. Cross-Sectional Area Changes for July 2017 to August 2020	11
+Figure 8. History of Great Egg Harbor Inlet Borrow Area Configurations	17
+Figure 9. Available Material History in Great Egg Harbor Borrow Area From 2013 to 2020	20
+Figure B-1. Beach Profiles from Sta. 0+00 to 50+00	2
+Figure B-2. Beach Profiles from Sta. 50+00 to 100+00	3
+Figure B-3. Beach Profiles from Sta. 100+00 to 160+00	4
+Figure B-4. Beach Profiles from Sta. 160+00 to 215+00	5
+Figure B-5. Beach Profiles from Sta. 215+00 to 250+00	6
+Figure D-1. Profile Line OC003, Ocean City, NJ	2
+Figure D-2. Profile Line OC005, Ocean City, NJ	3
+Figure D-3. Profile Line OC007, Ocean City, NJ	4
+Figure D-4. Profile Line OC008A, Ocean City, NJ	5
+Figure D-5. Profile Line OC009, Ocean City, NJ	6
+Figure D-6. Profile Line OC011, Ocean City, NJ	7
+Figure D-7. Profile Line OC013, Ocean City, NJ	8
+Figure D-8. Profile Line OC014, Ocean City, NJ	9
+Figure D-9. Profile Line OC016, Ocean City, NJ	10
+Figure D-10. Profile Line OC017, Ocean City, NJ	11
+Figure D-11. Profile Line OC018A, Ocean City, NJ	12
+Figure D-12. Profile Line OC019, Ocean City, NJ	13
+Figure D-13. Profile Line OC020A, Ocean City, NJ	14
+Figure D-14. Profile Line OC021, Ocean City, NJ	15
+Figure D-15. Profile Line OC022, Ocean City, NJ	16
+Figure D-16. Profile Line OC023A, Ocean City, NJ	17
+Figure D-17. Profile Line OC024, Ocean City, NJ	18
+Figure D-18. Profile Line OC025A, Ocean City, NJ	19
+Figure D-19. Profile Line OC026, Ocean City, NJ	20
+Figure D-20. Profile Line OC027A, Ocean City, NJ	21
+Figure D-21. Profile Line OC028, Ocean City, NJ	22
+Figure D-22. Profile Line OC030, Ocean City, NJ	23
+Figure D-23. Profile Line OC031, Ocean City, NJ	24
+Figure D-24. Profile Line OC032, Ocean City, NJ	25
+Figure D-25. Profile Line OC034, Ocean City, NJ	26
+Figure D-26. Profile Line OC035, Ocean City, NJ	27
+Figure D-27. Profile Line OC037, Ocean City, NJ	28
+Figure D-28. Profile Line OC039, Ocean City, NJ	29
+Figure D-29. Profile Line OC041, Ocean City, NJ	30
+ Figure D-30. Profile Line OC043, Ocean City, NJ	31
+Figure D-31. Profile Line OC045, Ocean City, NJ	32
+`Figure D-32. Profile Line OC047, Ocean City, NJ	33
+Figure D-33. Profile Line OC049, Ocean City, NJ	34
+Figure D-34. Profile Line OC050, Ocean City, NJ	35
+Figure D-35. Profile Line OC051, Ocean City, NJ	36
+Figure E-1. Cumulative Volumetric Changes from September 2007 to August 2020	9
+Figure E-2. Volume Changes from July 2017 to August 2020 for Great Egg Harbor and Peck Beach Project Area	10
+Figure E-3. Volume Changes from July 2017 to August 2020 for Profiles OC003 to OC012	11
+Figure E-4. Volume Changes from July 2017 to August 2020 for Profiles OC003 to OC020A	12
+Figure E-5. Volume Changes from July 2017 to August 2020 for Profiles OC020A to OC027A 	13
+Figure E-6. Volume Changes from July 2017 to August 2020 for Profiles OC027A to OC035	14
+Figure E-7. Volume Changes from July 2017 to August 2020 from Profile OC035 to OC043 	15
+Figure E-8. Volume Changes from July 2017 to August 2020 from Profile OC043 to OC051	16
+ Figure G-1. Shoreline Locations Between Profiles OC003 to OC011	2
+Figure G-2. Shoreline Locations Between Profiles OC011 to OC019	3
+Figure G-3. Shoreline Locations Between Profiles OC019 to OC026	4
+Figure G-4. Shoreline Locations Between Profiles OC026 to OC034	5
+Figure G-5. Shoreline Locations Between Profiles OC034 to OC043	6
+Figure G-6. Shoreline Locations Between Profiles OC043 to OC051	7
+Figure I-1. Great Egg Harbor Bathymetry from July 6, 2017 Survey	2
+Figure I-2. Great Egg Harbor Bathymetry from August 15, 2018 Survey	3
+Figure I-3. Great Egg Harbor Bathymetry from August 12, 2019 Survey	4
+Figure I-4. Great Egg Harbor Bathymetry from August 12, 2020 Survey	5
+Figure I-5. Changes Great Egg Harbor Bathymetry Between 2017 and 2018	6
+Figure I-6. Changes Great Egg Harbor Bathymetry Between 2018 and 2019	7
+Figure I-7. Changes Great Egg Harbor Bathymetry Between 2019 and 2020	8
+Figure I-8. Changes in Great Egg Harbor Bathymetry Between 2017 and 2020	9
+ Figure I-9. Great Egg Harbor Borrow Area Changes btw BD & AD Surveys for 2017 Nourishment	10
+Figure I-10. Great Egg Harbor Borrow Area Changes btw BD & AD Surveys for 2020 Nourishment	11
+ LIST OF FIGURES
+
+Figure 1. Location Map	2
+Figure 2. Nourishment History from 1994 to 2020 for the Great Egg Harbor and Peck Beach, NJ Project	3
+Figure 3. Typical Hydrographic Survey Coverage for Great Egg Harbor Inlet	8
+Figure 4. Cross-Sectional Area Changes for September 2017 to August 2018	9
+Figure 5. Cross-Sectional Area Changes for August 2018 to August 2019	10
+Figure 6. Cross-Sectional Area Changes for August 2019 to August 2020	10
+Figure 7. Cross-Sectional Area Changes for July 2017 to August 2020	11
+Figure 8. History of Great Egg Harbor Inlet Borrow Area Configurations	17
+Figure 9. Available Material History in Great Egg Harbor Borrow Area From 2013 to 2020	20
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. Introduction
+1.1. Project Description
+The City of Ocean City is located in Cape May County along the Atlantic Ocean Coast of New Jersey (Figure 1). Also known as Peck Beach, the barrier island extends from Great Egg Harbor Inlet on its northern boundary approximately 8 miles to Corson’s Inlet on its southern border. The project area doesn’t span the entire length of the barrier island, but ends approximately 4.5 miles from Great Egg Harbor Inlet at 34th St. A long-term erosion problem has been well-documented along the northern portion of Ocean City extending from 5th Street to 12th Street.
+A shoreline protection project for Ocean City, NJ was initiated by the Philadelphia District in 1992. This beach nourishment project, entitled Great Egg Harbor Inlet and Peck Beach, NJ, is also supported by the non-Federal sponsors of the New Jersey Department of Environmental Protection and the City of Ocean City.
+The project consists of an initial beachfill which occurred in 1992 with subsequent periodic nourishment on a 3-year cycle, and a beach profile and shoreline monitoring program for the project area. The authorized beach design template includes a minimum berm width of 100 feet at an elevation of +6.75 feet North Atlantic Vertical Datum of 1988 (NAVD 88). The 100-foot berm is defined from either the seaward edge of boardwalk, bulkhead or a baseline where no boardwalk or bulkhead is present. The material for the initial construction and the subsequent periodic nourishments every three years is taken from the ebb shoal area located approximately 5,000 feet offshore of Great Egg Harbor Inlet. This periodic dredging of the channel and ebb shoal area also helps to alleviate navigation difficulties in the inlet. Additionally, initial project construction required the extension of 38 storm drain-pipes.
+The initial fill operation was conducted in two phases; first 2.6 million cubic yards of sand were placed in the vicinity of Seaview Rd. to 15th St. and then approximately 2.7 million cubic yards of sand were placed from 15th St. to the project limit at 34th St, with a taper extending to 36th Street. Additionally, 846,000 cubic yards of sand were placed to repair erosion from storms occurring during initial construction. 
+
+
+
+
+
+
+
+
+
+
+
+Figure 1. Location Map 
+1.2. Project Status
+The scheduled 8th periodic nourishment cycle took place between June 2020 and September 2020. Quantity placed was 1.6 MCY and was placed from Great Egg Harbor Inlet to 12th Street. In November to December 2017, through the Flood Control and Coastal Emergencies (FCCE) Act, PL 84-99, a total of 1.3 MCY was placed from Great Egg Harbor Inlet to 12th St. The FCCE program authorizes the Corps of Engineers to repair previously constructed projects after a large storm event and return the project area to pre-storm conditions. To date, eight periodic nourishments, 2 Emergency FCCE Beachfills, and 1 State/Local Beachfill have been conducted since initial construction with a total of almost 20 million cubic yards of sand placed. The history of the periodic beachfill nourishments for the project is shown in Figure 2 and Table 1. 
+In 2009 the authorized Great Egg Harbor Inlet borrow area was expanded from 580 acres to 1,785 acres. Starting with the 6th nourishment cycle, a portion of the expanded borrow area was used in the vicinity of the natural channel within the inlet in order to help alleviate shoaling and improve navigation within the channel. The reason the borrow area was expanded in 2009 had to do with integrating the borrow location with the inlet’s natural hydrodynamics and geomorphology. By doing this expansion, impacts were minimized to the adjacent shorelines and the inlet system; The expansion also resulted in leaving the majority of the ebb shoal structure intact which provided increased protection and continued sediment supply for the northern end of Ocean City. This sediment should naturally move onshore and nourish the shoreline over time;  And, as an added benefit, improving navigation in the seaward region of the inlet channel. 
+ Figure 2. Nourishment History from 1994 to 2020 for the Great Egg Harbor and Peck Beach, NJ Project
+
+
+Table 1. Beachfills Placed Within the Great Egg Harbor and Peck Beach, NJ Project Area
+BeachfillDate CompletedMaterial Placed (cy)LocationInitial Construction Phase IFebruary 19922,618,000Inlet to 15th St.Initial Construction Phase IIOctober 19922,727,00015th St. to 36th St.Initial Construction Storm RehabJune 1993846,0005th St. 23rd St.1st Periodic Nourishment Phase IOctober 1994606,0001st St. to 11th St.1st Periodic Nourishment Phase IIJune 19951,411,000Inlet to 36th St.2nd Periodic NourishmentOctober 1997800,0003rd St. to 13th St.3rd Periodic NourishmentDecember 20001,351,000Inlet to 15th St.4th Periodic NourishmentFebruary 20041,600,000Inlet to 14th St.State/Local Beachfill1May 2008764,000Inlet to 12th St.5th Periodic NourishmentMay 20101,400,000Inlet to 36th St.6th Periodic NourishmentMay 20131,000,000Inlet to 14th St.Emergency FCCE BeachfillMay 2013 (Superstorm Sandy)800,000Inlet to 12th St.7th Periodic NourishmentDecember 20151,000,000Inlet to 12th St.Emergency FCCE BeachfillDecember 20171,278,000Inlet to 12th St.8th Periodic NourishmentOctober 20201,616,000Inlet to 13th St.TOTALSInitial Construction + 2 FCCE Emergency Fills + 1 NJDEP/Local Fill + 8 Periodic Renourishments19,817,000	1 State/Local Paid Beachfill Since Funding was not Available for the Federal Beachfill Nourishment in 2008				
+1.3. Purpose of Report
+The primary purpose of this inspection report is to document the current conditions of the Federal beach nourishment project located in Ocean City, NJ. The report will summarize the conditions and activities at the Federal project from July 2017 to September 2020. Refer to previous inspection reports for conditions of the Federal project prior to July 2017. South of the Great Egg Harbor and Peck Beach, the NJ project starting at 36th St. in Ocean City and proceeding south to Corson’s Inlet, is the Great Egg to Townsends Federal Beachfill Project. The Great Egg to Townsends Project had initial construction in 2016 and its first periodic nourishment was completed in September 2020. Previous inspection reports for this project included the analysis of the downdrift beach profiles that are within the limits of the Great Egg to Townsends Project. Analysis of the Great Egg to Townsends Federal Project including the beach profiles from 36th St. to Corson’s Inlet can be found in the latest inspection report for that project. 
+ In addition, this report also provides information useful for project management and design purposes and can proactively be utilized for project maintenance or by the Federal Government in the event of an approaching storm to more efficiently execute the Flood Control and Coastal Emergencies (FCCE) mission. 
+This report will identify project conditions relative to the design template defined in the decision document based upon the most recent annual monitoring survey collected in August 2020. It should be noted that the August 2020 survey took place during the latest nourishment project. When the survey data was collected, about 84% (1.36 MCY) had already been placed between Sta. 16+00 to 112+61 (Pinnacle Rd. to 12th St.). The remaining 254,000 cy of material was placed subsequently between Sta. 0+00 to 16+00 (Seaview Ave. to Pinnacle Rd). Therefore, the analyses summarized in this report of comparing the August 2020 survey against the design template will show a deficit of material north of Sta. 16+00 and surplus of material south of Sta. 16+00. Considering that the most recent survey coincided with the recent  nourishment, the project condition relative to the design template should not be used to predict quantities needs for the next nourishment cycle that is scheduled to occur in 2023. The next inspection report will be a better indicator of potential quantity needs in 2023 since a sufficient amount of time will have passed by then to allow the recent project condition to reach an equilibrium state.
+In addition to the design template comparison, this report also tracks shoreline position and annual volumetric change from July 2017 to July 2020 by using the annual collected beach profile monitoring surveys in 2017, 2018, 2019, and 2020. Summaries of additional data collection efforts and analyses pertinent to assessing condition of the project are included. Recommendations are presented based on the project condition assessment. The bathymetric changes within Great Egg Harbor Inlet which includes the authorized borrow area for the project is also documented in this report from 2017 to 2020. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. Coastal Monitoring Data Collection
+2.1. Coastal Monitoring Program Description
+The present coastal monitoring program for the Great Egg Harbor Inlet and Peck Beach, NJ Federal project includes beach profile surveys, pre- and post-storm ATV shoreline surveys, bathymetric borrow area surveys, and aerial photography. In addition, several surveys were collected associated with the FCCE renourishment beachfill in the Fall of 2017 and the recent 8th nourishment that concluded in September 2020. Table 2 summarizes the coastal monitoring data collected from 2017 to 2020.
+Table 2. Collected Survey Data from July 2017 to September 2020 
+Data TypePurpose/SourceCoverage ExtentsCollection DateBeach ProfilesAnnual MonitoringGreat Egg Harbor Inlet to Corson Inlet July 2017Pre-Construction Conditional Survey for FCCE ProjectGreat Egg Harbor Inlet to 36th St.October 2017Post-Construction Conditional Survey for FCCE ProjectGreat Egg Harbor Inlet to 36th St.December 2017Annual MonitoringGreat Egg Harbor Inlet to Corson Inlet August 2018Annual MonitoringGreat Egg Harbor Inlet to Corson Inlet August 2019Pre-Construction Conditional Survey for Renourishment ProjectGreat Egg Harbor Inlet to 36th St.June 2020Annual MonitoringGreat Egg Harbor Inlet to Corson Inlet August 2020Post-Construction Conditional Survey for Renourishment ProjectGreat Egg Harbor Inlet to 36th St.September 2020Great Egg Harbor Inlet Hydrographic SurveysAnnual MonitoringEntire InletJuly 2017Before Dredging Conditional Survey for FCCE ProjectBorrow Area OnlyOctober 2017After Dredging Conditional Survey for FCCE ProjectBorrow Area OnlyDecember 2017Annual MonitoringEntire InletAugust 2018Annual MonitoringEntire InletAugust 2019Before Dredging Conditional Survey for Renourishment ProjectBorrow Area OnlyJune 2020Annual MonitoringEntire InletAugust 2020After Dredging Conditional Survey for Renourishment ProjectBorrow Area OnlySeptember 2020Aerial PhotographyGoogle EarthStatewideSpring 2017Tidal DataNOSNOS Gage @ Atlantic City, NJContinuous2.2. Beach Profile Data Collection
+The beach profile network established for the project starts on the inlet frontage at Great Egg Harbor Inlet and ends at 36th St in Ocean City. The network consists of 35 beach profiles within the project area of Seaview Rd. groin to the buffer/transition area at 36th St, spaced between 200 to 1,000 feet apart. The network was established for design purposes and to serve as the monitoring network in order to evaluate beachfill performance during the 50-year project span. Table A-1 in Appendix A summarizes the network and Figures B-1 to B-5 in Appendix B show the locations of the 40 profile lines. Beach profile surveys were collected for multiple purposes during the July 2017 to September 2020 time period that included routine annual examinations and pre- and post-placement surveys for the two beachfills that occurred during the time period. The summary of what profile lines were collected for each given survey is shown in Appendix C on Table C-1. Plots of the beach profiles used in the volumetric analysis and project monitoring for this inspection report are included in Figures D-1 to D-35 in Appendix D. Each profile plot shows the four annual surveys from 2017 to 2020 along with the design template. Data for all beach profile surveys are available upon request from the Philadelphia District.
+2.3. Shoreline Data Collection
+Shoreline positions at the +4.0 ft. NAVD88 elevation were extracted from the four annual examinations from July 2017 to August 2020. Shoreline locations extracted from these surveys were used to track the conditions of the beaches annually and prior to and after beachfill placement. 
+2.4. Borrow Areas Bathymetry
+Since the Great Egg Harbor and Peck Beach, NJ beach fill project was initiated in 1992, hydrographic surveys of the Great Egg Harbor Inlet complex have routinely been collected. Within the timeframe of this report, yearly hydrographic surveys were conducted in the inlet which included the Federal borrow area (original and expanded) and the surrounding channel and ebb shoal complex. Line spacing for all surveys was 400 feet in the alongshore direction (SW to NE) and 500 feet in the offshore direction (SE to NW). Figure 3 shows the coverage for the July 2017 survey which is typical of the coverage captured in the annual examinations. Data for all hydrographic surveys is available upon request from the Philadelphia District.
+2.5. Other Data Collection Efforts
+Georeferenced aerial photography from 2017 is available online from the State of New Jersey at https://njgin.nj.gov/njgin/edata/imagery/index.html#!/. High-resolution LiDAR of the project area from various sources for 2017 and 2018 can be obtained from https://coast.noaa.gov/digitalcoast/data/. Also, tide data from the NOS gages at Atlantic City, NJ and Cape May, NJ were referenced as needed to assess water level conditions (tide and surge) at the project.
+
+Figure 3. Typical Hydrographic Survey Coverage for Great Egg Harbor Inlet
+3. Data Analysis
+3.1. Beach Profiles
+Design Template. The full design template was previously developed for each profile by translating the September 2011 profile shape below MHW and aligning with the adjusted design template above MHW. This method of defining the template profile shape below MHW is consistent with equilibrium profile concepts discussed in EM-1110-2-1100 (2006). In applying the profile shape below MHW, a smoothing algorithm was applied to smooth the profile shape as needed for presentation purposes.
+The full design template extends from the design baseline to the depth of closure defined at the seaward limit of nearshore profile change. The applied depth of closure ranged from -11 ft. NAVD88 in the northern part of the barrier island near Great Egg Harbor Inlet to -22 ft. NAVD88 at the southern end of the project area. Changes in offshore features beyond the defined depth of closure were not considered in the analysis as they are assumed to be decoupled from nearshore profile change at the timescale of interest (CHETN II-40, 1998).
+Volumetric Calculations. All volumetric calculations were performed by calculating cross-sectional areas for each profile as shown in Figures 4-7 for each time period above MHW and above closure depth and in Tables E-1 and E-2 in Appendix E. Changes in volumes from year to year between adjacent beach profiles were calculated using the cross-sectional area changes and the average-end-area method. The average-end-area method was applied by averaging adjacent profile areas and multiplying by the orthogonal distance between profile azimuths. Where adjacent profile azimuths differed, the difference was accounted for by adding (if azimuths diverged) or subtracting (if azimuths converged) a representative wedge volume to the orthogonal volume. The representative wedge volume was determined by multiplying each end area by an arc length, s and then averaging. The arc length for each end area was calculated by s=r?, where r is the radial distance from the profile origin to the centroid of the end area, and ? is the difference angle between the end profile azimuths.
+Figure 4. Cross-Sectional Area Changes for September 2017 to August 2018
+Figure 5. Cross-Sectional Area Changes for August 2018 to August 2019
+
+Figure 6. Cross-Sectional Area Changes for August 2019 to August 2020
+
+
+
+Figure 7. Cross-Sectional Area Changes for July 2017 to August 2020
+Project Volume Change. Annual incremental project volumetric changes from 2017 to 2020 and cumulative volumetric were calculated to assess changes within the project footprint as shown on Tables E-3 to E-6 in Appendix E and Figure E-1. Total volume change was calculated using the entire active profile (design baseline to profile depth of closure), and subaerial volume was calculated using data above the MHW contour. Figures E-2 to E-8 in Appendix E show visually in plan view the profile line to profile line volumetric changes for the entire 2017 to 2020 analysis period. It is recommended that additional analyses be conducted in future inspection reports to determine a volume loss rate and to update the background erosion rates, free from influences of beachfills being placed so that advance nourishment quantities can be projected for future beach nourishments. 
+Project Condition vs. Design Template. The August 2020 surveyed condition was compared to the design template to determine deficit quantities below template and excess quantities above template (Appendix F, Tables F-1 and F-2). As previously stated, the August 2020 survey took place during the latest nourishment project. Therefore, the analyses summarized in this report of comparing the August 2020 survey against the design template shows a deficit of material in areas where beachfill had not occurred prior to August (Sta 0+00 to Sta. 16+00) and a large surplus of material in the recently filled areas just prior to the August 2020 survey. Considering that the most recent survey coincided with the recent nourishment, the project condition relative to the design template should not be used to predict advance nourishment needs for the next nourishment cycle that is scheduled to occur in 2023. The updated project condition versus design template analysis that will be done in the next inspection report will be a better indicator of potential nourishment needs in 2023 since a sufficient amount of time will have passed by then to allow the recent project condition to reach an equilibrium state.
+
+
+3.2. Shorelines
+Shoreline Position vs. Design Template. Shoreline positions were extracted from each profile at the +4 ft. NAVD88 elevation, which lies approximately mid-elevation between MHW and the berm crest. Plots of shoreline positions for each of the surveys (2017 through to 2020) and the design template are shown in Appendix G in Figures G-1 to G-6. Tables of shoreline positions relative to the project baseline and the design template at each profile line location are shown on Table H-1 and H-2 in Appendix H. Lastly, the existing condition shoreline (August 2020) was compared to the design template shoreline at each beach profile to determine the minimum, maximum, and average offsets at the +4.0 ft. NAVD 88 elevation. Results are presented in both Section I-3 of the Project Performance Summary on page ii of this report and in Appendix H in Table H-3. Negative distances indicate the existing shoreline has eroded to a point landward of the design shoreline, while positive values indicate the existing shoreline (August 2020) is seaward of the design shoreline.
+Projected Erosion and Advance Nourishment. This analysis is typically completed for an annual inspection report but wasn’t completed for this report due to the timing of the report coinciding with the 8th nourishment cycle that was completed in September 2020. It would be premature to update the estimate of recent project erosion given the fact that beachfill was just placed for the 8th nourishment. Estimated advance nourishment quantities needed for the 9th nourishment cycle, based upon updated erosion rates calculated from the data in this report would likely be higher than needed based upon the rapid adjustment of the beach to achieve an equilibrium state. As stated in previous Great Egg Harbor and Peck Beach, NJ inspection reports, the background erosion rates have increased since the last time annual erosion rates that were used for advance nourishment calculations were determined using the 2001 to 2004 time period. The 2001 to 2004 time period was used because it was void of any beachfill projects that could potentially result in over-predicting annual erosion rates. The average annual erosion rates will be updated in the next inspection report and will utilize multiple time periods free of any beachfill activity and be adjusted as necessary to reflect recent trends.
+3.3. Borrow Areas
+Both inlet and borrow area hydrographic surveys were collected to monitor before and after dredging activities from the 2017 and 2020 beachfills and infilling of the borrow area. Annual hydrographic surveys of Great Egg Harbor Inlet were conducted in the Summers between 2017 and 2020 which included both the original and expanded Federal borrow areas and the entire inlet channel and ebb shoal complex. The amount of material above the authorized dredging depth that could be available for the next renourishment within the original borrow area is presented in Section I-6 of the Project Performance Summary on page iii and in Section 4.1 of this report. Recent inlet and borrow area surveys are plotted in Figures I-1 to I-8 in Appendix I along with difference plots showing areas of shoaling and scouring between successive surveys.
+
+
+
+
+4. Project Condition Evaluation
+4.1. Summary of Project Condition
+The three-year volumetric change between July 2017 and August 2020 as shown on Figures E-2 to E-8 in Appendix E include volume added to the project area from the two beachfills that occurred in the same time window. So, what is shown should not be considered as an indicator of natural background erosion rates for the areas that received fill. However, the figures can be looked as an indicator of what is going on south of the beachfill placement area (12th St.). The figures do indicate that there were some minor losses to the offshore above MHW south of the fill area from 12th St to 21st St. and deposition of material (greater than 10,000 cy) from 21st St to the end of the project area. Looking at this same area from the previous inspection report which covered the 2013 to 2017 time period, it can seen that the above MHW loss of material to the offshore reach length has expanded. From 2013 to 2017, the above MHW loss of material to the offshore ended at 15th St. (OC027A). If this loss of material above MHW trend continues, future renourishments may have to expand south of 12th St. Typically, the eight renourishments completed to date have terminated around 11th to 13th St. 
+As of the August 2020 beach profile survey, the project is below template at the stations (0+00 to 16+00) that will be filled during the last month of the nourishment project. Recently fill areas (Sta. 16+00 to 112+61) obviously show beach conditions well above the design template due to the recent beachfill. It is expected that as the beaches adjust to an equilibrium condition this surplus will not be as pronounced in the coming months through the winter season. In the next inspection report, surveys collected in the Summer of 2021 will be examined to ascertain beach conditions relative to the design template at that time. The rapid adjustment that always takes place shortly after a beachfill should be completed by then as the beaches return to a more stable equilibrium condition.
+The past trend of a very stable to accreting beach condition south of Sta. 128+00 (15th St.) to the end of the Federal Project is continuing. Traditionally, no nourishment is needed in this area due to being downdrift of the more dynamic beach conditions in the northern part of the project area. Generally speaking, the trend of 25% of the entire project length needing 75% of the nourishment volume every 3-years is continuing. The design template’s extracted +4.0 ft. NAVD88 location versus the extracted +4.0 ft. NAVD88 from the August 2020 survey shows that 88% of the entire project length is seaward of the design template. Upon examination of the post-placement surveys collected by the beachfill Contractor in September 2020, the 12% that was not seaward in August (Sta 0+00 to 16+00), was seaward at the conclusion of the beachfill project in September 2020. 
+An analysis of the material gained above MHW between the July 2017 to August 2018 time period (2017 FCCE beachfill) versus the material “lost” above MHW one year after the beachfill  (August 2018 to August 2019) was completed. Since the time periods were similar 385 versus 387 days between surveys a direct one versus one comparison is reasonable to do. It should be noted that in the time after a large beachfill like what was done in 2017, material placed above MHW is not considered to be “eroded away” and “lost” but as translated to the offshore where it can’t be seen but is still providing a benefit in reducing the risk to the community of coastal storm damage as designed. The difference of material “gained” during versus material “lost” above MHW after the 2017 beachfill can provide some insight as to the background erosion characteristics of the area such as specific location(s) and magnitude of stable areas, erosional “hot spot” areas, or accreting areas. Also, knowing this along with conducting other supplemental analyses that will be done in subsequent inspection reports can assist in the calculations of advance nourishment needs for future beachfills. Table 3 summarizes the above MHW volumetric changes that occurred during and after the 2017 beachfill at each profile line.
+
+
+
+Table 3. Volumetric Changes Above MHW After 2017 FCCE Beachfill 
+Profile ID FromProfile ID ToStation FromStation To07/18/2017 to 08/09/2018 Volume Change Above MHW (cy)08/09/2018 to 08/29/2019 Volume Change Above MHW (cy)% Mat’l Placed Above MHW Remaining Above MHW on 08/29/2019OC003OC0052+6911+0065,616-16,69475OC005OC00711+0018+0079,754-27,80865OC007OC008A18+0022+0092,921-38,80658OC008AOC00922+0026+00108,229-49,17155OC009OC01126+0034+0031,334-12,32061OC011OC01334+0041+5053,410-23,71756OC013OC01441+5050+2677,664-40,21548OC014OC01650+2658+7096,554-51,99246OC016OC01758+7064+00103,340-57,83144OC017OC018A64+0070+00115,453-67,29942OC018AOC01970+0075+00128,221-75,67641OC019OC020A75+0083+00143,151-86,53540OC020AOC02183+0088+00149,156-92,08938OC021OC02288+0093+004,737-6,289-33OC022OC023A93+0099+0010,145-15,141-49OC023AOC02499+00103+0014,884-18,740-26OC024OC025A103+00111+0024,327-21,84210OC025AOC026111+00118+0029,321-21,96025OC026OC027A118+00124+0032,802-19,88939OC027AOC028124+00128+0033,876-17,80447OC028OC030128+00138+0037,396-14,17662OC030OC031138+00143+3740,533-12,66769OC031OC032143+37148+0041,356-10,36275OC032OC034148+00158+0039,728-3,52091OC034OC035158+00165+9240,2162,99993OC035OC037165+92173+0043,1947,06584OC037OC039173+00183+0047,28111,43276OC039OC041183+00193+5051,17318,13965OC041OC043193+50203+0052,55625,99751OC043OC045203+00213+001,4728,918605OC045OC047213+00223+004,02416,154401OC047OC049223+00233+004,84723,338482OC049OC050233+00238+006,18227,619447OC050OC051238+00243+349,92530,886311% Material Remaining btw 75% to 100%% Material Remaining btw 50% to 75%% Material Remaining btw 25% to 50%% Material Remaining btw 0% to 25%Material Moved Offshore Exceeds Material PlacedMore Material Above MHW After Beachfill Vs. Before Due to be Downdrift of 2017 BeachfillProfiles that Received Beachfill from 2017 FCCE Project
+
+
+
+
+
+As Table 3 shows, the above MHW volumetric losses to the offshore were highest between Moorlyn Terrace and 12th St (OC021 to OC024). This is consistent with past experiences for the location of the “hot spot” area in Ocean City being near the Music Pier at 9th St. Further north towards Great Egg Harbor Inlet away from the Music Pier shows a gradual reduction in the loss rates to the offshore after the 2017 nourishment. Approximately, it took 4,600 feet to Stenton Place (OC013) for the losses to the offshore to reduce to below 25%. South of the Music Pier at 9th St, Table 3 also shows a much faster transition to the lower loss rates of 25% or less to the offshore. It took 8,000 feet (almost twice the distance), down to 25th St (OC039) for losses to the offshore to get below 25%. This type of analysis will be done in the next inspection report using data after the 2020 nourishment to see if the most recent nourishment behaved in a similar manner. Knowing this kind of information will be another helpful tool when it comes time to calculate advance nourishment needs in the future.
+One of the purposes of doing a yearly inspection report is to see if reworking material from areas of excess and moving it to areas in deficit can be accomplished thus reducing the amount of material needed to be dredged from the borrow area. However, this reworking of material has typically not been done for Ocean City in the past because the borrow area has always had ample available material within the traditional southwest portion of the borrow area and in the navigation channel.
+This practice of not reworking excess material may need to be revisited in the future if more borrowing demands are placed upon the inlet every three years. Needing 1.6 MCY every 3 years versus the typical 1.0 to 1.2 MCY may require dredging within the permitted borrow area in places not typically dredged. It has already been observed to some extent, as the borrow areas used for each nourishment project have crept to the northwest because of the need to “find” more available material as Figure 8 shows. If the need to dredge additional material increases every three years that could increase the risk to coastal storms for the northern part of Ocean City near the inlet. That’s because the northern part of Ocean City is protected somewhat due to being in the shadow of the inlet’s shallower waters from the shoal complex.
+
+
+
+Figure 8. History of Great Egg Harbor Inlet Borrow Area Configurations
+An infilling analysis of the permitted Great Egg Harbor Inlet borrow area and the original smaller borrow area used for the first five nourishments within the larger permitted borrow area was conducted utilizing the annual hydrographic surveys collected in the Summers of 2017 to 2020. As beachfill quantities have increased by approximately 300,000 cy over the last three renouirshments (Table 1), it is important to monitor the borrow area on a yearly basis to make sure it is infilling at a rate equal to or greater than the demands placed upon it from dredging it every three years and to make sure natural inlet processes are not interrupted. As previously discussed, if infilling slows down while demands remain the same or increase, then future dredging may have to be conducted within the borrow area at locations not traditionally dredged in the past. This is not desirable because the natural morphological processes and patterns within the inlet could be adversely affected. The updated infilling analysis showing pre 2017 rates along with the recent post 2017 rates are shown in Table 4 for the large permitted borrow and in Table 5 for the smaller original borrow area used for the first five nourishments. Figure 9 graphically shows available material for both areas from August 2013 to August 2020.
+Table 4. Infilling Analysis for the Permitted Great Egg Harbor Borrow Area
+SurveyMaximum Allowable Dredging Depth     (ft. NAVD88)Available Material To Allowable Dredging Depth (cy)Material Removed/Lost or Gained by Infilling (cy)NotesAug. 2013-214,728,000  999,000Sept. 2014-215,727,000  698,000Sept. 2015-216,425,000  -364,0007th RenourishmentSept. 2016-216,061,000  -984,000July 2017-215,077,000  -537,000FCCE NourishmentAug. 2018-214,540,000  309,000Aug. 2019-214,849,000  -745,0008th NourishmentAug. 2020-214,104,000 Quantity Infilled btw 20013 – 2020 (cy)897,0007 Year Average Infilling Rate (cy/yr)128,143
+
+
+
+
+
+Table 5. Infilling Analysis for the Original Great Egg Harbor Borrow Area
+SurveyMaximum Allowable Dredging Depth     (ft. NAVD88)Available Material To Allowable Dredging Depth (cy)Material Removed/Lost or Gained by Infilling (cy)NotesAug. 2013-211,373,000  783,000Sept. 2014-212,156,000  667,000Sept. 2015-212,823,000  -155,0007th RenourishmentSept. 2016-212,668,000  -142,000July 2017-212,526,000  -318,000FCCE NourishmentAug. 2018-212,208,000  304,000Aug. 2019-212,512,000  -242,0008th NourishmentAug. 2020-212,270,000 Quantity Infilled btw 20013 – 2020 (cy)-624,0007 Year Average Infilling Rate (cy/yr)-89,143
+
+Figure 9. Available Material History in Great Egg Harbor Borrow Area From 2013 to 2020
+As Table 4 shows, the permitted borrow area infilled a total quantity of 897,000 cy from August 2013 to December 2020 despite there being three beachfills that used the Great Egg Harbor inlet borrow area for material during that time. The source of the large quantity that infilled the permitted borrow area between August 2013 and September 2015 was from beach erosion in the northern part of Ocean City due to Super Storm Sandy that occurred at the end of October 2012 and sediment transport to the south into the inlet from Absecon Island.
+4.2. Recommendations
+The northern area of the project continues to erode below template between renourishments, but the large majority of the project consistently exceeds the design template. The general trend of 25% of the project length requiring 75% of the nourishment is continuing.
+Above MHW, the project continues to maintain surplus of material starting at Gardens Rd (Sta. 34+00) in excess of the design template by over 1.8 MCY. While some of this excess sand helps to stabilize the shoreline immediately adjacent to the eroding areas to the north (thereby limiting further losses) much of the sand is located in stable or accreting areas and could potentially be removed by bypassing or backpassing operations to provide supplemental fill to the northern eroding area. This “reservoir” of surplus sand could be used if the demands placed upon the borrow area continue to increase every three years. Using at least some of this surplus sand would be a better option than to over-dredge the borrow area to such an extent where new areas within the borrow area would be needed. Dredging these “new” subareas within the borrow area could increase the risks to the northern part of Ocean City because the shoals within the inlet complex reduce the wave energy impacting the beaches. Bypassing or backpassing operations from the southern portion to the northern portion of the project area has not been typically considered for Ocean City because of the expectations of the municipality and NJDEP to fill the project area with 1.0 MCY to 1.4 MCY of sand every 3 years (as done eight times over the last 24 years). Since Great Egg Harbor Inlet regularly infills with good quality sand typically from the beaches of Ocean City itself; the quantity of available sand for a 1.0 MCY to 1.4 MCY beachfill has not been an issue every 3 years.
+To better track fill sand placed during renourishment, precondition and post construction (as built) profile surveys should continue to be collected on the project monitoring lines (separate from construction payment surveys). Construction after-dredge payment surveys cannot be use effectively in the monitoring analysis because they are collected over a shifting time window and do not align spatially with the monitoring profile lines. Separate as-built monitoring surveys will enable more accurate tracking of sand placed during construction.
+Continuation of assessing the project’s conditions annually, which is one of the primary objectives for the beachfill monitoring program, is a necessity in order to ensure that project functionality is maintained throughout the 50-year design lifetime. Project condition monitoring for Ocean City should at a minimum consist of Summer to Fall surveys of the profile lines within the Federal project area and the downdrift area to Corson’s Inlet (part of the Great Egg to Townsends Inlet Federal Project) along with the annual Summer/Fall bathymetric surveys of Great Egg Harbor Inlet.
+Bathymetric surveys within Great Egg Harbor Inlet have been conducted annually for the past seventeen years. The dynamic nature of the inlet significantly impacts the northern portion of Ocean City and the beachfill placed there. In order to better understand the sediment pathways within the inlet, and the potential impacts of dredging within the borrow area has on the northern beaches of Ocean City, the past recommendation of developing an updated hydrodynamic model and sediment budget is still recommended for Great Egg Harbor Inlet. Since there is a substantial amount of material available in the expanded permitted borrow area; it is crucial to optimize how the inlet should be dredged in the future in order to minimize adverse impacts and promote beneficial impacts to the north end of the Federal project. Conducting these types of studies would also provide insight to the fact that nourishment quantities have increased over the past three renourishment cycles
+It is also recommended that a detailed analysis with modeling be conducted that examines the long-term annual erosion rates and trends for the northern portion of the project area. A detailed analysis and modeling effort could determine if erosion rates increase post beachfill, as the construction berm’s seaward edge is “pushed” further out offshore. Experience has shown that it is very difficult to maintain a berm for three years that doesn’t erode to the point where the design template gets compromised. Maybe overfilling the “hot spot” area would help in keeping an adequate buffer of sand seaward of the design berm for a full three years, or maybe it wouldn’t, because erosion would take all that excess sand and transport it to the north into the inlet in short order. A detailed analysis coupled with the inlet modeling discussed previously would provide better insights into the complex nature of the area. 
+
+
+
+
+
+
+
+
+
+5. References
+EM-1110-2-1100 (2006). “Coastal Engineering Manual,” U.S. Army Engineer Research and Development                                         Center, Vicksburg, MS.
+CHETN II-40 (1998). “Depth of Closure in Beachfill Design,” U.S. Army Engineer Research and Development Center, Vicksburg, MS.
+
+
+
+
+
+APPENDICES
+
+APPENDIX A – BEACH PROFILE NETWORK	A-1
+APPENDIX B – BEACH PROFILE LOCATIONS	B-1
+APPENDIX C – BEACH PROFILE SURVEY HISTORY	C-1
+APPENDIX D – BEACH PROFILE PLOTS	D-1
+APPENDIX E – BEACH PROFILE CROSS-SECTIONAL AREA AND VOLUMETRIC CHANGES	E-1
+APPENDIX F – EXCESS AND DEFICIT CROSS-SECTIONAL AREAS AND QUANTITIES VERSUS DESIGN TEMPLATE	F-1
+APPENDIX G – SHORELINE POSITION PLOTS	G-1
+APPENDIX H – SHORELINE POSITION TABLES	H-1
+APPENDIX I – GREAT EGG HARBOR INLET ANNUAL BATHYMETRIC CHANGES	I-1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+LIST OF TABLES
+
+Table A-1. Beach Profile Network for Great Egg Harbor and Peck Beach, NJ	A-2
+Table C-1. Beach Profile Survey Collection History for Great Egg Harbor and Peck Beach, NJ	C-2
+Table E-1. Cross-Sectional Areas for Great Egg Harbor and Peck Beach, NJ	E-2
+Table E-2. Cross-Sectional Areas Above Closure Depth for Great Egg Harbor and Peck Beach, NJ	E-3
+Table E-3. Volumetric Changes Between July 2017 and August 2018	E-4
+Table E-4. Volumetric Changes Between August 2018 and August 2019	E-5
+Table E-5. Volumetric Changes Between August 2019 and August 2020	E-6
+Table E-6. Volumetric Changes Between July 2017 and August 2020	E-7
+Table F-1. Cross-Sectional Areas of Project Conditions in August 2020 Versus Design Template	F-2
+Table F-2. Project Condition Volumes from August 2020 Versus Design Template	F-3
+Table H-1. Distance from Project Baseline to +4.0 ft. NAVD88 Surveyed Shoreline Contour	H-2
+Table H-2. Relative Distance from the Design Template Shoreline Contour to Surveys Shoreline Contour 	H-3
+Table H-3. Surveyed Shoreline Contour Characteristics Relative to the Design Template Shoreline Contour	H-4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+LIST OF FIGURES
+
+Figure B-1. Beach Profiles from Sta. 0+00 to 50+00	B-2
+Figure B-2. Beach Profiles from Sta. 50+00 to 100+00	B-3
+Figure B-3. Beach Profiles from Sta. 100+00 to 160+00	B-4
+Figure B-4. Beach Profiles from Sta. 160+00 to 215+00	B-5
+Figure B-5. Beach Profiles from Sta. 215+00 to 250+00	B-6
+Figure D-1. Profile Line OC003, Ocean City, NJ	D-2
+Figure D-2. Profile Line OC005, Ocean City, NJ	D-3
+Figure D-3. Profile Line OC007, Ocean City, NJ	D-4
+Figure D-4. Profile Line OC008A, Ocean City, NJ	D-5
+Figure D-5. Profile Line OC009, Ocean City, NJ	D-6
+Figure D-6. Profile Line OC011, Ocean City, NJ	D-7
+Figure D-7. Profile Line OC013, Ocean City, NJ	D-8
+Figure D-8. Profile Line OC014, Ocean City, NJ	D-9
+Figure D-9. Profile Line OC016, Ocean City, NJ	D-10
+Figure D-10. Profile Line OC017, Ocean City, NJ	D-11
+Figure D-11. Profile Line OC018A, Ocean City, NJ	D-12
+Figure D-12. Profile Line OC019, Ocean City, NJ	D-13
+Figure D-13. Profile Line OC020A, Ocean City, NJ	D-14
+Figure D-14. Profile Line OC021, Ocean City, NJ	D-15
+Figure D-15. Profile Line OC022, Ocean City, NJ	D-16
+Figure D-16. Profile Line OC023A, Ocean City, NJ	D-17
+Figure D-17. Profile Line OC024, Ocean City, NJ	D-18
+Figure D-18. Profile Line OC025A, Ocean City, NJ	D-19
+Figure D-19. Profile Line OC026, Ocean City, NJ	D-20
+Figure D-20. Profile Line OC027A, Ocean City, NJ	D-21
+Figure D-21. Profile Line OC028, Ocean City, NJ	D-22
+Figure D-22. Profile Line OC030, Ocean City, NJ	D-23
+Figure D-23. Profile Line OC031, Ocean City, NJ	D-24
+Figure D-24. Profile Line OC032, Ocean City, NJ	D-25
+Figure D-25. Profile Line OC034, Ocean City, NJ	D-26
+Figure D-26. Profile Line OC035, Ocean City, NJ	D-27
+Figure D-27. Profile Line OC037, Ocean City, NJ	D-28
+Figure D-28. Profile Line OC039, Ocean City, NJ	D-29
+Figure D-29. Profile Line OC041, Ocean City, NJ	D-30
+ Figure D-30. Profile Line OC043, Ocean City, NJ	D-31
+Figure D-31. Profile Line OC045, Ocean City, NJ	D-32
+`Figure D-32. Profile Line OC047, Ocean City, NJ	D-33
+Figure D-33. Profile Line OC049, Ocean City, NJ	D-34
+Figure D-34. Profile Line OC050, Ocean City, NJ	D-35
+Figure D-35. Profile Line OC051, Ocean City, NJ	D-36
+Figure E-1. Cumulative Volumetric Changes from September 2007 to August 2020	E-9
+Figure E-2. Volume Changes from July 2017 to August 2020 for Great Egg Harbor and Peck Beach Project Area	E-10
+Figure E-3. Volume Changes from July 2017 to August 2020 for Profiles OC003 to OC012	E-11
+Figure E-4. Volume Changes from July 2017 to August 2020 for Profiles OC003 to OC020A	E-12
+Figure E-5. Volume Changes from July 2017 to August 2020 for Profiles OC020A to OC027A 	E-13
+Figure E-6. Volume Changes from July 2017 to August 2020 for Profiles OC027A to OC035	E-14
+Figure E-7. Volume Changes from July 2017 to August 2020 from Profile OC035 to OC043 	E-15
+Figure E-8. Volume Changes from July 2017 to August 2020 from Profile OC043 to OC051	E-16
+ Figure G-1. Shoreline Locations Between Profiles OC003 to OC011	G-2
+Figure G-2. Shoreline Locations Between Profiles OC011 to OC019	G-3
+Figure G-3. Shoreline Locations Between Profiles OC019 to OC026	G-4
+Figure G-4. Shoreline Locations Between Profiles OC026 to OC034	G-5
+Figure G-5. Shoreline Locations Between Profiles OC034 to OC043	G-6
+Figure G-6. Shoreline Locations Between Profiles OC043 to OC051	G-7
+Figure I-1. Great Egg Harbor Bathymetry from July 6, 2017 Survey	I-2
+Figure I-2. Great Egg Harbor Bathymetry from August 15, 2018 Survey	I-3
+Figure I-3. Great Egg Harbor Bathymetry from August 12, 2019 Survey	I-4
+Figure I-4. Great Egg Harbor Bathymetry from August 12, 2020 Survey	I-5
+Figure I-5. Changes Great Egg Harbor Bathymetry Between 2017 and 2018	I-6
+Figure I-6. Changes Great Egg Harbor Bathymetry Between 2018 and 2019	I-7
+Figure I-7. Changes Great Egg Harbor Bathymetry Between 2019 and 2020	I-8
+Figure I-8. Changes in Great Egg Harbor Bathymetry Between 2017 and 2020	I-9
+ Figure I-9. Great Egg Harbor Borrow Area Changes btw BD & AD Surveys for 2017 Nourishment	I-10
+Figure I-10. Great Egg Harbor Borrow Area Changes btw BD & AD Surveys for 2020 Nourishment	I-11
+
+
+APPENDIX A – BEACH PROFILE NETWORK
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Table A-1. Beach Profile Network for Great Egg Harbor and Peck Beach, NJ 
+ProfileSta.Profile Origin Easting                 (ft. NJSP NAD83)Profile Origin Northing           (ft. NJSP NAD83)Profile Azimuth   (wrt North) Nearby Street/LandmarkProject Dune Elevation        (ft. NAVD88)Project Berm Elevation      (ft. NAVD88)Project Design Berm Width (ft.)OC060-15+41476,558.53168,644.6860.43Newcastle Rd.n/a6.75100OC001-11+92476,733.08168,337.1044.55Wesley Rd.n/a6.75100OC061-9+46476,849.89168,126.0161.04Seacrest Rd.n/a6.75100OC002-7+00476,970.88167,907.3544.52Seacliff Rd.n/a6.75100OC062-1+95477,337.98167,566.2642.90Seaview Rd.n/a6.75100OC0032+69477,417.71167,173.0687.17Waverly St.n/a6.75100OC00511+00477,244.14166,360.4798.86Seabright Rd.n/a6.75100OC00718+00477,118.46165,671.14104.03Pinnacle Rd.n/a6.75100OC008A22+00477,021.74165,284.05104.03Ocean Rd.n/a6.75100OC00926+00476,822.67164,945.37128.21Atlantic Blvd.n/a6.75100OC01134+00476,327.76164,316.83128.21Gardens Rd.n/a6.75100OC01341+50475,854.27163,735.48130.91Stenton Pl.n/a6.75100OC01450+26475,280.64163,073.57135.152nd St.n/a6.75100OC01658+70474,703.61162,459.63135.15Park Pl.n/a6.75100OC01764+00474,312.59162,101.34137.47Brighton Pl.n/a6.75100OC018A70+00473,826.19161,763.64154.31btw 5th & 6th St.n/a6.75100OC01975+00473,378.04161,539.80152.50btw 6th & 7th St.n/a6.75100OC020A83+00472,666.00161,169.67155.73btw Plymouth Pl & 8th St.n/a6.75100OC02188+00472,212.91160,965.24155.73Moorlyn Ter.n/a6.75100OC02293+00471,756.92160,759.66155.73btw 9th & 10th St.n/a6.75100OC023A99+00471,210.07160,514.46156.3410th St.n/a6.75100OC024103+00470,842.96160,353.64156.3411th St.n/a6.75100OC025A111+00470,116.63160,019.83149.0012th St.n/a6.75100OC026118+00469,517.40159,659.78149.00btw 13th & 14th St.n/a6.75100OC027A124+00469,015.14159,331.16143.96btw 14th & 15th St.n/a6.75100OC028128+00468,692.02159,096.06143.96btw 15th & 16th St.n/a6.75100OC030138+00467,883.43158,507.98143.9617th St.n/a6.75100OC031143+37467,473.61158,159.62137.1118th St.n/a6.75100OC032148+00467,120.66157,861.46139.6919th St.n/a6.75100OC034158+00466,358.07157,214.48139.69btw 20th & 21st St.n/a6.75100OC035165+92465,787.21156,667.66137.1122nd St.n/a6.75100OC037173+00465,290.56156,162.32134.49btw 23rd & 24th St.n/a6.75100OC039183+00464,589.88155,448.94134.4925th St.n/a6.75100OC041193+50463,866.51154,689.05130.1127th St.n/a6.75100OC043203+00463,221.51153,991.54132.74btw 28th & 29th St.n/a6.75100OC045213+00462,542.87153,257.10132.74btw 30th & 31st St.n/a6.75100OC047223+00461,875.07152,512.30131.44btw 32nd & 33rd St.n/a6.75100OC049233+00461,213.23151,762.69131.4434th St.n/a6.75100OC050238+00460,882.31151,387.83131.4435th St.n/a6.75100OC051243+34460,528.13150,986.83128.1136th St.n/a16.751100	1 Transition Location to Great Egg to Townsend’s Template of a 12.8 ft. NAVD88 dune and a berm elevation of 7.0 ft. NAVD88
+
+
+
+
+
+
+
+APPENDIX B – BEACH PROFILE LOCATIONS
+
+Figure B-1. Beach Profiles from Sta. 0+00 to 50+00
+Figure B-2. Beach Profiles from Sta. 50+00 to 100+00
+Figure B-3. Beach Profiles from Sta. 100+00 to 160+00
+Figure B-4. Beach Profiles from Sta. 160+00 to 215+00
+Figure B-5. Beach Profiles from Sta. 215+00 to 250+00
+APPENDIX C – BEACH PROFILE SURVEY HISTORY
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Table C-1. Beach Profile Survey Collection History for Great Egg Harbor and Peck Beach, NJ 
+PROFILESTA.07/18/2017 10/06/201712/20/201708/09/201808/29/201906/06/202008/15/202009/04/2020TOTALSOC0032+69XXXXXXXX8OC00511+00XXXXXXXX8OC00718+00XXXXXXXX8OC008A22+00XXXXXXXX8OC00926+00XXXXXXXX8OC01134+00XXXXXXXX8OC01341+50XXXXXXXX8OC01450+26XXXXXXXX8OC01658+70XXXXXXXX8OC01764+00XXXXXXXX8OC018A70+00XXXXXXXX8OC01975+00XXXXXXXX8OC020A83+00XXXXXXXX8OC02188+00XXXXXXXX8OC02293+00XXXXXXXX8OC023A99+00XXXXXXXX8OC024103+00XXXXXXXX8OC025A111+00XXXXXXXX8OC026118+00XXXXXXXX8OC027A124+00XXXXXXXX8OC028128+00XXXXXXXX8OC030138+00XXXXXXXX8OC031143+37XXXXXXXX8OC032148+00XXXXXXXX8OC034158+00XXXXXXXX8OC035165+92XXXXXXXX8OC037173+00XXXXXXXX8OC039183+00XXXXXXXX8OC041193+50XXXXXXXX8OC043203+00XXXXXXXX8OC045213+00XXXXXXXX8OC047223+00XXXXXXXX8OC049233+00XXXXXXXX8OC050238+00XXXXXXXX8OC051243+34XXXXXXXX8TOTALS3535353535353535280
+
+
+
+
+
+
+
+
+
+
+APPENDIX D – BEACH PROFILE PLOTS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure D-1. Profile Line OC003, Ocean City, NJ
+
+
+Figure D-2. Profile Line OC005, Ocean City, NJ 
+
+
+Figure D-3. Profile Line OC007, Ocean City, NJ 
+
+
+Figure D-4. Profile Line OC008A, Ocean City, NJ
+
+
+Figure D-5. Profile Line OC009, Ocean City, NJ 
+
+
+Figure D-6. Profile Line OC011, Ocean City, NJ 
+
+
+Figure D-7. Profile Line OC013, Ocean City, NJ 
+
+
+Figure D-8. Profile Line OC014, Ocean City, NJ 
+
+
+Figure D-9. Profile Line OC016, Ocean City, NJ 
+
+
+Figure D-10. Profile Line OC017, Ocean City, NJ 
+
+
+Figure D-11. Profile Line OC018A, Ocean City, NJ 
+
+
+Figure D-12. Profile Line OC019, Ocean City, NJ 
+
+
+Figure D-13. Profile Line OC020A, Ocean City, NJ 
+
+
+Figure D-14. Profile Line OC021, Ocean City, NJ 
+
+
+Figure D-15. Profile Line OC022, Ocean City, NJ 
+
+
+Figure D-16. Profile Line OC023A, Ocean City, NJ 
+
+
+Figure D-17. Profile Line OC024, Ocean City, NJ 
+
+
+Figure D-18. Profile Line OC025A, Ocean City, NJ
+
+
+Figure D-19. Profile Line OC026, Ocean City, NJ 
+
+
+Figure D-20. Profile Line OC027A, Ocean City, NJ 
+
+
+Figure D-21. Profile Line OC028, Ocean City, NJ 
+
+
+Figure D-22. Profile Line OC030, Ocean City, NJ 
+
+
+Figure D-23. Profile Line OC031, Ocean City, NJ 
+
+
+Figure D-24. Profile Line OC032, Ocean City, NJ 
+
+
+Figure D-25. Profile Line OC034, Ocean City, NJ 
+
+
+Figure D-26. Profile Line OC035, Ocean City, NJ 
+
+
+Figure D-27. Profile Line OC037, Ocean City, NJ 
+
+
+Figure D-28. Profile Line OC039, Ocean City, NJ 
+
+
+Figure D-29. Profile Line OC041, Ocean City, NJ 
+
+
+ Figure D-30. Profile Line OC043, Ocean City, NJ 
+
+
+Figure D-31. Profile Line OC045, Ocean City, NJ 
+
+
+`Figure D-32. Profile Line OC047, Ocean City, NJ 
+
+
+Figure D-33. Profile Line OC049, Ocean City, NJ 
+
+
+Figure D-34. Profile Line OC050, Ocean City, NJ 
+
+
+Figure D-35. Profile Line OC051, Ocean City, NJ 
+
+
+APPENDIX E – BEACH PROFILE CROSS-SECTIONAL AREA AND VOLUMETRIC CHANGES
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Table E-1. Cross-Sectional Areas for Great Egg Harbor and Peck Beach, NJ
+ProfileBaseline StationArea Change Above MHW (cy/lf)7/18/20178/9/20188/29/20197/18/20178/9/20188/29/20198/15/20208/15/2020OC0032+6916.44-17.85-17.17-18.58OC00511+009.65-9.84-24.74-24.93OC00718+0030.71-21.89-15.29-6.47OC008A22+0035.29-33.245.677.72OC00926+0042.64-19.52-2.3420.79OC01134+0035.69-11.2850.0274.44OC01341+5023.19-19.1260.7664.83OC01450+2632.19-18.5544.2957.93OC01658+7012.65-9.4151.7354.98OC01764+0012.94-12.6268.7469.06OC018A70+0027.98-19.3773.9182.53OC01975+0023.00-14.0850.6359.55OC020A83+0014.21-12.9929.7530.97OC02188+009.95-9.3631.6932.28OC02293+008.99-15.7953.9047.10OC023A99+009.06-13.75-12.26-16.96OC024103+0014.60-4.21-12.99-2.60OC025A111+009.03-3.56-8.63-3.16OC026118+005.263.22-7.890.59OC027A124+006.343.68-5.874.16OC028128+00-0.976.75-5.000.78OC030138+008.010.51-6.102.42OC031143+373.665.10-7.411.35OC032148+00-0.094.88-5.61-0.83OC034158+00-3.168.810.526.16OC035165+924.407.69-3.848.24OC037173+004.013.790.117.90OC039183+004.174.953.8612.98OC041193+503.257.843.5014.59OC043203+00-0.348.714.5212.88OC045213+003.289.134.4516.87OC047223+001.825.34-0.127.03OC049233+00-0.179.031.5510.40OC050238+005.528.101.2414.85OC051243+348.484.113.2115.80Surveyed Shoreline Position is Landward of Design TemplateTable E-2. Cross-Sectional Areas Above Closure Depth for Great Egg Harbor and Peck Beach, NJ
+ProfileBaseline StationArea Change Above Closure Depth (cy/lf)7/18/20178/9/20188/29/20197/18/20178/9/20188/29/20198/15/20208/15/2020OC0032+695.75-53.66-70.52-118.44OC00511+0040.18-88.18-67.87-115.87OC00718+00103.42-92.18-16.30-5.06OC008A22+00149.19-137.5760.2071.81OC00926+00161.24-44.3362.29179.20OC01134+0099.40-30.73180.21248.87OC01341+5060.55-88.21192.03164.38OC01450+2671.16-76.4394.6389.37OC01658+7049.63-56.68154.80147.75OC01764+0034.63-63.11173.14144.67OC018A70+0068.29-79.06175.78165.01OC01975+0058.37-68.71139.72129.38OC020A83+0044.04-53.9280.7270.84OC02188+0031.88-24.4469.2276.67OC02293+0049.12-54.12105.22100.22OC023A99+0069.21-81.2519.987.94OC024103+0061.70-19.37-26.0616.27OC025A111+0033.12-18.93-15.30-1.11OC026118+0060.63-23.02-32.565.05OC027A124+0091.97-33.68-28.8229.46OC028128+0051.56-0.01-21.8229.73OC030138+0053.37-21.31-9.8922.17OC031143+3736.87-18.44-2.5615.87OC032148+0023.8515.88-12.4627.27OC034158+0023.8817.0413.0753.99OC035165+9234.9117.16-1.8250.25OC037173+0048.28-23.256.5231.55OC039183+0029.81-15.9231.1745.07OC041193+5040.9913.746.5161.24OC043203+0033.6214.150.8948.66OC045213+0035.18-8.5630.2056.82OC047223+0046.44-5.5024.9565.89OC049233+004.7323.9212.9041.55OC050238+0030.8617.53-2.6745.72OC051243+3438.89-0.105.2244.01Surveyed Shoreline Position is Landward of Design Template
+Table E-3. Volumetric Changes Between July 2017 and August 2018
+Profile FromProfile ToStation FromStation To07/18/2017 to 08/09/2018Total Volumetric Change (cy)Above MHW (cy)Above Closure Depth (cy)OC003OC0052+6911+0065,61684,812OC005OC00711+0018+0079,754135,121OC007OC008A18+0022+0092,921185,515OC008AOC00922+0026+00108,229246,491OC009OC01126+0034+0031,334104,257OC011OC01334+0041+5053,410164,221OC013OC01441+5050+2677,664221,905OC014OC01650+2658+7096,554272,790OC016OC01758+7064+00103,340295,132OC017OC018A64+0070+00115,453325,602OC018AOC01970+0075+00128,221357,327OC019OC020A75+0083+00143,151398,418OC020AOC02183+0088+00149,156417,286OC021OC02288+0093+004,73720,259OC022OC023A93+0099+0010,14555,717OC023AOC02499+00103+0014,88481,949OC024OC025A103+00111+0024,327119,844OC025AOC026111+00118+0029,321152,613OC026OC027A118+00124+0032,802198,410OC027AOC028124+00128+0033,876227,087OC028OC030128+00138+0037,396279,544OC030OC031138+00143+3740,533303,813OC031OC032143+37148+0041,356317,841OC032OC034148+00158+0039,728341,709OC034OC035158+00165+9240,216364,946OC035OC037165+92173+0043,194394,418OC037OC039173+00183+0047,281433,463OC039OC041183+00193+5051,173470,605OC041OC043193+50203+0052,556506,045OC043OC045203+00213+001,47234,396OC045OC047213+00223+004,02475,216OC047OC049223+00233+004,847100,800OC049OC050233+00238+006,182109,699OC050OC051238+00243+349,925128,358TOTAL2+69243+341,814,7797,925,610Erosion between Survey DatesTable E-4. Volumetric Changes Between August 2018 and August 2019
+Profile FromProfile ToStation FromStation To08/09/2018 to 08/29/2019Total Volumetric Change (cy)Above MHW (cy)Above Closure Depth (cy)OC003OC0052+6911+00-16,694-36,161OC005OC00711+0018+00-27,808-99,348OC007OC008A18+0022+00-38,806-145,182OC008AOC00922+0026+00-49,171-180,913OC009OC01126+0034+00-12,320-30,027OC011OC01334+0041+50-23,717-74,615OC013OC01441+5050+26-40,215-146,715OC014OC01650+2658+70-51,992-202,790OC016OC01758+7064+00-57,831-234,554OC017OC018A64+0070+00-67,299-276,643OC018AOC01970+0075+00-75,676-313,654OC019OC020A75+0083+00-86,535-362,857OC020AOC02183+0088+00-92,089-382,330OC021OC02288+0093+00-6,289-19,647OC022OC023A93+0099+00-15,141-60,210OC023AOC02499+00103+00-18,740-80,373OC024OC025A103+00111+00-21,842-95,680OC025AOC026111+00118+00-21,960-110,344OC026OC027A118+00124+00-19,889-127,361OC027AOC028124+00128+00-17,804-134,093OC028OC030128+00138+00-14,176-144,753OC030OC031138+00143+37-12,667-155,443OC031OC032143+37148+00-10,362-156,034OC032OC034148+00158+00-3,520-139,577OC034OC035158+00165+922,999-126,064OC035OC037165+92173+007,065-128,225OC037OC039173+00183+0011,432-147,808OC039OC041183+00193+5018,139-148,950OC041OC043193+50203+0025,997-135,703OC043OC045203+00213+008,9182,795OC045OC047213+00223+0016,154-4,237OC047OC049223+00233+0023,3384,974OC049OC050233+00238+0027,61915,337OC050OC051238+00243+3430,88619,999TOTAL2+69243+34-629,994-4,357,189Erosion between Survey DatesTable E-5. Volumetric Changes Between August 2019 and August 2020
+Profile FromProfile ToStation FromStation To08/09/2018 to 08/29/2019Total Volumetric Change (cy)Above MHW (cy)Above Closure Depth (cy)OC003OC0052+6911+00-577-53,624OC005OC00711+0018+00-14,601-83,114OC007OC008A18+0022+00-16,520-74,356OC008AOC00922+0026+00-15,864-50,296OC009OC01126+0034+0019,07496,999OC011OC01334+0041+5060,604236,546OC013OC01441+5050+26106,609362,088OC014OC01650+2658+70147,060467,167OC016OC01758+7064+00179,005554,128OC017OC018A64+0070+00221,239657,432OC018AOC01970+0075+00252,432736,456OC019OC020A75+0083+00284,682824,906OC020AOC02183+0088+00299,951862,171OC021OC02288+0093+0021,40443,627OC022OC023A93+0099+0033,87981,145OC023AOC02499+00103+0028,81879,926OC024OC025A103+00111+0020,17563,396OC025AOC026111+00118+0014,40146,667OC026OC027A118+00124+0010,27328,246OC027AOC028124+00128+008,10218,128OC028OC030128+00138+002,5542,277OC030OC031138+00143+37-1,079-1,073OC031OC032143+37148+00-4,088-4,543OC032OC034148+00158+00-6,633-4,237OC034OC035158+00165+92-7,945212OC035OC037165+92173+00-9,2681,878OC037OC039173+00183+00-7,28320,719OC039OC041183+00193+50-3,42040,484OC041OC043193+50203+0038744,002OC043OC045203+00213+004,48515,547OC045OC047213+00223+006,65043,132OC047OC049223+00233+007,36262,056OC049OC050233+00238+008,05864,614OC050OC051238+00243+349,24865,298TOTAL2+69243+341,659,1735,248,003Erosion between Survey DatesTable E-6. Volumetric Changes Between July 2017 and August 2020
+Profile FromProfile ToStation FromStation To07/18/2017 to 08/15/2020Total Volumetric Change (cy)Above MHW (cy)Above Closure Depth (cy)OC003OC0052+6911+0048,346-4,973OC005OC00711+0018+0037,345-47,340OC007OC008A18+0022+0037,594-34,024OC008AOC00922+0026+0043,19415,281OC009OC01126+0034+0038,088171,229OC011OC01334+0041+5090,296326,152OC013OC01441+5050+26144,058437,278OC014OC01650+2658+70191,622537,167OC016OC01758+7064+00224,513614,706OC017OC018A64+0070+00269,393706,392OC018AOC01970+0075+00304,978780,129OC019OC020A75+0083+00341,298860,467OC020AOC02183+0088+00357,018897,127OC021OC02288+0093+0019,85244,239OC022OC023A93+0099+0028,88376,651OC023AOC02499+00103+0024,96281,503OC024OC025A103+00111+0022,66087,560OC025AOC026111+00118+0021,76288,937OC026OC027A118+00124+0023,18799,295OC027AOC028124+00128+0024,174111,123OC028OC030128+00138+0025,774137,068OC030OC031138+00143+3726,787147,297OC031OC032143+37148+0026,907157,263OC032OC034148+00158+0029,575197,895OC034OC035158+00165+9235,270239,094OC035OC037165+92173+0040,991268,071OC037OC039173+00183+0051,431306,373OC039OC041183+00193+5065,891362,138OC041OC043193+50203+0078,940414,344OC043OC045203+00213+0014,87552,738OC045OC047213+00223+0026,828114,111OC047OC049223+00233+0035,546167,830OC049OC050233+00238+0041,860189,650OC050OC051238+00243+3450,059213,654TOTAL2+69243+342,843,9578,816,424Erosion between Survey Dates
+
+
+Figure E-1. Cumulative Volumetric Changes from September 2007 to August 2020
+
+Figure E-2. Volume Changes from July 2017 to August 2020 for Great Egg Harbor and Peck Beach Project Area
+Figure E-3. Volume Changes from July 2017 to August 2020 for Profiles OC003 to OC012
+Figure E-4. Volume Changes from July 2017 to August 2020 for Profiles OC003 to OC020A
+Figure E-5. Volume Changes from July 2017 to August 2020 for Profiles OC020A to OC027A 
+Figure E-6. Volume Changes from July 2017 to August 2020 for Profiles OC027A to OC035
+Figure E-7. Volume Changes from July 2017 to August 2020 from Profile OC035 to OC043 
+Figure E-8. Volume Changes from July 2017 to August 2020 from Profile OC043 to OC051
+APPENDIX F – EXCESS AND DEFICIT CROSS-SECTIONAL AREAS AND QUANTITIES VERSUS DESIGN TEMPLATE  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Table F-1. Cross-Sectional Areas of Project Conditions in August 2020 Versus Design Template 
+Profile IDStationProfile Deficit Above MHW (cy/lf)Profile Deficit Below MHW (cy/lf)Total Deficit Along Profile (cy/lf)Berm Excess Above MHW (cy/lf)Profile Net Change (cy/lf)OC0032+69-18.55-60.46-79.011.42-77.59OC00511+00-21.80-51.80-73.610.18-73.42OC00718+00-13.97-22.69-36.660.31-36.36OC008A22+00-14.53-24.76-39.290.48-38.81OC00926+00-9.77-11.02-20.792.47-18.33OC01134+000.000.000.0049.9549.95OC01341+500.000.000.0055.0055.00OC01450+260.000.000.00105.75105.75OC01658+700.000.000.0098.0898.08OC01764+000.000.000.00107.55107.55OC018A70+000.000.000.0073.5573.55OC01975+000.000.000.0071.6971.69OC020A83+000.000.000.0060.8160.81OC02188+000.000.000.0065.5965.59OC02293+000.000.000.0039.6039.60OC023A99+000.000.000.0013.6213.62OC024103+000.000.000.0029.5729.57OC025A111+000.000.000.0063.6663.66OC026118+000.000.000.0062.9562.95OC027A124+000.000.000.0094.0894.08OC028128+000.000.000.0083.1183.11OC030138+000.000.000.00105.73105.73OC031143+370.000.000.00110.71110.71OC032148+000.000.000.00103.83103.83OC034158+000.000.000.00113.58113.58OC035165+920.000.000.00114.04114.04OC037173+000.000.000.00129.67129.67OC039183+000.000.000.00157.10157.10OC041193+500.000.000.00129.90129.90OC043203+000.000.000.00100.39100.39OC045213+000.000.000.00102.11102.11OC047223+000.000.000.0081.5781.57OC049233+000.000.000.0076.2976.29OC050238+000.000.000.00116.18116.18OC051243+340.000.000.0087.4987.49
+Table F-2. Project Condition Volumes from August 2020 Versus Design Template
+Profile FromProfile ToStation FromStation ToAbove MHWBelow MHW Deficit (cy)Total Deficit (cy)Net Deficit Below Template (cy)Deficit (cy)Excess (cy)OC003OC0052+6911+00-10,200500-57,100-67,300-66,800OC005OC00711+0018+00-17,300700-51,100-68,400-67,700OC007OC008A18+0022+00-12,800200-27,500-40,300-40,100OC008AOC00922+0026+00-5,700200-9,500-15,200-15,000OC009OC01126+0034+00-4,800600-10,800-15,600-15,000OC011OC01334+0041+50-3,90021,000-4,400-8,3000OC013OC01441+5050+26039,300000OC014OC01650+2658+70070,400000OC016OC01758+7064+00085,900000OC017OC018A64+0070+00054,500000OC018AOC01970+0075+00053,600000OC019OC020A75+0083+00036,400000OC020AOC02183+0088+00053,200000OC021OC02288+0093+00031,400000OC022OC023A93+0099+00026,300000OC023AOC02499+00103+00015,900000OC024OC025A103+00111+0008,700000OC025AOC026111+00118+00037,300000OC026OC027A118+00124+00044,300000OC027AOC028124+00128+00047,100000OC028OC030128+00138+00035,400000OC030OC031138+00143+37094,400000OC031OC032143+37148+00058,200000OC032OC034148+00158+00049,600000OC034OC035158+00165+920108,700000OC035OC037165+92173+00090,000000OC037OC039173+00183+00086,300000OC039OC041183+00193+500143,400000OC041OC043193+50203+000150,500000OC043OC045203+00213+000109,400000OC045OC047213+00223+000101,200000OC047OC049223+00233+00091,900000OC049OC050233+00238+00078,900000OC050OC051238+00243+34048,100000TOTAL2+69243+34-54,7001,857,600-160,400-215,100-204,600
+
+
+
+
+
+
+
+
+
+
+
+APPENDIX G – SHORELINE POSITION PLOTS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Figure G-1. Shoreline Locations Between Profiles OC003 to OC011
+Figure G-2. Shoreline Locations Between Profiles OC011 to OC019
+Figure G-3. Shoreline Locations Between Profiles OC019 to OC026
+Figure G-4. Shoreline Locations Between Profiles OC026 to OC034
+Figure G-5. Shoreline Locations Between Profiles OC034 to OC043
+Figure G-6. Shoreline Locations Between Profiles OC043 to OC051
+APPENDIX H – SHORELINE POSITION TABLES
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Table H-1. Distance from Project Baseline to +4.0 ft. NAVD88 Surveyed Shoreline Contour
+ProfileBaseline StationDistance from Baseline to +4.0 ft. NAVD88 Contour on Surveyed Profile07/18/201708/09/201808/29/201908/15/2020Design TemplateOC0032+69203.87253.40187.5194.10182.50OC00511+00193.92194.36151.8174.88182.50OC00718+00180.49243.39150.10115.13182.50OC008A22+0088.17175.7850.27174.17182.50OC00926+0078.77214.17140.52202.58182.50OC01134+00113.05208.94170.81338.90188.22OC01341+5099.19164.88106.59344.80182.50OC01450+26182.18277.47201.76354.7493.47OC01658+70233.03270.50238.33557.19161.48OC01764+00180.31215.88166.53494.06139.48OC018A70+00141.67231.37165.41480.28229.48OC01975+00208.59287.33230.89516.29214.65OC020A83+00228.39280.03230.78330.72171.43OC02188+00233.01274.47239.81340.58172.48OC02293+00151.37174.33149.35328.62175.59OC023A99+00218.85271.40202.80163.88172.48OC024103+00241.57308.81281.04234.02172.48OC025A111+00352.87400.42385.04314.50171.48OC026118+00394.90465.88456.33373.19184.48OC027A124+00430.89494.63484.51412.98180.48OC028128+00448.98452.46483.20418.83179.48OC030138+00498.86566.82524.89452.66180.48OC031143+37493.74565.04539.86461.46179.48OC032148+00514.34549.53548.97472.92178.48OC034158+00525.02509.41558.43514.04180.48OC035165+92508.12513.53561.18499.18134.48OC037173+00484.27511.35535.89486.0189.47OC039183+00460.89474.17495.64484.9829.48OC041193+50432.77448.10488.56445.3671.47OC043203+00411.48425.99466.89438.30119.47OC045213+00412.59427.25465.41430.86169.48OC047223+00429.23443.38469.28426.77170.26OC049233+00416.80418.78453.65416.57169.48OC050238+00405.83423.00454.45422.73180.01OC051243+34418.90449.91465.47432.06212.99
+Table H-2. Relative Distance from the Design Template Shoreline Contour to Surveys Shoreline Contour
+ProfileBaseline StationDistance from Design Template to Surveyed Profile at +4.0 ft. NAVD88 Contour07/18/201708/09/201808/29/201908/15/2020OC0032+6921.3770.905.01-88.40OC00511+0011.4211.86-30.69-107.62OC00718+00-2.0160.89-32.40-67.37OC008A22+00-94.33-6.72-132.23-8.33OC00926+00-103.7331.67-41.9820.08OC01134+00-75.1720.72-17.41150.68OC01341+50-83.31-17.62-75.91162.30OC01450+2688.71184.00108.29261.27OC01658+7071.55109.0276.85395.71OC01764+0040.8376.4027.05354.58OC018A70+00-87.811.89-64.07250.80OC01975+00-6.0672.6816.24301.64OC020A83+0056.96108.6059.35159.29OC02188+0060.53101.9967.33168.10OC02293+00-24.22-1.26-26.24153.03OC023A99+0046.3798.9230.32-8.60OC024103+0069.09136.33108.5661.54OC025A111+00181.39228.94213.56143.02OC026118+00210.42281.40271.85188.71OC027A124+00250.41314.15304.03232.50OC028128+00269.50272.98303.72239.35OC030138+00318.38386.34344.41272.18OC031143+37314.26385.56360.38281.98OC032148+00335.86371.05370.49294.44OC034158+00344.54328.93377.95333.56OC035165+92373.64379.05426.70364.70OC037173+00394.80421.88446.42396.54OC039183+00431.41444.69466.16455.50OC041193+50361.30376.63417.09373.89OC043203+00292.01306.52347.42318.83OC045213+00243.11257.77295.93261.38OC047223+00258.97273.12299.02256.51OC049233+00247.32249.30284.17247.09OC050238+00225.82242.99274.44242.72OC051243+34205.91236.92252.48219.07Surveyed Shoreline Position is Landward of Design TemplateTable H-3. Surveyed Shoreline Contour Characteristics Relative to the Design Template Shoreline Contour
+Date07/18/201708/09/201808/29/201908/15/2020Minimum Shoreline Position (ft)-103.73-17.62-132.23-107.62Maximum Shoreline Position (ft)431.41444.69466.16455.50Average Shoreline Position (ft)149.98194.81175.27208.02% Shoreline Length Seaward of Design Template80%93%80%88%Surveyed Shoreline Position is Landward of Design Template
+
+
+APPENDIX I – GREAT EGG HARBOR INLET ANNUAL BATHYMETRIC CHANGES
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure I-1. Great Egg Harbor Bathymetry from July 6, 2017 Survey
+Figure I-2. Great Egg Harbor Bathymetry from August 15, 2018 Survey
+Figure I-3. Great Egg Harbor Bathymetry from August 12, 2019 Survey
+Figure I-4. Great Egg Harbor Bathymetry from August 12, 2020 Survey
+Figure I-5. Changes Great Egg Harbor Bathymetry Between 2017 and 2018
+Figure I-6. Changes Great Egg Harbor Bathymetry Between 2018 and 2019
+Figure I-7. Changes Great Egg Harbor Bathymetry Between 2019 and 2020
+Figure I-8. Changes in Great Egg Harbor Bathymetry Between 2017 and 2020
+ Figure I-9. Great Egg Harbor Borrow Area Changes btw BD & AD Surveys for 2017 Nourishment 
+Figure I-10. Great Egg Harbor Borrow Area Changes btw BD & AD Surveys for 2020 Nourishment
+         Coastal Risk Management
+         Great Egg Harbor and Peck Beach (Ocean City), NJ
+         
+
+
+Prepared by:
+                                    U.S. Army Corps of Engineers, Philadelphia District
+
+
+
+
+                                              4
+
+
+
+
+Prepared by/for:
+                              U.S. Army Corps of Engineers, Philadelphia District
+XYZ District
+
+
+
+FOR OFFICIAL USE ONLY
+i
+
+         Coastal Risk Management
+         Great Egg Harbor and Peck Beach (Ocean City), NJ	                         Annual Inspection Report – FY 2020
+         
+
+
+ 3
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+         Coastal Risk Management
+         Great Egg Harbor and Peck Beach (Ocean City), NJ	                                                    	Annual Inspection Report – FY 2020
+         
+
+
+ 3
+
+
+		
+
+         Coastal Risk Management
+         Great Egg Harbor and Peck Beach (Ocean City), NJ                         	Annual Inspection Report – FY 2020
+         
+
+
+3
+
+
+		
+
+         Coastal Risk Management
+         Great Egg Harbor and Peck Beach (Ocean City), NJ                        				 	Annual Inspection Report – FY 2020
+         
+
+
+3
+
+
+		
+
+
+3
+
+
+		
+
+         Coastal Risk Management
+         Great Egg Harbor and Peck Beach (Ocean City), NJ                        			 	Annual Inspection Report – FY 2020
+         
+
+
+3
+
+
+		
+
+         Coastal Risk Management
+         Great Egg Harbor and Peck Beach (Ocean City), NJ                         	Annual Inspection Report – FY 2020
+         
+
+
+3
+
+
+		
+
+
+ 
+
+
+		1
+
+         Coastal Risk Management
+         Great Egg Harbor and Peck Beach (Ocean City), NJ                         	Annual Inspection Report – FY 2020
+         
+
+
+A-1
+
+		
+
+         Coastal Risk Management
+         Great Egg Harbor and Peck Beach (Ocean City), NJ
+         
+
+
+A-1
+
+		
+
+
+B-3
+
+
+		
+
+
+C-3
+
+
+		
+
+
+C-3
+
+
+		
+
+
+D-3
+
+
+		
+
+
+E-3
+
+
+		
+
+
+F-3
+
+
+		
+
+
+G-3
+
+
+		
+
+
+G-3
+
+
+		
+
+
+H-3
+
+
+		
+
+
+I-3
+
+
+		
+

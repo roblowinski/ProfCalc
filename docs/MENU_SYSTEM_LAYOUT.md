@@ -1,0 +1,193 @@
+# ProfCalc CLI Menu System Layout (as of October 29, 2025)
+
+## Main Menu
+
+1. Data Management
+    - 1. Import Data (from file or external utility)
+    - 1. View Data
+        - a. Browse Table/Profiles
+        - b. Plot Data
+        - c. View Summary Stats
+        - d. Back to Data Management
+    - 1. QA/QC Tasks
+        - a. Data Integrity Check
+        - b. Outlier Detection
+        - c. Spec/Requirements Check
+        - d. Validation (format, range, logical consistency)
+        - e. Back to Data Management Menu
+    - 1. Modify Data
+        - a. Edit/Update Data (local only)
+        - b. Merge/Append Data
+        - c. Delete Data (by profile name and/or dates)
+        - d. Back to Data Management
+    - 1. Save/Export Data (to file format of choice)
+    - 1. Back to Main Menu
+1. Annual Monitoring Report Analyses
+    - 1. Import Survey Data
+        - a. Select/Import Profiles
+        - b. Validate and Clean Data
+        - c. Back to Annual Monitoring Menu
+    - 1. Profile Analysis
+        - a. Run Cross-Sectional and Volume Analysis
+        - b. View Results Table
+        - c. Plot Profile Results
+        - d. Export Profile Results
+        - e. Back to Annual Monitoring Menu
+    - 1. Shoreline Analysis
+        - a. Extract Shoreline Positions from Survey Profiles
+        - b. Convert 2D Shoreline Positions to 3D with XYZ & Survey Date attributes
+        - c. Import Design Templates from Project
+        - d. Extract Design Template Shoreline Positions
+        - e. Convert 2D Design Template Positions to 3D with XYZ & Template Date attributes
+        - f. Calculate distance btw baseline & shoreline position and distance btw design template and survey shoreline positions
+        - g. Create Report Tables of Distance from Project Baseline to Surveys Shoreline Positions (H-1)
+        - h. Create Report Table of Relative Distance from Design Template Shoreline Location to Surveyed Shoreline Position (H-2). Highlight negative values as they are locations where survey shoreline is landward of design template shoreline
+        - i. Create summary table (H-3) showing Minimum Shoreline Position (highest negative value), Maximum Shoreline Position (highest positive value), Average Shoreline Position (for all profiles not just min/max), and calculate Percent of total project shoreline length is seaward of design template
+        - d. Export Shoreline Results (CSV, Shapefiles, Excel-Formatted Tables)
+        - e. Back to Annual Monitoring Menu
+    - 1. Condition Evaluation
+        - a. Integrate All Results
+        - b. Compare to Design Template
+        - c. Identify Excess/Deficit
+        - d. Estimate Renourishment Needs
+        - e. View/Export Summary
+        - f. Back to Annual Monitoring Menu
+    - 1. Reporting & Export
+        - a. Prepare Tables and Figures
+        - b. Generate Fact Sheets/Executive Summary
+        - c. Export All Results
+        - d. Back to Annual Monitoring Menu
+    - 1. Back to Main Menu
+1. Pre-Construction Template Design
+    - 1. Select Profiles
+    - 1. Cross-Sectional Analysis
+        - a. Run Analysis
+        - b. View Results Table
+        - c. Plot Results
+        - d. Export Results
+        - e. Back to Pre-Construction Menu
+    - 1. Volume Calculations
+        - a. Run Analysis
+        - b. View Results Table
+        - c. Plot Results
+        - d. Export Results
+        - e. Back to Pre-Construction Menu
+    - 1. Template Profile Generation
+        - a. Generate Template Profiles
+        - b. View Template Table
+        - c. Plot Templates
+        - d. Export Templates
+        - e. Back to Pre-Construction Menu
+    - 1. Statistics & Summaries
+        - a. View Summary Table
+        - b. Plot Summary
+        - c. Export Summary
+        - d. Back to Pre-Construction Menu
+    - 1. Export All Results
+    - 1. Back to Main Menu
+1. Construction Submittal Analyses
+    - 1. Select Profiles
+    - 1. Cross-Sectional Analysis
+        - a. Run Analysis
+        - b. View Results Table
+        - c. Plot Results
+        - d. Export Results
+        - e. Back to Construction Submittal Menu
+    - 1. Volume Calculations
+        - a. Run Analysis
+        - b. View Results Table
+        - c. Plot Results
+        - d. Export Results
+        - e. Back to Construction Submittal Menu
+    - 1. Compliance Checking
+        - a. Run Compliance Check
+        - b. View Compliance Table
+        - c. Plot Compliance Results
+        - d. Export Compliance Report
+        - e. Back to Construction Submittal Menu
+    - 1. Export All Results
+    - 1. Back to Main Menu
+1. Project Storm Analyses
+    - 1. Select Profiles
+    - 1. Cross-Sectional Analysis
+        - a. Run Analysis
+        - b. View Results Table
+        - c. Plot Results
+        - d. Export Results
+        - e. Back to Project Storm Menu
+    - 1. Volume Calculations
+        - a. Run Analysis
+        - b. View Results Table
+        - c. Plot Results
+        - d. Export Results
+        - e. Back to Project Storm Menu
+    - 1. Shoreline Change
+        - a. Run Analysis
+        - b. View Results Table
+        - c. Plot Results
+        - d. Export Results
+        - e. Back to Project Storm Menu
+    - 1. Statistics & Summaries
+        - a. View Summary Table
+        - b. Plot Summary
+        - c. Export Summary
+        - d. Back to Project Storm Menu
+    - 1. Export All Results
+    - 1. Back to Main Menu
+1. General Purpose Analyses
+    - 1. Select Profiles
+    - 1. Cross-Sectional Analysis
+        - a. Run Analysis
+        - b. View Results Table
+        - c. Plot Results
+        - d. Export Results
+        - e. Back to General Purpose Menu
+    - 1. Volume Calculations
+        - a. Run Analysis
+        - b. View Results Table
+        - c. Plot Results
+        - d. Export Results
+        - e. Back to General Purpose Menu
+    - 1. Shoreline Change
+        - a. Run Analysis
+        - b. View Results Table
+        - c. Plot Results
+        - d. Export Results
+        - e. Back to General Purpose Menu
+    - 1. Statistics & Summaries
+        - a. View Summary Table
+        - b. Plot Summary
+        - c. Export Summary
+        - d. Back to General Purpose Menu
+    - 1. Export All Results
+    - 1. Back to Main Menu
+1. Batch Processing
+    - 1. Select Batch Type
+    - 1. Configure Batch Parameters
+    - 1. Run Batch Job
+    - 1. View Batch Logs/Reports
+    - 1. Back to Main Menu
+1. Configuration & Settings
+    - 1. Set Data Paths
+    - 1. Toggle Features/Options
+    - 1. Save/Load Configuration
+    - 1. Back to Main Menu
+1. Quick Tools
+    - 1. File Conversion Utility
+    - 1. Coordinate Transform Utility
+    - 1. Data Inspection Utility
+    - 1. Back to Main Menu
+1. Help & Documentation
+    - 1. User Guide
+    - 1. Workflow Help
+    - 1. About/Version Info
+    - 1. Back to Main Menu
+1. Exit
+
+---
+
+- All data is local. Import data from files or via an external utility that exports from the database.
+- File Conversion Tools are accessed via Quick Tools.
+- Each workflow submenu contains the relevant analysis tools, with overlap as needed.
+- Data Integrity Check applies only to data loaded directly into this tool.
+- Prerequisites for actions are handled dynamically, with user confirmation, as described in DYNAMIC_PREREQUISITE_FLOW.md.

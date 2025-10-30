@@ -52,15 +52,22 @@ def compute_volume_above_contour(profile, contour: float, dx: float = 10.0):
     area_ft3_per_ft = np.trapz(h, xg)
     area_cuyd_per_ft = float(area_ft3_per_ft) / 27.0
 
-    # Find contour crossing (seaward-most)
-    x_cross = np.nan
-    for i in range(1, len(xg)):
-        if (zg[i-1] - contour) * (zg[i] - contour) <= 0:
-            frac = (contour - zg[i-1]) / (zg[i] - zg[i-1] + 1e-12)
-            x_cross = xg[i-1] + frac * (xg[i] - xg[i-1])
+    # Find contour crossing (seaward-most) using original (x, z) data
+    crossings = []
+    for i in range(1, len(x)):
+        if (z[i - 1] - contour) * (z[i] - contour) < 0:
+            # Linear interpolation for crossing
+            frac = (contour - z[i - 1]) / (z[i] - z[i - 1])
+            x_cross = x[i - 1] + frac * (x[i] - x[i - 1])
+            crossings.append(x_cross)
+        elif (z[i - 1] - contour) == 0:
+            crossings.append(x[i - 1])
+        elif (z[i] - contour) == 0:
+            crossings.append(x[i])
+    x_cross = max(crossings) if crossings else np.nan
     return {
         "x_on": float(xg[0]),
-        "x_off": float(xg[-1]),
+        "x_off": float(profile.x[-1]),
         "volume_cuyd_per_ft": float(area_cuyd_per_ft),
         "contour_x": float(x_cross) if x_cross == x_cross else None,
     }
@@ -84,13 +91,15 @@ def main():
 
     for p in profiles:
         res = compute_volume_above_contour(p, args.contour, dx)
-        results.append({
-            "label": f"{p.name} {p.date or ''} {p.description or ''}".strip(),
-            "x_on": res["x_on"],
-            "x_off": res["x_off"],
-            "volume_cuyd_per_ft": res["volume_cuyd_per_ft"],
-            "contour_x": res["contour_x"],
-        })
+        results.append(
+            {
+                "label": f"{p.name} {p.date or ''} {p.description or ''}".strip(),
+                "x_on": res["x_on"],
+                "x_off": res["x_off"],
+                "volume_cuyd_per_ft": res["volume_cuyd_per_ft"],
+                "contour_location": res["contour_x"],
+            }
+        )
 
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     write_volume_report(args.output, results, args.contour, args.title)

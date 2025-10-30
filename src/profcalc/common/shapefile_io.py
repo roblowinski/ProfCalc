@@ -22,8 +22,8 @@ import numpy as np
 from profcalc.common.bmap_io import Profile
 
 try:
-    import geopandas as gpd
-    from shapely.geometry import LineString, Point
+    import geopandas as gpd  # type: ignore
+    from shapely.geometry import LineString, Point  # type: ignore
 
     GEOPANDAS_AVAILABLE = True
 except ImportError:
@@ -380,10 +380,14 @@ def validate_shapefile_export_requirements(
             missing_origins.append(profile.name)
 
     if missing_origins:
+        extra = (
+            f" ... and {len(missing_origins) - 5} more"
+            if len(missing_origins) > 5
+            else ""
+        )
         issues.append(
             f"❌ {len(missing_origins)} profile(s) missing origin coordinates:\n"
-            f"   {', '.join(missing_origins[:5])}"
-            + (f" ... and {len(missing_origins) - 5} more" if len(missing_origins) > 5 else "")
+            f"   {', '.join(missing_origins[:5])}{extra}"
         )
 
     # Check for missing azimuths (needed for line shapefile)
@@ -393,11 +397,14 @@ def validate_shapefile_export_requirements(
             missing_azimuth.append(profile.name)
 
     if missing_azimuth:
+        extra = (
+            f" ... and {len(missing_azimuth) - 5} more"
+            if len(missing_azimuth) > 5
+            else ""
+        )
         issues.append(
             f"⚠️  {len(missing_azimuth)} profile(s) missing azimuth:\n"
-            f"   {', '.join(missing_azimuth[:5])}"
-            + (f" ... and {len(missing_azimuth) - 5} more" if len(missing_azimuth) > 5 else "")
-            + "\n   Cannot create line shapefile for these profiles"
+            f"   {', '.join(missing_azimuth[:5])}{extra}\n   Cannot create line shapefile for these profiles"
         )
 
     # Check for missing Y coordinates (needed for point shapefile)
@@ -407,11 +414,12 @@ def validate_shapefile_export_requirements(
             missing_y.append(profile.name)
 
     if missing_y:
+        extra = (
+            f" ... and {len(missing_y) - 5} more" if len(missing_y) > 5 else ""
+        )
         issues.append(
             f"⚠️  {len(missing_y)} profile(s) missing Y coordinates:\n"
-            f"   {', '.join(missing_y[:5])}"
-            + (f" ... and {len(missing_y) - 5} more" if len(missing_y) > 5 else "")
-            + "\n   Cannot create point shapefile for these profiles"
+            f"   {', '.join(missing_y[:5])}{extra}\n   Cannot create point shapefile for these profiles"
         )
 
     return issues
@@ -568,11 +576,19 @@ def read_line_shapefile(shapefile_path: Path) -> List[Profile]:
         if geom is None:
             continue
 
+
         # Get profile name
-        profile_name = row.get(
-            "profile",
-            row.get("profile_name", row.get("name", f"Profile_{idx + 1}")),
-        )
+        if "profile" in row:
+            profile_name = row["profile"]
+        elif "profile_name" in row:
+            profile_name = row["profile_name"]
+        elif "name" in row:
+            profile_name = row["name"]
+        else:
+            if isinstance(idx, int):
+                profile_name = f"Profile_{idx + 1}"
+            else:
+                profile_name = f"Profile_{str(idx)}"
 
         # Extract coordinates
         coords = list(geom.coords)
