@@ -239,7 +239,43 @@ def main() -> None:
     Example:
         python -m profcalc.cli.menu
     """
-    engine = MenuEngine()
+    import argparse
+
+    ap = argparse.ArgumentParser(description="ProfCalc menu CLI")
+    ap.add_argument("--menu-path", "-m", help="Path to menu JSON file (overrides package default)")
+    ap.add_argument("--list", action="store_true", help="Print the menu tree and exit (non-interactive)")
+    ap.add_argument("--no-interactive", action="store_true", help="Do not start the interactive menu loop")
+    ap.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    args = ap.parse_args()
+
+    engine = MenuEngine(menu_path=Path(args.menu_path) if args.menu_path else None)
+
+    if args.verbose:
+        print(f"Loaded menu from: {engine.menu_path}")
+
+    if args.list:
+        # Print a simple textual representation of the menu and exit
+        def _print_nodes(nodes: list, indent: int = 0) -> None:
+            prefix = "" if indent == 0 else "".join(["  "] * indent)
+            for node in nodes:
+                title = node.get("title", "<no title>")
+                handler = node.get("handler")
+                children = node.get("children")
+                if handler:
+                    print(f"{prefix}- {title} -> {handler}")
+                else:
+                    print(f"{prefix}- {title}")
+                if children:
+                    _print_nodes(children, indent + 1)
+
+        _print_nodes(engine.menu)
+        return
+
+    if args.no_interactive:
+        if args.verbose:
+            print("No-interactive mode selected; exiting.")
+        return
+
     engine.run()
 
 
