@@ -122,4 +122,3 @@ def compute_combine_profiles(
         raise ValueError(
             "Invalid 'combine_by' value. Use 'distance' or 'elevation'."
         )
-

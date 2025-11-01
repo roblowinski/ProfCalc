@@ -34,7 +34,9 @@ def write_volume_report(
         f.write(f"{title}\n")
         f.write("Profile Volume Report\n")
         f.write(f"Contour Level:\t{contour_level:.2f} ft\t\t\t\n\n")
-        f.write("Profile\tXOn(ft)\tXOff(ft)\tVolume(cu. yd/ft)\tContour Location(ft)\n")
+        f.write(
+            "Profile\tXOn(ft)\tXOff(ft)\tVolume(cu. yd/ft)\tContour Location(ft)\n"
+        )
 
         for r in results:
             name_parts = [r.get("name", "")]
@@ -92,13 +94,23 @@ def write_cutfill_detailed_report(
         f.write(f"XOn:\t{x_on:.2f} ft\t\t\t\t\t\n")
         f.write(f"XOff:\t{x_off:.2f} ft\t\t\t\t\t\n")
         f.write("Volume Change:\t\t\t\t\t\t\n")
-        f.write(f"   Above Datum:\t{above_datum_cuyd_per_ft:.3f} cu. yd/ft\t\t\t\t\t\n")
-        f.write(f"   Below Datum:\t{below_datum_cuyd_per_ft:.3f} cu.yd/ft\t\t\t\t\t\n")
-        f.write(f"Total Volume:\t{total_volume_cuyd_per_ft:.3f} cu.yd/ft\t\t\t\t\t\n")
+        f.write(
+            f"   Above Datum:\t{above_datum_cuyd_per_ft:.3f} cu. yd/ft\t\t\t\t\t\n"
+        )
+        f.write(
+            f"   Below Datum:\t{below_datum_cuyd_per_ft:.3f} cu.yd/ft\t\t\t\t\t\n"
+        )
+        f.write(
+            f"Total Volume:\t{total_volume_cuyd_per_ft:.3f} cu.yd/ft\t\t\t\t\t\n"
+        )
 
         # Shoreline section
-        if (shoreline_from_x == shoreline_from_x) and (shoreline_to_x == shoreline_to_x):  # not NaN
-            f.write(f"Shoreline Change:\t{shoreline_change:.2f} ft\t\t\t\t\t\n")
+        if (shoreline_from_x == shoreline_from_x) and (
+            shoreline_to_x == shoreline_to_x
+        ):  # not NaN
+            f.write(
+                f"Shoreline Change:\t{shoreline_change:.2f} ft\t\t\t\t\t\n"
+            )
             f.write(f"   From:\t{shoreline_from_x:.2f} ft\t\t\t\t\t\n")
             f.write(f"   To:\t{shoreline_to_x:.2f} ft\t\t\t\t\t\n")
         else:
@@ -108,7 +120,9 @@ def write_cutfill_detailed_report(
 
         f.write("\t\t\t\t\t\t\n")
         f.write("Cell Changes:\t\t\t\t\t\t\n")
-        f.write("Cell #\tEnding Distance(ft)\tEnding Elevation(ft)\tCell Volume(cu. yd/ft)\tCell Thickness(ft)\tCumulative Volume(cu. yd/ft)\tGross Volume(cu. yd/ft)\n")
+        f.write(
+            "Cell #\tEnding Distance(ft)\tEnding Elevation(ft)\tCell Volume(cu. yd/ft)\tCell Thickness(ft)\tCumulative Volume(cu. yd/ft)\tGross Volume(cu. yd/ft)\n"
+        )
 
         for i, c in enumerate(cells, start=1):
             f.write(
@@ -121,9 +135,11 @@ def write_cutfill_detailed_report(
                 f"{c['gross_vol_cuyd_per_ft']:.3f}\n"
             )
 
+
 # ---------------------------------------------------------------------
 # Bar Properties report (BMAP-style, single specific profile)
 # ---------------------------------------------------------------------
+
 
 def write_bar_properties_report(
     output_path: str,
@@ -148,6 +164,7 @@ def write_bar_properties_report(
     - Maximum Height is crestZ - troughZ (ft).
     - Center of Mass is the centroid X of volume (ft).
     """
+
     def fmt(v, nd=2):
         if v is None:
             return ""
@@ -168,10 +185,9 @@ def write_bar_properties_report(
     lines.append(f"   Location:\t{fmt(min_depth_x_ft)} ft")
     lines.append(f"Maximum Height:\t{fmt(max_height_ft)} ft")
     lines.append(f"   Location:\t{fmt(max_height_x_ft)} ft")
-    lines.append(f"Bar Volume:\t{fmt(bar_volume_cuyd_per_ft,3)} cu. yd/ft")
+    lines.append(f"Bar Volume:\t{fmt(bar_volume_cuyd_per_ft, 3)} cu. yd/ft")
     lines.append(f"Bar Length:\t{fmt(bar_length_ft)} ft")
     lines.append(f"Center of Mass:\t{fmt(center_of_mass_x_ft)} ft")
 
     with open(output_path, "w", newline="\n") as f:
         f.write("\n".join(lines) + "\n")
-

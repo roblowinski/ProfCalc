@@ -63,4 +63,3 @@ def compute_slope_profile(
     }
 
     return profile_df
-

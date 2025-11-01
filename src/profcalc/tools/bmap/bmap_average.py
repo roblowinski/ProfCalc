@@ -60,4 +60,3 @@ def compute_average_profiles(
         "max_envelope": pd.DataFrame({"X": x_common, "Z": z_max}),
         "std_dev": pd.DataFrame({"X": x_common, "Z": z_std}),
     }
-

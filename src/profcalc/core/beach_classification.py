@@ -73,4 +73,3 @@ def classify_beach_type(beach_face_slope: float) -> str:
         return "INTERMEDIATE"
     else:  # <2% slope
         return "DISSIPATIVE"
-

@@ -136,12 +136,16 @@ def detect_gaps_and_outliers(
 
         # Detect elevation outliers using modified IQR method (less sensitive)
         elevations = [p[1] for p in sorted_points]
-        if len(elevations) >= 10:  # Need more points for reliable outlier detection
+        if (
+            len(elevations) >= 10
+        ):  # Need more points for reliable outlier detection
             # Calculate IQR for outlier detection (more conservative for coastal profiles)
             q1 = np.percentile(elevations, 25)
             q3 = np.percentile(elevations, 75)
             iqr = q3 - q1
-            lower_bound = q1 - 5.0 * iqr  # Increased from 3.0 to 5.0 for coastal profiles
+            lower_bound = (
+                q1 - 5.0 * iqr
+            )  # Increased from 3.0 to 5.0 for coastal profiles
             upper_bound = q3 + 5.0 * iqr
 
             # Find outliers
@@ -150,4 +154,3 @@ def detect_gaps_and_outliers(
                     outliers.append((profile_name, point[0]))
 
     return gaps, outliers
-

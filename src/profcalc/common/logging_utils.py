@@ -40,7 +40,7 @@ class ProfileAnalysisLogger:
             # Create console handler with standard format
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             )
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
@@ -76,7 +76,7 @@ class ProfileAnalysisLogger:
         operation: str,
         success: bool,
         operation_id: Optional[str] = None,
-        **results
+        **results,
     ) -> None:
         """Log the completion of an operation with results.
 
@@ -108,7 +108,9 @@ class ProfileAnalysisLogger:
             message += f" [{results_str}]"
 
         log_level = logging.INFO if success else logging.ERROR
-        log_message = f"[{operation_id}] {message}" if operation_id else message
+        log_message = (
+            f"[{operation_id}] {message}" if operation_id else message
+        )
 
         self.logger.log(log_level, log_message)
 
@@ -130,18 +132,22 @@ class ProfileAnalysisLogger:
                     f"range=[{data.min():.3f}, {data.max():.3f}], "
                     f"has_nan={np.any(np.isnan(data))}"
                 )
-            elif hasattr(data, 'shape'):  # pandas DataFrame/Series
+            elif hasattr(data, "shape"):  # pandas DataFrame/Series
                 self.logger.info(
                     f"{name}: shape={data.shape}, columns={list(data.columns) if hasattr(data, 'columns') else 'N/A'}"
                 )
             elif isinstance(data, (list, tuple)):
-                self.logger.info(f"{name}: length={len(data)}, type={type(data).__name__}")
+                self.logger.info(
+                    f"{name}: length={len(data)}, type={type(data).__name__}"
+                )
             else:
                 self.logger.info(f"{name}: type={type(data).__name__}")
         except Exception as e:
             self.logger.warning(f"Could not log statistics for {name}: {e}")
 
-    def log_error(self, error: Exception, operation: Optional[str] = None, **context) -> None:
+    def log_error(
+        self, error: Exception, operation: Optional[str] = None, **context
+    ) -> None:
         """Log an exception with full context.
 
         Args:
@@ -163,10 +169,13 @@ class ProfileAnalysisLogger:
         # Log traceback if debug logging is enabled
         if self.logger.isEnabledFor(logging.DEBUG):
             import traceback
+
             self.logger.debug(f"Traceback:\n{traceback.format_exc()}")
 
 
-def setup_module_logger(module_name: str, level: Union[str, int] = "INFO") -> ProfileAnalysisLogger:
+def setup_module_logger(
+    module_name: str, level: Union[str, int] = "INFO"
+) -> ProfileAnalysisLogger:
     """Create a configured logger for a module.
 
     Args:
@@ -188,7 +197,7 @@ def setup_file_logging(
     log_file: Union[str, Path],
     level: Union[str, int] = "INFO",
     max_bytes: int = 10 * 1024 * 1024,  # 10MB
-    backup_count: int = 5
+    backup_count: int = 5,
 ) -> None:
     """Set up file logging with rotation.
 
@@ -209,7 +218,7 @@ def setup_file_logging(
     )
 
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
     handler.setFormatter(formatter)
 
@@ -240,16 +249,25 @@ def log_operation(logger: ProfileAnalysisLogger, operation: str, **context):
         yield
         duration = time.time() - start_time
         logger.log_operation_result(
-            operation, success=True, operation_id=operation_id,
-            duration=f"{duration:.3f}s"
+            operation,
+            success=True,
+            operation_id=operation_id,
+            duration=f"{duration:.3f}s",
         )
     except Exception as e:
         duration = time.time() - start_time
-        logger.log_error(e, operation, operation_id=operation_id, duration=f"{duration:.3f}s")
+        logger.log_error(
+            e,
+            operation,
+            operation_id=operation_id,
+            duration=f"{duration:.3f}s",
+        )
         raise
 
 
-def create_operation_logger(operation_name: str, log_level: str = "INFO") -> ProfileAnalysisLogger:
+def create_operation_logger(
+    operation_name: str, log_level: str = "INFO"
+) -> ProfileAnalysisLogger:
     """Create a temporary logger for a specific operation.
 
     Args:
@@ -262,7 +280,9 @@ def create_operation_logger(operation_name: str, log_level: str = "INFO") -> Pro
     return setup_module_logger(f"operation.{operation_name}", log_level)
 
 
-def log_performance_stats(func_name: str, execution_time: float, **metrics) -> None:
+def log_performance_stats(
+    func_name: str, execution_time: float, **metrics
+) -> None:
     """Log performance statistics for an operation.
 
     Args:
@@ -281,7 +301,9 @@ def log_performance_stats(func_name: str, execution_time: float, **metrics) -> N
     logger.info(message)
 
 
-def benchmark_function(logger: Optional[ProfileAnalysisLogger] = None) -> Callable:
+def benchmark_function(
+    logger: Optional[ProfileAnalysisLogger] = None,
+) -> Callable:
     """Decorator to benchmark function execution time.
 
     Args:
@@ -295,6 +317,7 @@ def benchmark_function(logger: Optional[ProfileAnalysisLogger] = None) -> Callab
         def my_function():
             pass
     """
+
     def decorator(func: Callable) -> Callable:
         def wrapper(*args, **kwargs):
             nonlocal logger
@@ -312,20 +335,22 @@ def benchmark_function(logger: Optional[ProfileAnalysisLogger] = None) -> Callab
                     f"call_{func.__name__}",
                     success=True,
                     operation_id=operation_id,
-                    execution_time=f"{execution_time:.3f}s"
+                    execution_time=f"{execution_time:.3f}s",
                 )
 
                 return result
             except Exception as e:
                 execution_time = time.time() - start_time
                 logger.log_error(
-                    e, f"call_{func.__name__}",
+                    e,
+                    f"call_{func.__name__}",
                     operation_id=operation_id,
-                    execution_time=f"{execution_time:.3f}s"
+                    execution_time=f"{execution_time:.3f}s",
                 )
                 raise
 
         return wrapper
+
     return decorator
 
 
@@ -344,4 +369,3 @@ def set_global_log_level(level: Union[str, int]) -> None:
     for name in logging.root.manager.loggerDict:
         logger = logging.getLogger(name)
         logger.setLevel(level)
-

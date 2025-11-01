@@ -76,12 +76,17 @@ def compute_volume_above_contour(profile, contour: float, dx: float = 10.0):
 def main():
     ap = argparse.ArgumentParser(description="BMAP-style Volume Above Contour")
     ap.add_argument("--input", required=True, help="BMAP Free Format file")
-    ap.add_argument("--contour", type=float, required=True,
-                    help="Contour elevation (ft)")
+    ap.add_argument(
+        "--contour", type=float, required=True, help="Contour elevation (ft)"
+    )
     ap.add_argument("--output", required=True, help="Output ASCII report path")
     ap.add_argument("--title", default="Untitled", help="Report title")
-    ap.add_argument("--dx", type=float, default=None,
-                    help="Analysis step size in feet (default from config.json)")
+    ap.add_argument(
+        "--dx",
+        type=float,
+        default=None,
+        help="Analysis step size in feet (default from config.json)",
+    )
     args = ap.parse_args()
 
     dx = args.dx if args.dx is not None else get_dx()
@@ -109,4 +114,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

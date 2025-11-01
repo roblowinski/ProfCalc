@@ -1,4 +1,4 @@
-Skip to content
+﻿Skip to content
 Chat history
 
 This is a copy of a conversation between ChatGPT & Anonymous.
@@ -7,7 +7,7 @@ Report conversation
 You said:
 are you familiar with the program called BMAP?  It's used by USACE for beach profile analysis on our beachfill projects
 ChatGPT said:
-Yes — I’m familiar with the program BMAP (Beach Morphology Analysis Package) developed for the U.S. Army Engineer Research and Development Center (ERDC) / U.S. Army Corps of Engineers (USACE) for beach-profile change / beach-fill / shore-protection projects. 
+Yes — I’m familiar with the program BMAP (Beach Morphology Analysis Package) developed for the U.S. Army Engineer Research and Development Center (ERDC) / U.S. Army Corps of Engineers (USACE) for beach-profile change / beach-fill / shore-protection projects.
 ERDC
 +3
 erdc-library.erdc.dren.mil
@@ -18,44 +18,44 @@ erdc-library.erdc.dren.mil
 Here’s a more detailed summary of what I know (and we can dive deeper into specifics if you like):
 
 What BMAP is
-BMAP was described in a technical note (CETN-II-34) as “an integrated set of beach profile analysis routines developed to automate and support mainframe and desktop studies of beach profile change, beach-fill design, and numerical simulation of storm-induced beach erosion.” 
+BMAP was described in a technical note (CETN-II-34) as “an integrated set of beach profile analysis routines developed to automate and support mainframe and desktop studies of beach profile change, beach-fill design, and numerical simulation of storm-induced beach erosion.”
 erdc-library.erdc.dren.mil
 +2
 erdc-library.erdc.dren.mil
 +2
 
-It is part of a broader suite of morphology/shore-change tools used by the USACE/ERDC as noted in fact-sheets for the CEDAS suite (Coastal Engineering Design and Analysis System) where BMAP is listed alongside other tools like RMAP, Genesis, SBEACH. 
+It is part of a broader suite of morphology/shore-change tools used by the USACE/ERDC as noted in fact-sheets for the CEDAS suite (Coastal Engineering Design and Analysis System) where BMAP is listed alongside other tools like RMAP, Genesis, SBEACH.
 ERDC
 +1
 
-According to a user’s guide / report (e.g., “Beach Morphology Analysis Package (BMAP) User’s Guide / Report 1”) it has a graphical interface for selecting profiles, computing results, and exporting plots. 
+According to a user’s guide / report (e.g., “Beach Morphology Analysis Package (BMAP) User’s Guide / Report 1”) it has a graphical interface for selecting profiles, computing results, and exporting plots.
 ResearchGate
 
 What BMAP can do / typical use-cases
 From what I’ve gathered:
 
-It can take a sequence of beach profile surveys (cross-shore profiles) and analyze how they change over time (erosion/accretion) — e.g., quantify volumetric changes, profile shape changes, possibly compute long-shore changes. 
+It can take a sequence of beach profile surveys (cross-shore profiles) and analyze how they change over time (erosion/accretion) — e.g., quantify volumetric changes, profile shape changes, possibly compute long-shore changes.
 ASCE Library
 +2
 erdc-library.erdc.dren.mil
 +2
 
-It can assist with the design of beach‐fill projects (which it sounds like your work is oriented toward) by providing tools to analyze pre-fill vs post-fill profiles, monitor performance, and perhaps maintain an archive of profile changes. 
+It can assist with the design of beach‐fill projects (which it sounds like your work is oriented toward) by providing tools to analyze pre-fill vs post-fill profiles, monitor performance, and perhaps maintain an archive of profile changes.
 erdc-library.erdc.dren.mil
 +1
 
-It can interface with or support storm-induced erosion modelling (for example as input/validation for tools like SBEACH). 
+It can interface with or support storm-induced erosion modelling (for example as input/validation for tools like SBEACH).
 erdc-library.erdc.dren.mil
 +1
 
 Some caveats / incarnations
-The original BMAP seems to date back to the mid-1990s (Technical Note dated March 1995). 
+The original BMAP seems to date back to the mid-1990s (Technical Note dated March 1995).
 erdc-library.erdc.dren.mil
 +1
 
 Because of its age, depending on your environment you might be dealing with legacy versions, compatibility issues, or parts of the functionality might have been superseded by more modern tools within USACE/ERDC (especially for large, integrated beach-fill performance evaluation)
 
-The documentation I found is somewhat generic: e.g., “report 1” suggests subsequent versions or modules (Beach Fill Module, etc). 
+The documentation I found is somewhat generic: e.g., “report 1” suggests subsequent versions or modules (Beach Fill Module, etc).
 ResearchGate
 
 How this relates to your work
@@ -77,19 +77,19 @@ Awesome—let’s “clone” the BMAP routines you actually use into a small, t
 
 Below is a compact, production-ready starter you can drop into your coastal tools repo as bmap_clone.py. It implements:
 
-Horizontal alignment at a chosen elevation (uses the landward-most crossing, per BMAP). 
+Horizontal alignment at a chosen elevation (uses the landward-most crossing, per BMAP).
 Internet Archive
 
-Volume change (“cut/fill”) between two profiles using trapezoidal integration over segments bounded by profile intersections or common end points. 
+Volume change (“cut/fill”) between two profiles using trapezoidal integration over segments bounded by profile intersections or common end points.
 Internet Archive
 
-Profile volume within limits, and “volume above a contour.” (Matches BMAP’s Volume option & Figure 2.) 
+Profile volume within limits, and “volume above a contour.” (Matches BMAP’s Volume option & Figure 2.)
 Internet Archive
 
-Contour positions & contour change (Δx at specified elevations) between two profiles. 
+Contour positions & contour change (Δx at specified elevations) between two profiles.
 Internet Archive
 
-Equilibrium profile generator & least-squares A-parameter fit for Dean’s 
+Equilibrium profile generator & least-squares A-parameter fit for Dean’s
 h
 =
 A
@@ -98,9 +98,9 @@ x
 2
 /
 3
-h=Ax 
+h=Ax
 2/3
-  (fit only—no d50 back-calculation, since the CETN cites Moore (1982)/Hanson-Kraus for that relation without giving a single canonical formula; we’ll keep this explicit and optional). 
+  (fit only—no d50 back-calculation, since the CETN cites Moore (1982)/Hanson-Kraus for that relation without giving a single canonical formula; we’ll keep this explicit and optional).
 Internet Archive
 +1
 
@@ -263,7 +263,7 @@ def align_profile_at_elevation(profile: Profile, z_align: float,
     Horizontally translate a profile so that the landward-most crossing of
     elevation z_align occurs at x_ref. Matches BMAP's alignment behavior.
 
-    Ref: BMAP 'Horizontal Alignment' – uses landward-most crossing. 
+    Ref: BMAP 'Horizontal Alignment' – uses landward-most crossing.
     """
     p = profile.sorted()
     x_cross = _linear_interp_x_at_z(p.x, p.z, z_align, landward_most=True)
@@ -400,16 +400,16 @@ def fit_dean_A(profile: Profile,
     rmse = float(math.sqrt(np.mean((h_fit - h) ** 2)))
     return A, rmse
 Why these match BMAP
-Profile Comparison (volume & contour change): We reproduce BMAP’s option that “calculates volume change and contour change between two profiles given specified contour elevations and starting and ending positions,” and its note that cut/fill areas are bounded by profile intersections or end points. 
+Profile Comparison (volume & contour change): We reproduce BMAP’s option that “calculates volume change and contour change between two profiles given specified contour elevations and starting and ending positions,” and its note that cut/fill areas are bounded by profile intersections or end points.
 Internet Archive
 
-Volume & “above a contour”: We expose both modes shown in BMAP’s Volume option and its Figure 2 sketch. 
+Volume & “above a contour”: We expose both modes shown in BMAP’s Volume option and its Figure 2 sketch.
 Internet Archive
 
-Horizontal alignment: Uses the landward-most crossing of the alignment elevation, exactly as BMAP specifies. 
+Horizontal alignment: Uses the landward-most crossing of the alignment elevation, exactly as BMAP specifies.
 Internet Archive
 
-Dean equilibrium profile: Implements 
+Dean equilibrium profile: Implements
 h
 =
 A
@@ -418,26 +418,26 @@ x
 2
 /
 3
-h=Ax 
+h=Ax
 2/3
-  per Dean (1991), and a least-squares fit to get 
+  per Dean (1991), and a least-squares fit to get
 A
-A. (BMAP can also show 
+A. (BMAP can also show
 A
-A and an 
+A and an
 R
 2
-R 
+R
 2
- .) I’ve intentionally not backed out 
+ .) I’ve intentionally not backed out
 d
 50
-d 
+d
 50
 ​
-  from 
+  from
 A
-A because the CETN cites Moore (1982)/Hanson-Kraus (1989) for that relation without a single standard formula; we can add a documented mapping you’re comfortable with if you want. 
+A because the CETN cites Moore (1982)/Hanson-Kraus (1989) for that relation without a single standard formula; we can add a documented mapping you’re comfortable with if you want.
 Internet Archive
 +1
 
@@ -463,12 +463,12 @@ dshore = contour_change(p1a, p2a, contours=[0.0, 2.5])  # shoreline & MHW
 A, rmse = fit_dean_A(p2a, 0, 600)
 z_eq = dean_equilibrium_profile(np.linspace(0, 600, 301), A)
 Next steps I can add (all source-verified):
-Transport-rate option: BMAP integrates the sand-conservation equation between two dates across 
+Transport-rate option: BMAP integrates the sand-conservation equation between two dates across
 x
-x (CETN notes this under “Transport Rate”). I can implement a faithful discrete form once we confirm the exact stencil you’d like to match. 
+x (CETN notes this under “Transport Rate”). I can implement a faithful discrete form once we confirm the exact stencil you’d like to match.
 Internet Archive
 
-Bar properties (min depth/loc, max height/loc, volume, center of mass): Also described in CETN; straightforward to add atop the existing integration & interpolation utilities. 
+Bar properties (min depth/loc, max height/loc, volume, center of mass): Also described in CETN; straightforward to add atop the existing integration & interpolation utilities.
 Internet Archive
 
 Project-style I/O: BMAP used ISRP-format profile files and “projects.” If you want drop-in compatibility, I can write a reader for common ISRP variants or define a clean CSV/Parquet schema and a CLI (typer or click) that mirrors BMAP’s menu verbs.
@@ -477,7 +477,7 @@ Unit tests & regression harness: We can set up tests that assert parity to BMAP 
 
 If you send me one pair of profiles (x,z) and the exact limits/contours you typically use (e.g., NAVD datum, MHW value), I’ll run this against them and show you that the numbers line up with what BMAP gives you.
 
-Primary sources used: the official BMAP Coastal Engineering Technical Note (CETN II-34, Mar 1995) for feature definitions/behavior, and Dean (1991) for the equilibrium-profile form. 
+Primary sources used: the official BMAP Coastal Engineering Technical Note (CETN II-34, Mar 1995) for feature definitions/behavior, and Dean (1991) for the equilibrium-profile form.
 Internet Archive
 +2
 Internet Archive
@@ -997,7 +997,7 @@ Would you like to start with the Volume Analysis module as your first tool?
 That’s typically the easiest to validate numerically against BMAP and builds the foundation for the others (cut/fill, contour change, etc.).
 
 You said:
-i get it that importing functions needing to be part of the database project, but how about output functions?  Do I take those functions out of the database project and treat/develop them in isolation?  
+i get it that importing functions needing to be part of the database project, but how about output functions?  Do I take those functions out of the database project and treat/develop them in isolation?
 ChatGPT said:
 That’s a really smart and important question, Rob — and the short answer is:
 👉 Keep your export/output functions inside the database project for now — but design them so they can also be reused externally (by your analysis tools or future GUI).
@@ -1508,7 +1508,7 @@ You can copy and paste this directly into a new file named something like TOOL_D
 # 🧭 BMAP Clone & Expansion – Tool Development Roadmap
 
 ## Overview
-This roadmap outlines the **development plan for the analysis tools** used to replicate and extend BMAP (Beach Morphology Analysis Package) functionality.  
+This roadmap outlines the **development plan for the analysis tools** used to replicate and extend BMAP (Beach Morphology Analysis Package) functionality.
 The focus here is strictly on **tool logic, calculations, and validation** — independent of the database, GUI, or CLI integrations.
 
 The goal is to:
@@ -1740,25 +1740,25 @@ These combine two or more core modules into higher-level automated analyses base
 
 ## Development Philosophy
 
-1. **Accuracy First:** Match BMAP outputs numerically before adding new capabilities.  
-2. **Modularity:** Each tool is standalone and reusable.  
-3. **Transparency:** Equations and assumptions are documented inline.  
-4. **Flexibility:** All tools can run from file input or later from database.  
+1. **Accuracy First:** Match BMAP outputs numerically before adding new capabilities.
+2. **Modularity:** Each tool is standalone and reusable.
+3. **Transparency:** Equations and assumptions are documented inline.
+4. **Flexibility:** All tools can run from file input or later from database.
 5. **Reproducibility:** Every calculation can be repeated from source data with no hidden steps.
 
 ---
 
 ## Immediate Next Step
 
-**Start with:** `/modules/volume.py`  
-- Implement and test cross-sectional and above-contour volume computation.  
+**Start with:** `/modules/volume.py`
+- Implement and test cross-sectional and above-contour volume computation.
 - Validate against one or more BMAP profile datasets.
 
 Once verified, proceed to **Profile Comparison** (`compare.py`).
 
 ---
 
-**Maintainer:** Rob (U.S. Army Corps of Engineers – Philadelphia District)  
+**Maintainer:** Rob (U.S. Army Corps of Engineers – Philadelphia District)
 **Focus:** Hydrology, Hydraulics, and Coastal Branch – Beach Profile Analysis Automation
 Would you like me to follow this roadmap format for future milestones (e.g., I can generate similar .md roadmap files for the database and integration phases later)?
 
@@ -1880,7 +1880,7 @@ You’re building two distinct engines (database + analysis), and later we’ll 
 Would you like me to generate a starter set of empty folders and placeholder files (like volume.py, utils.py, etc.) in Markdown format so you can quickly create the structure in VS Code? That way you can just copy/paste it to scaffold your project instantly.
 
 You said:
-ok i created a folder tree slightly different than yours.  Im called the project "profile_analysis".  under that, i have folders called "ref_scripts", "src", "templates", ".venv", ".vscode".  Under the "src" folder, I have just a single folder called "profile_analysis") which repeats the project name.  and under that folder level, i have folders for "core", "docs", "modules", "tests"
+ok i created a folder tree slightly different than yours.  Im called the project "profcalc".  under that, i have folders called "ref_scripts", "src", "templates", ".venv", ".vscode".  Under the "src" folder, I have just a single folder called "profcalc") which repeats the project name.  and under that folder level, i have folders for "core", "docs", "modules", "tests"
 ChatGPT said:
 Excellent — that’s a perfectly solid and professional layout, Rob.
 You’re following the same structure that a lot of scientific Python projects use (the “src layout”), which gives you strong isolation between your actual package code and everything else in the repo.
@@ -1888,11 +1888,11 @@ You’re following the same structure that a lot of scientific Python projects u
 Let’s walk through what you’ve created and make sure everything’s aligned with how we’ll build going forward — because you’re already 95% there.
 
 🧱 Your Current Layout
-profile_analysis/
+profcalc/
 │
 ├── ref_scripts/          ← reference code, snippets, or legacy conversions
 ├── src/
-│   └── profile_analysis/ ← main Python package (the codebase)
+│   └── profcalc/ ← main Python package (the codebase)
 │        ├── core/
 │        ├── docs/
 │        ├── modules/
@@ -1906,25 +1906,25 @@ That’s clean, organized, and extensible. You’re doing everything exactly how
 
 ✅ Why This Structure Works Perfectly
 1️⃣ “src” layout is the right choice
-This isolates your actual code package (profile_analysis) from the repo root.
+This isolates your actual code package (profcalc) from the repo root.
 It prevents import confusion when you start testing (a best practice that even scientific libraries like SciPy and pandas use).
 
 It means that when you run tests, you’ll do things like:
 
-cd profile_analysis
-pytest src/profile_analysis/tests
+cd profcalc
+pytest src/profcalc/tests
 or
 
-from profile_analysis.modules.volume import compute_volume
+from profcalc.modules.volume import compute_volume
 That src/ layout ensures Python imports from the right place, not your local working folder.
 
 2️⃣ Your subfolder roles make perfect sense
 Folder	Purpose
 ref_scripts/	Great place to keep old code, BMAP export parsing routines, or one-off test scripts that inform your new modules.
-src/profile_analysis/core/	Shared data types, math utilities, and ASCII I/O. These will be imported by all tools.
-src/profile_analysis/modules/	Each analysis tool module (e.g., volume.py, compare.py, equilibrium.py).
-src/profile_analysis/docs/	Markdown docs, user manuals, and roadmap files.
-src/profile_analysis/tests/	Validation datasets and pytest scripts for regression testing.
+src/profcalc/core/	Shared data types, math utilities, and ASCII I/O. These will be imported by all tools.
+src/profcalc/modules/	Each analysis tool module (e.g., volume.py, compare.py, equilibrium.py).
+src/profcalc/docs/	Markdown docs, user manuals, and roadmap files.
+src/profcalc/tests/	Validation datasets and pytest scripts for regression testing.
 templates/	Useful later for standard output formats (report templates, config JSON, etc.).
 .venv/	Local environment (keeps dependencies contained).
 .vscode/	Launch configs and interpreter settings — great for consistency.
@@ -1934,14 +1934,14 @@ Later, when we connect this to your database project, we’ll just add it to the
 pip install -e .
 That lets other scripts or apps call:
 
-from profile_analysis.modules.volume import compute_volume
+from profcalc.modules.volume import compute_volume
 without worrying about where the files actually live.
 
 ⚙️ Minor Recommendations (Optional Tweaks)
 To polish things up a bit:
 
 🔹 Add a requirements.txt
-In your root (profile_analysis/):
+In your root (profcalc/):
 
 numpy
 pandas
@@ -1970,7 +1970,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "profile_analysis"
+name = "profcalc"
 version = "0.1.0"
 description = "BMAP-style coastal beach profile analysis tools"
 authors = [{ name = "Rob" }]
@@ -1985,7 +1985,7 @@ You add this line to .vscode/settings.json:
 {
   "python.analysis.extraPaths": ["./src"]
 }
-This ensures VS Code recognizes your imports like from profile_analysis.modules.volume import compute_volume.
+This ensures VS Code recognizes your imports like from profcalc.modules.volume import compute_volume.
 
 🚀 TL;DR — You’re Set Up Exactly Right
 ✅ Isolated project → yes
@@ -1995,7 +1995,7 @@ This ensures VS Code recognizes your imports like from profile_analysis.modules.
 
 So we can now jump straight into developing your first real tool module under:
 
-src/profile_analysis/modules/volume.py
+src/profcalc/modules/volume.py
 Would you like me to generate the starter code template for that file next?
 It’ll include the basic structure, docstring, imports, and a test harness that reads an ASCII file and computes the volume — ready for you to start running and comparing to BMAP.
 
@@ -2014,7 +2014,7 @@ The code should remain clean and deployable; data is project-specific and may ch
 
 So, top-level, your structure will look like this:
 
-profile_analysis/
+profcalc/
 │
 ├── data/                       ← all example and test data goes here
 │   ├── input_examples/          ← ASCII/CSV profile files you feed into tools
@@ -2024,7 +2024,7 @@ profile_analysis/
 │
 ├── ref_scripts/
 ├── src/
-│   └── profile_analysis/
+│   └── profcalc/
 │        ├── core/
 │        ├── docs/
 │        ├── modules/
@@ -2054,7 +2054,7 @@ Contents:
 ...
 Run the tool:
 
-python src/profile_analysis/modules/volume.py \
+python src/profcalc/modules/volume.py \
        --input data/input_examples/OCNJ_23+00_2025-04-02.txt \
        --x0 0 --x1 400 --zref 2.5 \
        --output data/output_examples/volume_OCNJ_2025-04-02.txt
@@ -2214,7 +2214,7 @@ profile.meta = {
 ✅ Later, add a new module
 When the time comes, create something like:
 
-src/profile_analysis/modules/gis_io.py
+src/profcalc/modules/gis_io.py
 It will:
 
 Read shapefiles of transects and output station IDs / coordinates.
@@ -2251,7 +2251,7 @@ Output results both to screen and (optionally) to a text file in your data/outpu
 
 We’ll build it step-by-step, each block cleanly separated so you can paste them in order.
 
-🧩 Step 1 – File: src/profile_analysis/modules/volume.py
+🧩 Step 1 – File: src/profcalc/modules/volume.py
 Below is the header + imports + basic data structure portion.
 Paste this first.
 
@@ -2415,10 +2415,10 @@ if __name__ == "__main__":
 ✅ After Pasting
 You’ll have a complete, runnable tool:
 
-src/profile_analysis/modules/volume.py
+src/profcalc/modules/volume.py
 You can test it like this (from your project root):
 
-python src/profile_analysis/modules/volume.py \
+python src/profcalc/modules/volume.py \
   --input data/input_examples/OCNJ_23+00_2025-04-02.txt \
   --x0 0 --x1 400 --zref 2.5 \
   --output data/output_examples/volume_OCNJ_23+00_2025-04-02.txt
@@ -2503,7 +2503,7 @@ Handle variable spacing and optional fields.
 
 Return a list of Profile objects (like the one we defined earlier).
 
-🧩 File: src/profile_analysis/core/io_bmap_freeformat.py
+🧩 File: src/profcalc/core/io_bmap_freeformat.py
 Here’s the complete reader (split into two chunks for easy pasting).
 
 Chunk 1 of 2 — header and imports
@@ -2593,7 +2593,7 @@ def read_bmap_freeformat(file_path: str) -> List[Profile]:
             profiles.append(Profile(name, date, desc, x, z))
     return profiles
 ✅ Example Usage
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
 
 profiles = read_bmap_freeformat("data/input_examples/OCNJ_FreeFormat.txt")
 for p in profiles:
@@ -2614,7 +2614,7 @@ If you feed this reader into your volume tool, it’ll let you process multiple 
 Would you like me to show you next how to connect this reader directly to your volume.py tool — so it can accept either your existing 2-column ASCII format or this BMAP Free Format automatically?
 
 You said:
-lol geez u could have told me u were familiar with the format before i typed all that  
+lol geez u could have told me u were familiar with the format before i typed all that
 ChatGPT said:
 😂 Haha fair point, Rob — you’re totally right. I should’ve saved you the typing marathon.
 
@@ -4567,7 +4567,7 @@ Handle bad or missing point counts gracefully — it’ll read until it sees the
 Store everything as structured Profile objects ready for downstream use (like with your volume tool).
 
 🧩 Replace your old file:
-src/profile_analysis/core/io_bmap_freeformat.py
+src/profcalc/core/io_bmap_freeformat.py
 
 Chunk 1 of 2 — header, imports, and dataclass
 """
@@ -4681,7 +4681,7 @@ def read_bmap_freeformat(file_path: str) -> List[Profile]:
                                     np.array(z_vals, dtype=float)))
     return profiles
 ✅ Example Usage
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
 
 profiles = read_bmap_freeformat("data/input_examples/OCNJ_FreeFormat_Test.txt")
 for p in profiles:
@@ -4836,7 +4836,7 @@ After computing results, it’ll write the same format back out, one profile aft
 
 The only difference: it’ll add extra metadata (like computed volumes) in the header comment block above each profile, so you can re-import the file into BMAP or your tools later.
 
-🧩 File: src/profile_analysis/core/io_bmap_freeformat.py
+🧩 File: src/profcalc/core/io_bmap_freeformat.py
 Let’s extend the reader module with a writer function that saves profiles in BMAP Free Format.
 
 Add this after your existing read_bmap_freeformat() function:
@@ -4862,14 +4862,14 @@ def write_bmap_freeformat(file_path: str, profiles: list, header_comment: str | 
             for xi, zi in zip(p.x, p.z):
                 f.write(f"{xi:12.4f}{zi:12.4f}\n")
 ✅ Example usage
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat, write_bmap_freeformat
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat, write_bmap_freeformat
 
 # Read file
 profiles = read_bmap_freeformat("data/input_examples/OCNJ_FreeFormat_Test.txt")
 
 # Write file back (verifying round-trip)
 write_bmap_freeformat("data/output_examples/OCNJ_FreeFormat_RoundTrip.txt", profiles,
-                      header_comment="Round-trip test output from profile_analysis")
+                      header_comment="Round-trip test output from profcalc")
 This will reproduce your file structure identically (only differences: trimmed whitespace and optional header comment).
 
 🧠 Notes
@@ -4888,12 +4888,12 @@ Or test this writer standalone first by round-tripping one of your trimmed datas
 Would you like to integrate it with the volume.py tool next so it writes computed results in this format?
 
 You said:
-no dont do that with the math results.  they have to be separate from the profile data.  BMAP generates a report of the calc that can be exported out.  Its just  ASCII file, 
+no dont do that with the math results.  they have to be separate from the profile data.  BMAP generates a report of the calc that can be exported out.  Its just  ASCII file,
 
 Untitled
 Profile Volume Report
-Contour Level:	0.00 ft			
-				
+Contour Level:	0.00 ft
+
 Profile	XOn(ft)	XOff(ft)	Volume(cu. yd/ft)	Contour Location(ft)
 334+00 2025_08_18 Template	-23.56	573.05	157.979	373.05
 336+00 2025_08_18 Template	-18.83	595.71	163.619	395.71
@@ -4918,13 +4918,13 @@ Just to restate what you posted (we’ll replicate this verbatim):
 
 Untitled
 Profile Volume Report
-Contour Level:  0.00 ft			
+Contour Level:  0.00 ft
 
 Profile	XOn(ft)	XOff(ft)	Volume(cu. yd/ft)	Contour Location(ft)
 334+00 2025_08_18 Template	-23.56	573.05	157.979	373.05
 336+00 2025_08_18 Template	-18.83	595.71	163.619	395.71
 ...
-🧩 File: src/profile_analysis/core/io_reports.py
+🧩 File: src/profcalc/core/io_reports.py
 Let’s create a dedicated report writer that all tools can use.
 
 Chunk 1 of 2 — header & imports
@@ -4981,7 +4981,7 @@ def write_volume_report(
 
     print(f"\n✅ BMAP-style Volume Report written to: {file_path}")
 ✅ Example Usage
-from profile_analysis.core.io_reports import write_volume_report
+from profcalc.core.io_reports import write_volume_report
 
 results = [
     {
@@ -5095,7 +5095,7 @@ XOff (ft)	Most seaward survey point (largest X)	x_off = np.max(profile.x)
 Volume (cu yd/ft)	Cross-sectional area between XOn and XOff, limited vertically between the user-specified contour elevation (z_ref) and the highest elevation in the profile, converted to cubic yards per foot (÷ 27)	1️⃣ Clip profile to [XOn, XOff]; 2️⃣ Subtract contour elevation from z-values (z_rel = z - z_ref); 3️⃣ Set any negative z_rel → 0 (so only material above contour counts); 4️⃣ Integrate area with trapezoidal rule → ft³/ft; 5️⃣ Divide by 27 to convert to yd³/ft.
 Contour Location (ft)	The X-coordinate where the profile crosses the contour elevation (z = z_ref). If multiple crossings, take the seawardmost (largest X).	Interpolate where z crosses z_ref and take the maximum X crossing. If none exist, output blank or NaN.
 🧮 Conceptual Formula
-For a profile 
+For a profile
 z
 (
 x
@@ -5133,21 +5133,21 @@ f
  
 d
 x
-V= 
+V=
 27
 1
 ​
- ∫ 
-x 
+ ∫
+x
 on
 ​
- 
-x 
+
+x
 off
 ​
- 
+
 ​
- max(0,z(x)−z 
+ max(0,z(x)−z
 ref
 ​
  )dx
@@ -5159,7 +5159,7 @@ max
 ⁡
 (
 x
- where 
+ where
 z
 (
 x
@@ -5170,7 +5170,7 @@ r
 e
 f
 )
-Contour Location=max(x where z(x)=z 
+Contour Location=max(x where z(x)=z
 ref
 ​
  )
@@ -5207,7 +5207,7 @@ It’ll:
 
 We’ll keep this clean and modular so you can expand it later (e.g., add GUI, database link, or batch runs).
 
-🧩 File: src/profile_analysis/modules/volume.py
+🧩 File: src/profcalc/modules/volume.py
 You can replace the previous file with this one.
 I’ll split it into four chunks for easier pasting.
 
@@ -5232,8 +5232,8 @@ import numpy as np
 import argparse
 from pathlib import Path
 
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
-from profile_analysis.core.io_reports import write_volume_report
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_reports import write_volume_report
 Chunk 2 of 4 — core math
 def find_contour_crossings(x: np.ndarray, z: np.ndarray, z_ref: float) -> list[float]:
     """Find all x-locations where profile crosses z_ref elevation."""
@@ -5304,7 +5304,7 @@ def main():
 if __name__ == "__main__":
     main()
 ✅ Example Run
-python src/profile_analysis/modules/volume.py \
+python src/profcalc/modules/volume.py \
   --input data/input_examples/OCNJ_FreeFormat_Test.txt \
   --zref 0.0 \
   --output data/output_examples/OCNJ_2025_Volume_Report.txt \
@@ -5312,7 +5312,7 @@ python src/profile_analysis/modules/volume.py \
 🧾 Sample Output File
 OCNJ 2025 Profile Volumes
 Profile Volume Report
-Contour Level:	0.00 ft			
+Contour Level:	0.00 ft
 
 Profile	XOn(ft)	XOff(ft)	Volume(cu. yd/ft)	Contour Location(ft)
 334+00 2025_08_18 Template	-23.56	573.05	157.979	373.05
@@ -5385,7 +5385,7 @@ Here are your best candidates for the next one (each builds logically on what we
 Tool	Description	Why it’s a good next step
 Profile Comparison (Cut/Fill)	Computes volume difference between two surveys along the same profile and reports Cut, Fill, and Net Volume Change.	Directly uses the Volume tool’s foundation and common in annual reports.
 Contour Change	Determines horizontal change (ΔX) in contour position between two survey dates (e.g., 0 ft or MHW).	Builds on the crossing logic we already have.
-Dean Equilibrium Profile	Fits 
+Dean Equilibrium Profile	Fits
 h
 =
 A
@@ -5393,7 +5393,7 @@ x
 2
 /
 3
-h=Ax 
+h=Ax
 2/3
   to a profile and reports the A-value (used for nourishment design).	Good for verifying modeling and morphologic equilibrium assumptions.
 Reach Summary Tool	Averages volumes/changes across multiple profiles in a reach.	Great reporting tool, but better to add after Cut/Fill exists.
@@ -5440,19 +5440,19 @@ x
  
 d
 x
-V= 
+V=
 27
 1
 ​
- ∫ 
-x 
+ ∫
+x
 on
 ​
- 
-x 
+
+x
 off
 ​
- 
+
 ​
  z(x)dx
 (where the result is in cubic yards per linear foot).
@@ -5463,7 +5463,7 @@ Integration limits	Between XOn/XOff where z > z_ref	Between XOn/XOff (entire sec
 Zero baseline	User-specified z_ref	Always z = 0 ft (datum)
 Ignores below contour	Yes	No
 Output	Volume above contour only	Total cross-sectional volume
-🧩 File: src/profile_analysis/modules/volume_xon_xoff.py
+🧩 File: src/profcalc/modules/volume_xon_xoff.py
 This tool will be structured just like the last one for consistency.
 
 We’ll output the same BMAP-style “Profile Volume Report”, but this time with:
@@ -5493,8 +5493,8 @@ import numpy as np
 import argparse
 from pathlib import Path
 
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
-from profile_analysis.core.io_reports import write_volume_report
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_reports import write_volume_report
 Chunk 2 of 3 — core calculations
 def compute_total_volume(x: np.ndarray, z: np.ndarray) -> float:
     """
@@ -5557,14 +5557,14 @@ def main():
 if __name__ == "__main__":
     main()
 ✅ Example Run
-python src/profile_analysis/modules/volume_xon_xoff.py \
+python src/profcalc/modules/volume_xon_xoff.py \
   --input data/input_examples/OCNJ_FreeFormat_Test.txt \
   --output data/output_examples/Volume_XOnXOff_OCNJ_2025.txt \
   --title "OCNJ 2025 Profile Volumes"
 🧾 Example Output File
 OCNJ 2025 Profile Volumes (XOn to XOff)
 Profile Volume Report
-Contour Level:	0.00 ft			
+Contour Level:	0.00 ft
 
 Profile	XOn(ft)	XOff(ft)	Volume(cu. yd/ft)	Contour Location(ft)
 334+00 2025_08_18 Template	-23.56	573.05	-310.541	573.05
@@ -5642,21 +5642,21 @@ r
  
 d
 x
-V= 
+V=
 27
 1
 ​
- ∫ 
-X 
+ ∫
+X
 on
 ​
- 
-X 
+
+X
 off
 ​
- 
+
 ​
- max(0,z(x)−z 
+ max(0,z(x)−z
 contour
 ​
  )dx
@@ -5674,7 +5674,7 @@ Once you confirm those three details, I’ll build the “Volume from Xon to Xof
 
 You said:
 upper bound like before is zmax for the profile
-integrates within the box user specified.  
+integrates within the box user specified.
 Now how it handles multiple profiles is like so
 Checks user's x values compared to all profiles used for the calc.  If user value is more landward than any of the profiles used or more seaward, a message sent to user on what to do.  They can extend the profile to the x location the user provided at a constant elevation which is the same elevation of the last or first point of the profile depending if we are talking about Xon or Xoff. bmap could override the user provided x value that falls within the bounds of the profile. or 3rd option is to throw out the profile from the analysis
 ChatGPT said:
@@ -5730,16 +5730,16 @@ l
 e
 )
 ]
-X∈[X 
+X∈[X
 on
 ​
- ,X 
+ ,X
 off
 ​
- ],Z∈[Z 
+ ],Z∈[Z
 min
 ​
- ,Z 
+ ,Z
 max
 ​
  (profile)]
@@ -5776,21 +5776,21 @@ n
  
 d
 x
-V= 
+V=
 27
 1
 ​
- ∫ 
-X 
+ ∫
+X
 on
 ​
- 
-X 
+
+X
 off
 ​
- 
+
 ​
- max(0,z(x)−Z 
+ max(0,z(x)−Z
 min
 ​
  )dx
@@ -5875,12 +5875,12 @@ Do you want our replica to follow that same rule (landward-most crossing only)?
 Once you confirm that, I’ll integrate this logic into the code exactly as BMAP does.
 
 You said:
-here's the bmap report produced for this tool 
+here's the bmap report produced for this tool
 
 Untitled
 Profile Volume Report
-Contour Level:	0.00 ft			
-				
+Contour Level:	0.00 ft
+
 Profile	XOn(ft)	XOff(ft)	Volume(cu. yd/ft)	Contour Location(ft)
 334+00 2025_08_18 Template	-23.56	573.05	157.979	373.05
 336+00 2025_08_18 Template	-18.83	595.71	163.619	395.71
@@ -5941,21 +5941,21 @@ r
  
 d
 x
-V= 
+V=
 27
 1
 ​
- ∫ 
-X 
+ ∫
+X
 on
 ​
- 
-X 
+
+X
 off
 ​
- 
+
 ​
- max(0,z(x)−z 
+ max(0,z(x)−z
 contour
 ​
  )dx
@@ -5967,7 +5967,7 @@ max
 ⁡
 (
 x
- where 
+ where
 z
 (
 x
@@ -5982,7 +5982,7 @@ o
 u
 r
 )
-Contour Location=max(x where z(x)=z 
+Contour Location=max(x where z(x)=z
 contour
 ​
  )
@@ -6026,7 +6026,7 @@ Xoff (ft)	User-specified seaward limit	Horizontal flat extension to this X if pr
 Contour Elevation (ft)	User-specified minimum elevation (Zmin)	Used as integration floor (Z below it clipped to 0)
 Zmax (ft)	Profile surface	Used as top of bounding box
 Integration Domain	Xon → Xoff	Linear interpolation + trapezoidal integration
-Volume (cu yd/ft)	
+Volume (cu yd/ft)
 1
 27
 ∫
@@ -6061,17 +6061,17 @@ x
 27
 1
 ​
- ∫ 
-X 
+ ∫
+X
 on
 ​
- 
-X 
+
+X
 off
 ​
- 
+
 ​
- max(0,z(x)−Z 
+ max(0,z(x)−Z
 contour
 ​
  )dx	Always positive; below contour ignored
@@ -6080,7 +6080,7 @@ Out-of-range behavior	Extend flat to user X (default)	Elevation = first or last 
 Output Format	BMAP ASCII “Profile Volume Report”	Same columns, precision, order
 We’ll name the file:
 
-📄 src/profile_analysis/modules/volume_xon_xoff.py
+📄 src/profcalc/modules/volume_xon_xoff.py
 
 and structure it to match your other tools (CLI-compatible, modular, uses existing I/O).
 
@@ -6155,7 +6155,7 @@ Contour Location = seaward-most crossing of the contour elevation (computed on t
 
 Report format = the same BMAP “Profile Volume Report” you shared
 
-src/profile_analysis/modules/volume_xon_xoff.py (Chunk 1/3 — imports & helpers)
+src/profcalc/modules/volume_xon_xoff.py (Chunk 1/3 — imports & helpers)
 """
 volume_xon_xoff.py
 ------------------
@@ -6184,8 +6184,8 @@ from typing import List, Tuple, Optional
 
 import numpy as np
 
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
-from profile_analysis.core.io_reports import write_volume_report
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_reports import write_volume_report
 (Chunk 2/3 — core math & per-profile analysis)
 def _ensure_sorted(x: np.ndarray, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     idx = np.argsort(x)
@@ -6382,7 +6382,7 @@ If a profile has no crossing, the report will currently show nan in that column 
 
 The CLI is simple and mirrors BMAP’s workflow:
 
-python src/profile_analysis/modules/volume_xon_xoff.py \
+python src/profcalc/modules/volume_xon_xoff.py \
   --input data/input_examples/YourFile.txt \
   --xon -25.0 --xoff 600.0 --zref 0.0 \
   --output data/output_examples/YourReport.txt \
@@ -6478,7 +6478,7 @@ add a report writer for Cut/Fill (to your existing io_reports.py)
 
 the full tool: cut_fill.py
 
-1) Append this to src/profile_analysis/core/io_reports.py
+1) Append this to src/profcalc/core/io_reports.py
 def write_cutfill_report(
     file_path: str,
     rows: list[dict],
@@ -6511,7 +6511,7 @@ def write_cutfill_report(
                 f"{r['fill_cuyd_per_ft']:.3f}\t"
                 f"{r['net_cuyd_per_ft']:.3f}\n"
             )
-2) Create src/profile_analysis/modules/cut_fill.py
+2) Create src/profcalc/modules/cut_fill.py
 Chunk 1/3 — imports & selection helpers
 
 """
@@ -6544,8 +6544,8 @@ from typing import Tuple, Optional, List
 
 import numpy as np
 
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
-from profile_analysis.core.io_reports import write_cutfill_report
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_reports import write_cutfill_report
 
 
 def _header_string(p) -> str:
@@ -6712,22 +6712,22 @@ Report columns: Cut, Fill, Net in cu. yd/ft, like BMAP.
 When you’re ready, run it on a pair you’ve used in BMAP and we’ll reconcile any tiny differences (usually down to rounding or node handling).
 
 You said:
-The user doesnt provide anything for this tool.  it is generated purely on the 2 selected profiles.  The report bmap produces for the cut/fill tool is the following 
+The user doesnt provide anything for this tool.  it is generated purely on the 2 selected profiles.  The report bmap produces for the cut/fill tool is the following
 Untitled
 Cut and Fill Report
-Profile 1:	OC118 21SEP2021 (AME)					
-Profile 2:	OC118 16SEP2022 (AME)					
-XOn:	-1.78 ft					
-XOff:	4993.62 ft					
-Volume Change:						
-   Above Datum:	-23.885 cu. yd/ft					
-   Below Datum:	0.571 cu.yd/ft					
-Total Volume:	-23.314 cu.yd/ft					
-Shoreline Change:	-71.09 ft					
-   From:	318.55 ft					
-   To:	247.47 ft					
-						
-Cell Changes:						
+Profile 1:	OC118 21SEP2021 (AME)
+Profile 2:	OC118 16SEP2022 (AME)
+XOn:	-1.78 ft
+XOff:	4993.62 ft
+Volume Change:
+   Above Datum:	-23.885 cu. yd/ft
+   Below Datum:	0.571 cu.yd/ft
+Total Volume:	-23.314 cu.yd/ft
+Shoreline Change:	-71.09 ft
+   From:	318.55 ft
+   To:	247.47 ft
+
+Cell Changes:
 Cell #	Ending Distance(ft)	Ending Elevation(ft)	Cell Volume(cu. yd/ft)	Cell Thickness(ft)	Cumulative Volume(cu. yd/ft)	Gross Volume(cu. yd/ft)
 1	71.27	13.76	0.613	0.23	0.613	0.613
 2	73.36	13.61	-0.003	-0.03	0.611	0.616
@@ -6803,58 +6803,58 @@ x
  
 d
 x
-V 
+V
 i
 ​
- = 
+ =
 27
 1
 ​
- ∫ 
-x 
+ ∫
+x
 i
 ​
- 
-x 
+
+x
 i+1
 ​
- 
+
 ​
- [z 
+ [z
 2
 ​
- (x)−z 
+ (x)−z
 1
 ​
  (x)]dx
-Positive 
+Positive
 V
 i
-V 
+V
 i
 ​
   → Fill (gain above datum).
 
-Negative 
+Negative
 V
 i
-V 
+V
 i
 ​
   → Cut (loss below datum).
 
 Total Volume = sum of all cells (cu. yd/ft).
 
-“Above Datum” = sum of all positive 
+“Above Datum” = sum of all positive
 V
 i
-V 
+V
 i
 ​
- ; “Below Datum” = sum of all negative 
+ ; “Below Datum” = sum of all negative
 V
 i
-V 
+V
 i
 ​
  .
@@ -6894,7 +6894,7 @@ Before I generate that module, can you confirm you want it to include the per-ce
 That will decide whether we build the full detailed writer or just the high-level Cut/Fill summary first.
 
 You said:
-xon = landward most point that is defined for both profiles, therefore the profile that extends further landward gets truncated at the x location of the other profile.  Xoff is the same logic on the opposite end.  xon and xoff are computed not user supplied.  In the report "datum" is same as elev. zero.  thats fixed too, and not user supplied.  Shoreline change value is the difference (x) 
+xon = landward most point that is defined for both profiles, therefore the profile that extends further landward gets truncated at the x location of the other profile.  Xoff is the same logic on the opposite end.  xon and xoff are computed not user supplied.  In the report "datum" is same as elev. zero.  thats fixed too, and not user supplied.  Shoreline change value is the difference (x)
 ChatGPT said:
 Excellent — that clarifies everything perfectly.
 
@@ -6930,78 +6930,78 @@ z
  
 d
 x
-V 
+V
 i
 ​
- = 
+ =
 27
 1
 ​
- ∫ 
-x 
+ ∫
+x
 i
 ​
- 
-x 
+
+x
 i+1
 ​
- 
+
 ​
- (z 
+ (z
 2
 ​
- −z 
+ −z
 1
 ​
  )dx
-where 
+where
 z
 1
-z 
+z
 1
 ​
-  = Profile 1 elevation, 
+  = Profile 1 elevation,
 z
 2
-z 
+z
 2
 ​
   = Profile 2 elevation. |
-| Above Datum / Below Datum | If 
+| Above Datum / Below Datum | If
 V
 i
 >
 0
-V 
+V
 i
 ​
  >0: add to Above Datum (Fill).
-If 
+If
 V
 i
 <
 0
-V 
+V
 i
 ​
  <0: add to Below Datum (Cut). |
-| Total Volume | Sum of all 
+| Total Volume | Sum of all
 V
 i
-V 
+V
 i
 ​
  . |
-| Shoreline Change | 
+| Shoreline Change |
 X
 2
 −
 X
 1
-X 
+X
 2
 ​
- −X 
+ −X
 1
 ​
   where each profile crosses Z = 0 (datum). |
@@ -7039,10 +7039,10 @@ z
 (
 x
 )
-x 
+x
 1
 ​
- ,z 
+ ,z
 1
 ​
  (x) → Profile 1 (older survey or template)
@@ -7055,10 +7055,10 @@ z
 (
 x
 )
-x 
+x
 2
 ​
- ,z 
+ ,z
 2
 ​
  (x) → Profile 2 (newer survey)
@@ -7086,13 +7086,13 @@ x
 2
 )
 )
-X 
+X
 on
 ​
- =max(min(x 
+ =max(min(x
 1
 ​
- ),min(x 
+ ),min(x
 2
 ​
  )) ← landward common extent
@@ -7119,13 +7119,13 @@ x
 2
 )
 )
-X 
+X
 off
 ​
- =min(max(x 
+ =min(max(x
 1
 ​
- ),max(x 
+ ),max(x
 2
 ​
  )) ← seaward common extent
@@ -7146,20 +7146,20 @@ x
 x
 2
 )
-x 
+x
 g
 ​
- =sorted unique(x 
+ =sorted unique(x
 1
 ​
- ∪x 
+ ∪x
 2
 ​
  )
-Interpolate both profiles onto 
+Interpolate both profiles onto
 x
 g
-x 
+x
 g
 ​
  .
@@ -7182,17 +7182,17 @@ z
 (
 x
 )
-Δz(x)=z 
+Δz(x)=z
 2
 ​
- (x)−z 
+ (x)−z
 1
 ​
  (x)
 Positive → fill (gain), negative → cut (loss).
 
 Step 3 — Integrate incremental volume
-For each interval 
+For each interval
 [
 x
 i
@@ -7202,10 +7202,10 @@ i
 +
 1
 ]
-[x 
+[x
 i
 ​
- ,x 
+ ,x
 i+1
 ​
  ]:
@@ -7253,37 +7253,37 @@ i
 +
 1
 ]
-V 
+V
 i
 ​
- = 
+ =
 27
 1
 ​
- ∫ 
-x 
+ ∫
+x
 i
 ​
- 
-x 
+
+x
 i+1
 ​
- 
+
 ​
- Δz(x)dx≈ 
+ Δz(x)dx≈
 54
-(x 
+(x
 i+1
 ​
- −x 
+ −x
 i
 ​
  )
 ​
- [Δz 
+ [Δz
 i
 ​
- +Δz 
+ +Δz
 i+1
 ​
  ]
@@ -7334,16 +7334,16 @@ x
 )
 =
 0
-x 
+x
 shore,1
 ​
- :z 
+ :z
 1
 ​
- (x)=0,x 
+ (x)=0,x
 shore,2
 ​
- :z 
+ :z
 2
 ​
  (x)=0
@@ -7370,17 +7370,17 @@ r
 e
 ,
 1
-Shoreline Change=x 
+Shoreline Change=x
 shore,2
 ​
- −x 
+ −x
 shore,1
 ​
- 
+
 “From” = x₁ shoreline, “To” = x₂ shoreline.
 
 📊 4. Cell Table Computations
-Each row in the “Cell Changes” table corresponds to an interval 
+Each row in the “Cell Changes” table corresponds to an interval
 [
 x
 i
@@ -7390,26 +7390,26 @@ i
 +
 1
 ]
-[x 
+[x
 i
 ​
- ,x 
+ ,x
 i+1
 ​
  ]:
 
 Column	Meaning	Formula
-Cell #	Sequential index	
-Ending Distance(ft)	
+Cell #	Sequential index
+Ending Distance(ft)
 x
 i
 +
 1
-x 
+x
 i+1
 ​
- 	
-Ending Elevation(ft)	
+
+Ending Elevation(ft)
 z
 2
 (
@@ -7418,21 +7418,21 @@ i
 +
 1
 )
-z 
+z
 2
 ​
- (x 
+ (x
 i+1
 ​
- )	
-Cell Volume(cu yd/ft)	
+ )
+Cell Volume(cu yd/ft)
 V
 i
-V 
+V
 i
 ​
-  (as above)	
-Cell Thickness(ft)	
+  (as above)
+Cell Thickness(ft)
 1
 2
 [
@@ -7475,32 +7475,32 @@ i
 2
 1
 ​
- [(z 
+ [(z
 2
 ​
- (x 
+ (x
 i
 ​
- )−z 
+ )−z
 1
 ​
- (x 
+ (x
 i
 ​
- ))+(z 
+ ))+(z
 2
 ​
- (x 
+ (x
 i+1
 ​
- )−z 
+ )−z
 1
 ​
- (x 
+ (x
 i+1
 ​
- ))]	
-Cumulative Volume(cu yd/ft)	Running total of Σ Vᵢ	
+ ))]
+Cumulative Volume(cu yd/ft)	Running total of Σ Vᵢ
 Gross Volume(cu yd/ft)	Running total of Σ	Vᵢ
 The final line in the table matches the summary:
 
@@ -7527,7 +7527,7 @@ awesome — here’s a BMAP-faithful Cut & Fill (detailed) tool that takes only 
 
 I’ve split it into two paste-friendly parts:
 
-1) Add this writer to src/profile_analysis/core/io_reports.py
+1) Add this writer to src/profcalc/core/io_reports.py
 (append to the end of the file — it won’t collide with your existing writers)
 
 from pathlib import Path
@@ -7597,7 +7597,7 @@ def write_cutfill_detailed_report(
                 f"{c['cum_vol_cuyd_per_ft']:.3f}\t"
                 f"{c['gross_vol_cuyd_per_ft']:.3f}\n"
             )
-2) Create src/profile_analysis/modules/cut_fill_detailed.py
+2) Create src/profcalc/modules/cut_fill_detailed.py
 (Chunk 1/3 — imports & selectors)
 """
 cut_fill_detailed.py
@@ -7629,8 +7629,8 @@ import argparse
 import numpy as np
 from typing import Tuple, List, Optional
 
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
-from profile_analysis.core.io_reports import write_cutfill_detailed_report
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_reports import write_cutfill_detailed_report
 
 
 def _header_string(p) -> str:
@@ -7815,7 +7815,7 @@ def main():
 if __name__ == "__main__":
     main()
 usage example
-python src/profile_analysis/modules/cut_fill_detailed.py \
+python src/profcalc/modules/cut_fill_detailed.py \
   --input1 data/input_examples/OCNJ_FreeFormat_Test.txt \
   --sel1 "OC117 27SEP2021 (AME)" \
   --input2 data/input_examples/OCNJ_FreeFormat_Test.txt \
@@ -8014,7 +8014,7 @@ We’ll make dX a shared global analysis parameter across your entire toolset so
 🧩 STEP 1 — Add a Global Config File
 Create this file:
 
-src/profile_analysis/core/config.json
+src/profcalc/core/config.json
 with this content:
 
 {
@@ -8023,7 +8023,7 @@ with this content:
 That’s your project-wide default. You can change it once, and all tools will respect it.
 
 🧠 STEP 2 — Add a Getter Function
-In src/profile_analysis/core/config_utils.py, add:
+In src/profcalc/core/config_utils.py, add:
 
 from pathlib import Path
 import json
@@ -8045,7 +8045,7 @@ Every tool (e.g., volume_above_contour.py, volume_xon_xoff.py, cut_fill_detailed
 
 Import the getter:
 
-from profile_analysis.core.config_utils import get_dx
+from profcalc.core.config_utils import get_dx
 Add a CLI argument override:
 
 ap.add_argument("--dx", type=float, default=None,
@@ -8090,12 +8090,12 @@ A shared global dX (from config.json)
 
 Uniform code structure (same CLI patterns)
 
-Same import and directory style (under src/profile_analysis/modules/)
+Same import and directory style (under src/profcalc/modules/)
 
 Because these are long, I’ll send them in three consecutive messages, one per tool, each self-contained and fully functional.
 
 🧩 Shared Configuration — put this once
-src/profile_analysis/core/config_utils.py
+src/profcalc/core/config_utils.py
 
 from pathlib import Path
 import json
@@ -8112,7 +8112,7 @@ def get_dx(default: float = 10.0) -> float:
         return float(cfg.get("dx", default))
     except Exception:
         return default
-src/profile_analysis/core/config.json
+src/profcalc/core/config.json
 
 {
   "dx": 10.0
@@ -8125,7 +8125,7 @@ ChatGPT said:
 Perfect — here’s the full code for Tool 1: Volume Above Contour, written to match BMAP’s logic and your directory structure.
 
 Save this file as:
-src/profile_analysis/modules/volume_above_contour.py
+src/profcalc/modules/volume_above_contour.py
 
 🧮 Tool 1 – Volume Above Contour
 """
@@ -8159,9 +8159,9 @@ import argparse
 import numpy as np
 from pathlib import Path
 
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
-from profile_analysis.core.io_reports import write_volume_report
-from profile_analysis.core.config_utils import get_dx
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_reports import write_volume_report
+from profcalc.core.config_utils import get_dx
 
 
 def compute_volume_above_contour(profile, contour: float, dx: float = 10.0):
@@ -8244,7 +8244,7 @@ Excellent — here’s the full, ready-to-paste code for
 
 🧮 Tool 2 – Volume from Xon–Xoff
 Save as:
-src/profile_analysis/modules/volume_xon_xoff.py
+src/profcalc/modules/volume_xon_xoff.py
 
 This version mirrors BMAP’s “Volume from Xon to Xoff” behavior:
 
@@ -8285,9 +8285,9 @@ import argparse
 import numpy as np
 from pathlib import Path
 
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
-from profile_analysis.core.io_reports import write_volume_report
-from profile_analysis.core.config_utils import get_dx
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_reports import write_volume_report
+from profcalc.core.config_utils import get_dx
 
 
 def _extend_or_interp(x, z, xq):
@@ -8392,7 +8392,7 @@ Awesome — here’s the complete and final version of Tool 3: Cut & Fill (Detai
 This version matches your confirmed BMAP behavior, now with uniform dX spacing (default 10 ft) loaded from config.json or overridden via --dx.
 
 Save this file as:
-src/profile_analysis/modules/cut_fill_detailed.py
+src/profcalc/modules/cut_fill_detailed.py
 
 🧮 Tool 3 – Cut & Fill (Detailed)
 """
@@ -8424,9 +8424,9 @@ import argparse
 import numpy as np
 from typing import Tuple, Optional
 
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
-from profile_analysis.core.io_reports import write_cutfill_detailed_report
-from profile_analysis.core.config_utils import get_dx
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_reports import write_cutfill_detailed_report
+from profcalc.core.config_utils import get_dx
 
 
 # ---------------------------------------------------------------------
@@ -8854,22 +8854,22 @@ Would you like me to pull those exact references?
 You said:
 what does the report say about the bar properties tool?  that will be our next
 ChatGPT said:
-I found a reference to the “Bar Properties” tool in the Regional Morphology Analysis Package (RMAP) user guide (which is described as being backwards-compatible with Beach Morphology Analysis Package (BMAP)). 
+I found a reference to the “Bar Properties” tool in the Regional Morphology Analysis Package (RMAP) user guide (which is described as being backwards-compatible with Beach Morphology Analysis Package (BMAP)).
 Knowledge Core Repository
 
 Here are the key points about what it says for Bar Properties — we’ll have to interpret a few things since the document doesn’t provide full algorithmic detail:
 
 🛠 What the document says about Bar Properties
-The section lists Bar Properties among the beach-profile analysis tools. 
+The section lists Bar Properties among the beach-profile analysis tools.
 Knowledge Core Repository
 
-It states that “Bar volume, length, center of mass, minimum depth and location, and maximum depth and location are reported.” 
+It states that “Bar volume, length, center of mass, minimum depth and location, and maximum depth and location are reported.”
 Knowledge Core Repository
 
-It says the bar feature is selected via “drawing a selection box around the bar form”; i.e., the user visually identifies the bar portion of the profile. 
+It says the bar feature is selected via “drawing a selection box around the bar form”; i.e., the user visually identifies the bar portion of the profile.
 Knowledge Core Repository
 
-The guide remarks: “Although defining a bar feature visually may be subjective, negligible differences in bar volume typically result from this method if done by an experienced user.” 
+The guide remarks: “Although defining a bar feature visually may be subjective, negligible differences in bar volume typically result from this method if done by an experienced user.”
 Knowledge Core Repository
 
 📌 What this implies for implementation
@@ -8944,7 +8944,7 @@ what you actually use it for in your work,
 I’ll translate that into the logic and structure for our Python version so it behaves just like the real BMAP tool.
 
 You said:
-for the bar properties too.....the user picks 
+for the bar properties too.....the user picks
 ChatGPT said:
 Perfect — keep going, Rob.
 
@@ -9054,7 +9054,7 @@ We also compute deltas (Specific − Reference).
 Report is a clean ASCII file.
 
 1) New tool file
-Save as: src/profile_analysis/modules/bar_properties.py
+Save as: src/profcalc/modules/bar_properties.py
 
 """
 bar_properties.py
@@ -9096,9 +9096,9 @@ from typing import Tuple
 
 import numpy as np
 
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
-from profile_analysis.core.io_reports import write_bar_properties_report
-from profile_analysis.core.config_utils import get_dx
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_reports import write_bar_properties_report
+from profcalc.core.config_utils import get_dx
 
 
 # ----------------------------
@@ -9259,7 +9259,7 @@ def main():
 if __name__ == "__main__":
     main()
 2) Add a report writer
-Append this function to your existing src/profile_analysis/core/io_reports.py (keep your current functions; just add this one):
+Append this function to your existing src/profcalc/core/io_reports.py (keep your current functions; just add this one):
 
 # ---------------------------------------------------------------------
 # Bar Properties Report
@@ -9401,7 +9401,7 @@ to mean no reference profile, and then just compute and report the specific prof
 Want me to make sure our bar_properties.py tool supports that same “Reference = None” mode, so it automatically skips the delta calculations and just prints the Specific Profile results?
 
 You said:
-ok, after the 2 profiles are selected then bmap looks at the 2 profiles and calculate what it calls "Crossing Pair".  It lists the crossing pairs landward to seaward (xmin to xmax).  In the bmap gui, the user picks just 1 crossing pair.  Once they do that, the report is generated z 
+ok, after the 2 profiles are selected then bmap looks at the 2 profiles and calculate what it calls "Crossing Pair".  It lists the crossing pairs landward to seaward (xmin to xmax).  In the bmap gui, the user picks just 1 crossing pair.  Once they do that, the report is generated z
 
 Reference Profile:	OC118 21SEP2021 (AME)
 Specific Profile:	OC118 16SEP2022 (AME)
@@ -9552,51 +9552,51 @@ h
  
 d
 x
-x 
+x
 cm
 ​
- = 
-∫ 
-X 
+ =
+∫
+X
 start
 ​
- 
-X 
+
+X
 end
 ​
- 
+
 ​
- (z−z 
+ (z−z
 trough
 ​
  )dx
-∫ 
-X 
+∫
+X
 start
 ​
- 
-X 
+
+X
 end
 ​
- 
+
 ​
- x⋅(z−z 
+ x⋅(z−z
 trough
 ​
  )dx
 ​
- 
+
 The reference level is the trough elevation (minimum Z within the bar window).
 
 The integral uses the Specific Profile only.
 
 It effectively gives you the “balance point” of the bar mass horizontally.
 
-A seaward shift of the 
+A seaward shift of the
 x
 c
 m
-x 
+x
 cm
 ​
   between years = bar migration offshore, a landward shift = bar welding / onshore migration.
@@ -9636,9 +9636,9 @@ when it lists Crossing Pairs, they’re ordered from landward to seaward (lowest
 
 So for example, if the two profiles cross at:
 
-1279.19 ft  
-4287.67 ft  
-4900.22 ft  
+1279.19 ft
+4287.67 ft
+4900.22 ft
 5535.14 ft
 BMAP automatically groups them as:
 
@@ -9690,7 +9690,7 @@ So the list of zero-crossings and which segments are enclosed as “bars” depe
 
 In mathematical terms:
 
-Crossings occur when 
+Crossings occur when
 (
 z
 r
@@ -9705,10 +9705,10 @@ c
 )
 =
 0
-Crossings occur when (z 
+Crossings occur when (z
 ref
 ​
- −z 
+ −z
 spec
 ​
  )=0
@@ -9844,7 +9844,7 @@ d
 x
 /
 27
-∫(Z−Z 
+∫(Z−Z
 trough
 ​
  )dx/27 → cu yd/ft volume
@@ -9881,10 +9881,10 @@ h
  
 d
 x
-∫x(Z−Z 
+∫x(Z−Z
 trough
 ​
- )dx/∫(Z−Z 
+ )dx/∫(Z−Z
 trough
 ​
  )dx → center of mass X
@@ -9907,13 +9907,13 @@ can u provide to me the erdc reports u referenced so i can download them?
 ChatGPT said:
 Yes — I found a few free‐download sources for key reports related to BMAP and similar packages. Here they are:
 
-“Beach morphology analysis package (BMAP) Version 1” — public access via the U.S. Army Engineer Research and Development Center (ERDC) library. 
+“Beach morphology analysis package (BMAP) Version 1” — public access via the U.S. Army Engineer Research and Development Center (ERDC) library.
 erdc-library.erdc.dren.mil
 +2
 Internet Archive
 +2
 
-“BFM: Beach Fill Module. Beach Morphology Analysis Package (BMAP) – User’s Guide” (Report 1) by Barry G. Sommerfeld, Nicholas C. Kraus, and Magnus Larson — there are archive versions of this pdf. 
+“BFM: Beach Fill Module. Beach Morphology Analysis Package (BMAP) – User’s Guide” (Report 1) by Barry G. Sommerfeld, Nicholas C. Kraus, and Magnus Larson — there are archive versions of this pdf.
 books.google.com
 +1
 
@@ -10035,7 +10035,7 @@ awesome — let’s add the Bar Properties tool now, staying faithful to BMAP’
 i’m splitting the code across two messages so it’s easy to copy/paste.
 
 Part 1/2 — bar_properties.py
-Save as: src/profile_analysis/modules/bar_properties.py
+Save as: src/profcalc/modules/bar_properties.py
 
 """
 bar_properties.py
@@ -10081,9 +10081,9 @@ from typing import List, Tuple, Optional
 
 import numpy as np
 
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat
-from profile_analysis.core.io_reports import write_bar_properties_report
-from profile_analysis.core.config_utils import get_dx
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat
+from profcalc.core.io_reports import write_bar_properties_report
+from profcalc.core.config_utils import get_dx
 
 
 # ----------------------------
@@ -10357,7 +10357,7 @@ def main():
 if __name__ == "__main__":
     main()
 Part 2/2 — add a report writer
-Append this function to src/profile_analysis/core/io_reports.py (keep everything else you already have):
+Append this function to src/profcalc/core/io_reports.py (keep everything else you already have):
 
 # ---------------------------------------------------------------------
 # Bar Properties report (BMAP-style, single specific profile)
@@ -10508,7 +10508,7 @@ All our current tools (Volume Above Contour, Xon–Xoff, Cut/Fill, Bar Propertie
 
 Then, later, we can build a new layer — say:
 
-src/profile_analysis/interface/
+src/profcalc/interface/
     ├── cli_interactive.py
     └── gui_web.py
 where cli_interactive.py will handle:
@@ -10688,7 +10688,7 @@ Writes the averaged profile back out in BMAP Free Format
 
 (Optional) Writes a short stats report (X range, N profiles, per-x valid counts)
 
-src/profile_analysis/modules/average.py
+src/profcalc/modules/average.py
 """
 average.py
 ----------
@@ -10731,8 +10731,8 @@ from typing import List, Tuple, Dict
 
 import numpy as np
 
-from profile_analysis.core.io_bmap_freeformat import read_bmap_freeformat, write_bmap_freeformat_single
-from profile_analysis.core.config_utils import get_dx
+from profcalc.core.io_bmap_freeformat import read_bmap_freeformat, write_bmap_freeformat_single
+from profcalc.core.config_utils import get_dx
 
 # ----------------------------
 # Helpers
@@ -10909,7 +10909,7 @@ def main():
 if __name__ == "__main__":
     main()
 Small writer helper (if you don’t already have it)
-Add this to src/profile_analysis/core/io_bmap_freeformat.py if it’s not there yet:
+Add this to src/profcalc/core/io_bmap_freeformat.py if it’s not there yet:
 
 def write_bmap_freeformat_single(output_path: str, name: str, date: str, description: str, x, z):
     """
@@ -13750,20 +13750,20 @@ Z
 x
 )
 2
-Z 
+Z
 avg
 ​
- (x)= 
+ (x)=
 2
-Z 
+Z
 1
 ​
- (x)+Z 
+ (x)+Z
 2
 ​
  (x)
 ​
- 
+
 after both profiles are linearly interpolated to the same X-points.
 
 Min/Max envelopes:
@@ -13812,22 +13812,22 @@ Z
 x
 )
 )
-Z 
+Z
 min
 ​
- (x)=min(Z 
+ (x)=min(Z
 1
 ​
- (x),Z 
+ (x),Z
 2
 ​
- (x)),Z 
+ (x)),Z
 max
 ​
- (x)=max(Z 
+ (x)=max(Z
 1
 ​
- (x),Z 
+ (x),Z
 2
 ​
  (x))
@@ -13870,29 +13870,29 @@ x
 )
 2
 2
-σ(x)= 
+σ(x)=
 2
-(Z 
+(Z
 1
 ​
- (x)−Z 
+ (x)−Z
 avg
 ​
- (x)) 
+ (x))
 2
- +(Z 
+ +(Z
 2
 ​
- (x)−Z 
+ (x)−Z
 avg
 ​
- (x)) 
+ (x))
 2
- 
+
 ​
- 
+
 ​
- 
+
 (essentially the population standard deviation for 2 samples).
 
 All outputs share the same X-grid and can thus be stored as distinct profiles in the database.
@@ -14061,22 +14061,22 @@ Z
 x
 )
 )
-Z 
+Z
 min
 ​
- (x)=min(Z 
+ (x)=min(Z
 1
 ​
- (x),Z 
+ (x),Z
 2
 ​
- (x)),Z 
+ (x)),Z
 max
 ​
- (x)=max(Z 
+ (x)=max(Z
 1
 ​
- (x),Z 
+ (x),Z
 2
 ​
  (x))
@@ -14260,18 +14260,18 @@ Output keys ("average", "min_envelope", etc.) are consistent for DB tagging and 
 Would you like me to write the companion unit test script next (so you can quickly verify it against your actual BMAP output data)?
 
 You said:
-remember for the folders we are using profile_analysis as project name.  and we are putting code in \profile_analysis\src\profile_analysis\modules or ...\core
+remember for the folders we are using profcalc as project name.  and we are putting code in \profcalc\src\profcalc\modules or ...\core
 ChatGPT said:
 Perfect — good catch, Rob 👍
-Let’s align the folder structure and code style exactly to your profile_analysis project layout.
+Let’s align the folder structure and code style exactly to your profcalc project layout.
 
 Here’s how this Average tool should live within your project, following your convention and the pattern we’ve been establishing for everything else.
 
 📁 Recommended Placement
-profile_analysis/
+profcalc/
 │
 ├── src/
-│   └── profile_analysis/
+│   └── profcalc/
 │       ├── core/
 │       │   ├── interpolation.py       # shared utilities
 │       │   └── __init__.py
@@ -14288,7 +14288,7 @@ profile_analysis/
 └── tests/
     └── test_average_profiles.py
 🧩 Here’s the Updated Code
-src/profile_analysis/modules/average_profiles.py
+src/profcalc/modules/average_profiles.py
 """
 Module: average_profiles
 ------------------------
@@ -14300,8 +14300,8 @@ Generates:
   • Maximum envelope profile
   • Standard deviation profile
 
-This tool belongs to the 'profile_analysis.modules' package
-and uses shared interpolation logic from profile_analysis.core.interpolation.
+This tool belongs to the 'profcalc.modules' package
+and uses shared interpolation logic from profcalc.core.interpolation.
 
 Author: Rob & GPT-5
 Date: October 2025
@@ -14310,7 +14310,7 @@ Date: October 2025
 from typing import Dict, Tuple
 import numpy as np
 import pandas as pd
-from profile_analysis.core.interpolation import interpolate_to_common_grid
+from profcalc.core.interpolation import interpolate_to_common_grid
 
 
 def compute_average_profiles(
@@ -14349,7 +14349,7 @@ def compute_average_profiles(
         "max_envelope": pd.DataFrame({"X": x_common, "Z": z_max}),
         "std_dev": pd.DataFrame({"X": x_common, "Z": z_std}),
     }
-src/profile_analysis/core/interpolation.py
+src/profcalc/core/interpolation.py
 """
 Core Utility: interpolation
 ---------------------------
@@ -14410,11 +14410,11 @@ so the folder we are putting tools that generate reports same folder as tools th
 ChatGPT said:
 Excellent question — and you’re thinking exactly like a system architect here. 👏
 
-Here’s the clean, scalable way to handle that question for your profile_analysis structure.
+Here’s the clean, scalable way to handle that question for your profcalc structure.
 
 🧭 The Big Picture
 Yes — both report-generating and profile-generating tools should live under
-src/profile_analysis/modules/,
+src/profcalc/modules/,
 but we’ll sub-organize it internally so the distinction stays clear without fragmenting imports.
 
 That way:
@@ -14424,10 +14424,10 @@ Everything that’s a “tool” (BMAP-style module the user can run) lives toge
 You can still easily separate “report-type” and “profile-type” tools logically.
 
 🗂️ Recommended Folder Layout
-profile_analysis/
+profcalc/
 │
 ├── src/
-│   └── profile_analysis/
+│   └── profcalc/
 │       ├── core/                     # shared math, IO, interpolation, etc.
 │       │   ├── geometry.py
 │       │   ├── interpolation.py
@@ -14464,8 +14464,8 @@ Report-generating	Volume, Cut/Fill, Bar Properties	Tabular report (DataFrame, di
 🔗 Import Consistency
 From anywhere inside your project, you’ll still use simple imports like:
 
-from profile_analysis.modules.profiles.average_profiles import compute_average_profiles
-from profile_analysis.modules.reports.cut_fill import compute_cut_fill_report
+from profcalc.modules.profiles.average_profiles import compute_average_profiles
+from profcalc.modules.reports.cut_fill import compute_cut_fill_report
 Clean, explicit, and future-proof.
 
 Would you like me to refactor the Average tool code paths and docstring headers so they reference modules/profiles instead of just modules now?
@@ -14477,7 +14477,7 @@ ChatGPT said:
 Perfect — now that you’ve moved the files into profiles and reports, here’s how to cleanly refactor the code so it matches your new structure and imports correctly.
 
 ✅ Updated File Headers & Imports
-src/profile_analysis/modules/profiles/average_profiles.py
+src/profcalc/modules/profiles/average_profiles.py
 """
 Module: average_profiles
 ------------------------
@@ -14489,8 +14489,8 @@ Generates:
   • Maximum envelope profile
   • Standard deviation profile
 
-This tool belongs to the 'profile_analysis.modules.profiles' package
-and uses shared interpolation logic from profile_analysis.core.interpolation.
+This tool belongs to the 'profcalc.modules.profiles' package
+and uses shared interpolation logic from profcalc.core.interpolation.
 
 Author: Rob & GPT-5
 Date: October 2025
@@ -14499,7 +14499,7 @@ Date: October 2025
 from typing import Dict
 import numpy as np
 import pandas as pd
-from profile_analysis.core.interpolation import interpolate_to_common_grid
+from profcalc.core.interpolation import interpolate_to_common_grid
 
 
 def compute_average_profiles(
@@ -14538,7 +14538,7 @@ def compute_average_profiles(
         "max_envelope": pd.DataFrame({"X": x_common, "Z": z_max}),
         "std_dev": pd.DataFrame({"X": x_common, "Z": z_std}),
     }
-src/profile_analysis/core/interpolation.py
+src/profcalc/core/interpolation.py
 """
 Core Utility: interpolation
 ---------------------------
@@ -14595,10 +14595,10 @@ The imports are absolute, which is best practice for Python packages (and works 
 
 You’ll eventually import tools like:
 
-from profile_analysis.modules.profiles.average_profiles import compute_average_profiles
+from profcalc.modules.profiles.average_profiles import compute_average_profiles
 or
 
-from profile_analysis.modules.reports.cut_fill import compute_cut_fill_report
+from profcalc.modules.reports.cut_fill import compute_cut_fill_report
 Both subfolders (profiles, reports) should have an __init__.py file — even if empty — to make them proper packages.
 
 Would you like me to give you the short companion test script (tests/test_profiles/test_average_profiles.py) next? It’ll let you quickly confirm the math matches BMAP’s results.
@@ -14611,7 +14611,7 @@ Good question — here’s exactly what changes when you move your tools into mo
 🔍 1. Imports change (paths updated)
 In the earlier version, your code said:
 
-from profile_analysis.core.interpolation import interpolate_to_common_grid
+from profcalc.core.interpolation import interpolate_to_common_grid
 That line stays the same, because core didn’t move.
 
 What does change is how other files import this tool.
@@ -14619,24 +14619,24 @@ For example:
 
 Before (when average tool was in /modules/):
 
-from profile_analysis.modules.average_profiles import compute_average_profiles
+from profcalc.modules.average_profiles import compute_average_profiles
 Now (since it’s in /modules/profiles/):
 
-from profile_analysis.modules.profiles.average_profiles import compute_average_profiles
+from profcalc.modules.profiles.average_profiles import compute_average_profiles
 📁 2. New __init__.py files are needed
 To make Python treat your subfolders as packages, add empty __init__.py files:
 
-src/profile_analysis/modules/__init__.py
-src/profile_analysis/modules/profiles/__init__.py
-src/profile_analysis/modules/reports/__init__.py
-That’s what allows imports like from profile_analysis.modules.profiles... to work.
+src/profcalc/modules/__init__.py
+src/profcalc/modules/profiles/__init__.py
+src/profcalc/modules/reports/__init__.py
+That’s what allows imports like from profcalc.modules.profiles... to work.
 
 🧩 3. Optional docstring and module headers
 Inside your Python files, update the header so the documentation matches the new location:
 
 """
 Module: average_profiles
-Location: profile_analysis.modules.profiles
+Location: profcalc.modules.profiles
 Purpose: Generate average, min, max, and std deviation profiles.
 """
 This doesn’t affect functionality — just clarity.
@@ -14647,9 +14647,9 @@ Only the package structure (imports and file organization) changes.
 
 Example Summary
 Type	Old Path	New Path	Import Example
-Tool file	modules/average_profiles.py	modules/profiles/average_profiles.py	from profile_analysis.modules.profiles.average_profiles import compute_average_profiles
-Tool file	modules/cut_fill.py	modules/reports/cut_fill.py	from profile_analysis.modules.reports.cut_fill import compute_cut_fill_report
-Shared core utility	core/interpolation.py	same	from profile_analysis.core.interpolation import interpolate_to_common_grid
+Tool file	modules/average_profiles.py	modules/profiles/average_profiles.py	from profcalc.modules.profiles.average_profiles import compute_average_profiles
+Tool file	modules/cut_fill.py	modules/reports/cut_fill.py	from profcalc.modules.reports.cut_fill import compute_cut_fill_report
+Shared core utility	core/interpolation.py	same	from profcalc.core.interpolation import interpolate_to_common_grid
 Would you like me to show you the exact updated import statements and docstring headers for all three tools (volume_xon_xoff, cut_fill, and bar_properties) to match this structure too?
 
 You said:
@@ -14658,14 +14658,14 @@ ChatGPT said:
 Perfect 👍 — shorter names like average.py are better anyway.
 Here’s how everything should look now that your tool is called average.py and lives in:
 
-src/profile_analysis/modules/profiles/average.py
+src/profcalc/modules/profiles/average.py
 Below I’ll show you exactly what to change in the file header, imports, and how other scripts will import it — plus matching updates for the other tools.
 
 🧭 Updated Project Structure (for reference)
-profile_analysis/
+profcalc/
 │
 ├── src/
-│   └── profile_analysis/
+│   └── profcalc/
 │       ├── core/
 │       │   ├── interpolation.py
 │       │   └── __init__.py
@@ -14688,7 +14688,7 @@ profile_analysis/
 🧩 average.py
 """
 Module: average
-Location: profile_analysis.modules.profiles
+Location: profcalc.modules.profiles
 -------------------------------------------
 Replicates BMAP's "Average" tool.
 
@@ -14705,7 +14705,7 @@ Date: October 2025
 from typing import Dict
 import numpy as np
 import pandas as pd
-from profile_analysis.core.interpolation import interpolate_to_common_grid
+from profcalc.core.interpolation import interpolate_to_common_grid
 
 
 def compute_average_profiles(
@@ -14755,39 +14755,39 @@ Import paths remain the same (because core didn’t move)
 🧾 Example imports elsewhere in your code
 From anywhere inside the project (e.g., a CLI or batch runner):
 
-from profile_analysis.modules.profiles.average import compute_average_profiles
+from profcalc.modules.profiles.average import compute_average_profiles
 📊 Other tools (adjusted for structure)
 volume_xon_xoff.py
-from profile_analysis.core.interpolation import interpolate_to_common_grid
+from profcalc.core.interpolation import interpolate_to_common_grid
 Use:
 
-from profile_analysis.modules.reports.volume_xon_xoff import compute_volume_xon_xoff
+from profcalc.modules.reports.volume_xon_xoff import compute_volume_xon_xoff
 cut_fill.py
-from profile_analysis.core.interpolation import interpolate_to_common_grid
+from profcalc.core.interpolation import interpolate_to_common_grid
 Use:
 
-from profile_analysis.modules.reports.cut_fill import compute_cut_fill_report
+from profcalc.modules.reports.cut_fill import compute_cut_fill_report
 bar_properties.py
-from profile_analysis.core.interpolation import interpolate_to_common_grid
+from profcalc.core.interpolation import interpolate_to_common_grid
 Use:
 
-from profile_analysis.modules.reports.bar_properties import compute_bar_properties
+from profcalc.modules.reports.bar_properties import compute_bar_properties
 Would you like me to give you a simple __init__.py for both profiles and reports so your tools auto-import cleanly when you do
 
-from profile_analysis.modules import profiles, reports
+from profcalc.modules import profiles, reports
 ?
 
 You said:
 i need __init__.py files for every folder with code, i have none so far
 ChatGPT said:
 Perfect timing — let’s make this clean and professional.
-Below are all the __init__.py files your current profile_analysis project should have, each with just enough content to make imports easy and self-documenting (no clutter, no magic).
+Below are all the __init__.py files your current profcalc project should have, each with just enough content to make imports easy and self-documenting (no clutter, no magic).
 
 🧱 Base layout recap
-profile_analysis/
+profcalc/
 │
 ├── src/
-│   └── profile_analysis/
+│   └── profcalc/
 │       ├── core/
 │       │   ├── interpolation.py
 │       │   └── __init__.py
@@ -14810,9 +14810,9 @@ profile_analysis/
 │       └── main.py   (optional driver / CLI)
 │
 └── README.md
-🧩 src/profile_analysis/__init__.py
+🧩 src/profcalc/__init__.py
 """
-Top-level package for the Beach Profile Analysis Toolkit (profile_analysis).
+Top-level package for the Beach Profile Analysis Toolkit (profcalc).
 
 Provides:
   - Core computational utilities (interpolation, math)
@@ -14822,7 +14822,7 @@ Provides:
 
 __version__ = "0.1.0"
 __author__ = "Rob"
-🧩 src/profile_analysis/core/__init__.py
+🧩 src/profcalc/core/__init__.py
 """
 Core numerical and geometric utilities for profile analysis.
 Shared across all BMAP-style tools.
@@ -14831,7 +14831,7 @@ Shared across all BMAP-style tools.
 from .interpolation import interpolate_to_common_grid
 
 __all__ = ["interpolate_to_common_grid"]
-🧩 src/profile_analysis/modules/__init__.py
+🧩 src/profcalc/modules/__init__.py
 """
 Modules package
 ---------------
@@ -14841,7 +14841,7 @@ Subpackages:
   - profiles: Tools that generate new beach profiles (e.g., Average)
   - reports: Tools that generate tabular ASCII reports (e.g., Volume, Cut/Fill)
 """
-🧩 src/profile_analysis/modules/profiles/__init__.py
+🧩 src/profcalc/modules/profiles/__init__.py
 """
 Profiles subpackage
 -------------------
@@ -14853,7 +14853,7 @@ Tools that output new computed profiles such as:
 from .average import compute_average_profiles
 
 __all__ = ["compute_average_profiles"]
-🧩 src/profile_analysis/modules/reports/__init__.py
+🧩 src/profcalc/modules/reports/__init__.py
 """
 Reports subpackage
 ------------------
@@ -14875,14 +14875,14 @@ __all__ = [
 ✅ After adding these
 You’ll be able to import tools cleanly anywhere in your project:
 
-from profile_analysis.modules.profiles import compute_average_profiles
-from profile_analysis.modules.reports import (
+from profcalc.modules.profiles import compute_average_profiles
+from profcalc.modules.reports import (
     compute_cut_fill_report,
     compute_bar_properties,
 )
 and also access the core function with:
 
-from profile_analysis.core import interpolate_to_common_grid
+from profcalc.core import interpolate_to_common_grid
 Would you like me to add one more __init__.py under tests/ (so your test suite auto-discovers submodules cleanly in VS Code’s Python test runner)?
 
 You said:
@@ -14892,7 +14892,7 @@ Excellent 👌 — here’s the last one you’ll want under your tests/ folder 
 
 🧩 tests/__init__.py
 """
-Test suite for the Beach Profile Analysis Toolkit (profile_analysis).
+Test suite for the Beach Profile Analysis Toolkit (profcalc).
 Ensures that all computational and reporting tools perform as expected.
 
 You can run all tests using:
@@ -14932,12 +14932,12 @@ Here’s a quick snapshot of where we stand and what’s next 👇
 
 ✅ Already Implemented
 Tool	Type	Status	Notes
-Volume (above contour)	Report	✅ Done	
-Volume Xon–Xoff	Report	✅ Done	
-Cut & Fill	Report	✅ Done	
-Bar Properties	Report	✅ Done	
-Average	Profile	✅ Done	
-Base project structure / init files	Core	✅ Done	
+Volume (above contour)	Report	✅ Done
+Volume Xon–Xoff	Report	✅ Done
+Cut & Fill	Report	✅ Done
+Bar Properties	Report	✅ Done
+Average	Profile	✅ Done
+Base project structure / init files	Core	✅ Done
 ⚙️ Next Logical Tool Candidates
 Here are the next core BMAP tools you listed earlier that we haven’t implemented yet:
 
@@ -14963,7 +14963,7 @@ ChatGPT said:
 Perfect choice 👍 — the Translate tool is foundational, simple to verify, and BMAP uses it often before comparison or averaging.
 
 Let’s walk through the design first, then I’ll give you clean code for
-src/profile_analysis/modules/profiles/translate.py.
+src/profcalc/modules/profiles/translate.py.
 
 🧭 Purpose
 Replicate BMAP’s Translate tool, which shifts an existing beach profile:
@@ -15004,18 +15004,18 @@ Z
 +
 Δ
 Z
-X 
+X
 ′
  =X+ΔX
-Z 
+Z
 ′
  =Z+ΔZ
 That’s all — but we’ll include sanity checks (e.g., missing columns, NaN handling).
 
-🧩 File: src/profile_analysis/modules/profiles/translate.py
+🧩 File: src/profcalc/modules/profiles/translate.py
 """
 Module: translate
-Location: profile_analysis.modules.profiles
+Location: profcalc.modules.profiles
 --------------------------------------------
 Replicates BMAP's "Translate" tool.
 
@@ -15062,7 +15062,7 @@ def compute_translate(
     return profile_shifted
 ✅ Example Usage
 import pandas as pd
-from profile_analysis.modules.profiles.translate import compute_translate
+from profcalc.modules.profiles.translate import compute_translate
 
 # Example profile
 df = pd.DataFrame({"X": [0, 10, 20], "Z": [5.0, 4.5, 4.0]})
@@ -15131,25 +15131,25 @@ B
 Z
 A
 )
-Z 
+Z
 interp
 ​
- =Z 
+ =Z
 A
 ​
- +f×(Z 
+ +f×(Z
 B
 ​
- −Z 
+ −Z
 A
 ​
  )
 Optionally, if the two X grids differ slightly, we’ll resample both onto a common X-axis first (using linear interpolation).
 
-🧩 File: src/profile_analysis/modules/profiles/interpolate.py
+🧩 File: src/profcalc/modules/profiles/interpolate.py
 """
 Module: interpolate
-Location: profile_analysis.modules.profiles
+Location: profcalc.modules.profiles
 --------------------------------------------
 Replicates BMAP's "Interpolate" tool.
 
@@ -15206,7 +15206,7 @@ def compute_interpolate(
     return df_interp
 ✅ Example Usage
 import pandas as pd
-from profile_analysis.modules.profiles.interpolate import compute_interpolate
+from profcalc.modules.profiles.interpolate import compute_interpolate
 
 prof_a = pd.DataFrame({"X": [0, 10, 20], "Z": [5.0, 4.5, 4.0]})
 prof_b = pd.DataFrame({"X": [0, 10, 20], "Z": [6.0, 5.0, 4.0]})
@@ -15282,17 +15282,17 @@ X
 ,
 Z
 )
-Z 
+Z
 i
 ​
- =Z(x 
+ =Z(x
 i
 ​
  )=linear(X,Z)
-🧩 File: src/profile_analysis/modules/profiles/interpolate.py
+🧩 File: src/profcalc/modules/profiles/interpolate.py
 """
 Module: interpolate
-Location: profile_analysis.modules.profiles
+Location: profcalc.modules.profiles
 --------------------------------------------
 Replicates BMAP's "Interpolate" tool.
 
@@ -15334,7 +15334,7 @@ def compute_interpolate(profile: pd.DataFrame, dx: float = 5.0) -> pd.DataFrame:
     return resampled
 ✅ Example Usage
 import pandas as pd
-from profile_analysis.modules.profiles.interpolate import compute_interpolate
+from profcalc.modules.profiles.interpolate import compute_interpolate
 
 df = pd.DataFrame({
     "X": [0, 7.3, 13.9, 22.4, 35.1],
@@ -15402,14 +15402,14 @@ BMAP (and our design so far) separates things this way:
 
 ✅ Recommended Folder Pattern
 Folder	Purpose	Example file
-src/profile_analysis/core/	Generic math / geometric / data utilities that other tools use	interpolation.py (note the full word)
-src/profile_analysis/modules/profiles/	User-facing tool scripts that replicate BMAP tools	interpolate.py
+src/profcalc/core/	Generic math / geometric / data utilities that other tools use	interpolation.py (note the full word)
+src/profcalc/modules/profiles/	User-facing tool scripts that replicate BMAP tools	interpolate.py
 So, you’d have:
 
-profile_analysis/
+profcalc/
 │
 ├── src/
-│   ├── profile_analysis/
+│   ├── profcalc/
 │   │   ├── core/
 │   │   │   ├── interpolation.py     ← generic interpolation functions
 │   │   │   ├── geometry.py
@@ -15433,8 +15433,8 @@ modules/profiles/interpolate.py → full BMAP “Interpolate Tool” that calls 
 
 That way you can safely import both like this:
 
-from profile_analysis.core.interpolation import interp_linear
-from profile_analysis.modules.profiles.interpolate import compute_interpolate
+from profcalc.core.interpolation import interp_linear
+from profcalc.modules.profiles.interpolate import compute_interpolate
 Would you like me to show what should go in your core/interpolation.py (the shared math helper used by tools like Interpolate, Average, Translate, etc.)?
 
 You said:
@@ -15449,16 +15449,16 @@ Here’s how I’d recommend renaming and organizing them:
 
 🧩 Revised Naming Scheme
 Purpose	Old Name	New Recommended Name	Location
-Core math utilities (used across multiple tools)	interpolation.py	resampling_core.py	src/profile_analysis/core/
-BMAP Interpolate Tool (user-facing)	interpolate.py	tool_interpolate.py	src/profile_analysis/modules/profiles/
-BMAP Average Tool	average.py	tool_average.py	src/profile_analysis/modules/profiles/
-BMAP Translate Tool	translate.py	tool_translate.py	src/profile_analysis/modules/profiles/
-Volume Tools (Cut/Fill, Xon/Xoff, etc.)	volume_xon_xoff.py	tool_volume_xon_xoff.py, etc.	src/profile_analysis/modules/reports/
+Core math utilities (used across multiple tools)	interpolation.py	resampling_core.py	src/profcalc/core/
+BMAP Interpolate Tool (user-facing)	interpolate.py	tool_interpolate.py	src/profcalc/modules/profiles/
+BMAP Average Tool	average.py	tool_average.py	src/profcalc/modules/profiles/
+BMAP Translate Tool	translate.py	tool_translate.py	src/profcalc/modules/profiles/
+Volume Tools (Cut/Fill, Xon/Xoff, etc.)	volume_xon_xoff.py	tool_volume_xon_xoff.py, etc.	src/profcalc/modules/reports/
 📁 Folder Layout (Clean + Clear)
-profile_analysis/
+profcalc/
 │
 ├── src/
-│   └── profile_analysis/
+│   └── profcalc/
 │       ├── core/
 │       │   ├── resampling_core.py          ← shared interpolation logic
 │       │   ├── geometry_core.py
@@ -15483,8 +15483,8 @@ profile_analysis/
 ✅ Import Example
 This naming scheme keeps imports simple and readable:
 
-from profile_analysis.core.resampling_core import linear_resample
-from profile_analysis.modules.profiles.tool_interpolate import compute_interpolate
+from profcalc.core.resampling_core import linear_resample
+from profcalc.modules.profiles.tool_interpolate import compute_interpolate
 Would you like me to update the Interpolate Tool code and add a small shared helper file (resampling_core.py) accordingly?
 That way you’ll have both — the high-level tool and its reusable math logic, properly renamed.
 
@@ -15498,7 +15498,7 @@ You can easily generate a text-based folder tree (like the ones I’ve shown you
 
 In Windows PowerShell or Command Prompt, run:
 
-tree "C:\path\to\your\profile_analysis" /f > folder_tree.txt
+tree "C:\path\to\your\profcalc" /f > folder_tree.txt
 Then open that folder_tree.txt, copy the contents, and paste it here.
 
 (Tip: if you want it smaller, drop the /f flag — that will list only folders, not every file.)
@@ -15530,10 +15530,10 @@ Would you like me to give you the exact tree command to run from inside your cur
 You said:
 Folder PATH listing for volume OS
 Volume serial number is BCC2-6963
-C:\__PROJECTS\SCRIPTS\PYTHON\COASTAL\PROFILE_ANALYSIS\SRC
-+---profile_analysis
+C:\__PROJECTS\SCRIPTS\PYTHON\COASTAL\profcalc\SRC
++---profcalc
     ¦   __init__.py
-    ¦   
+    ¦
     +---core
     ¦       config.json
     ¦       config_utils.py
@@ -15541,29 +15541,29 @@ C:\__PROJECTS\SCRIPTS\PYTHON\COASTAL\PROFILE_ANALYSIS\SRC
     ¦       io_reports.py
     ¦       resampling_core.py
     ¦       __init__.py
-    ¦       
+    ¦
     +---docs
     ¦       ToolDevelopmentRoadmap.md
-    ¦       
+    ¦
     +---modules
     ¦   ¦   __init__.py
-    ¦   ¦   
+    ¦   ¦
     ¦   +---profiles
     ¦   ¦       tool_average.py
     ¦   ¦       tool_interpolate.py
     ¦   ¦       tool_translate.py
     ¦   ¦       __init__.py
-    ¦   ¦       
+    ¦   ¦
     ¦   +---reports
     ¦           tool_bar_properties.py
     ¦           tool_cut_fill.py
     ¦           tool_volume_above_contour.py
     ¦           tool_volume_xon_xoff.py
     ¦           __init__.py
-    ¦           
+    ¦
     +---tests
             __init__.py
-            
+
 ChatGPT said:
 Perfect — that’s a clean and professional folder layout, Rob 👏
 
@@ -15609,7 +15609,7 @@ tests/
   ├── test_reports/
   │     test_tool_cut_fill.py
   └── __init__.py
-Add a README.md at src/profile_analysis/
+Add a README.md at src/profcalc/
 Just a short description: what the project does, tool categories, and how to run them — helps future maintainers.
 
 ✅ Verdict:
@@ -15627,10 +15627,10 @@ Let’s add a placeholder settings folder and a stub config.json so the structur
 Here’s exactly what to do:
 
 📁 Add These
-profile_analysis/
+profcalc/
 │
 ├── src/
-│   └── profile_analysis/
+│   └── profcalc/
 │       ├── core/
 │       │   ├── settings/
 │       │   │   ├── config.json
@@ -15642,12 +15642,12 @@ profile_analysis/
 │       │   └── __init__.py
 │       ...
 🧩 config.json (placeholder contents)
-Create src/profile_analysis/core/settings/config.json with this minimal safe structure:
+Create src/profcalc/core/settings/config.json with this minimal safe structure:
 
 {
   "version": "0.1.0",
-  "project_name": "profile_analysis",
-  "description": "Configuration placeholder for profile_analysis project.",
+  "project_name": "profcalc",
+  "description": "Configuration placeholder for profcalc project.",
   "default_units": {
     "horizontal": "feet",
     "vertical": "feet"
@@ -15671,7 +15671,7 @@ or CLI argument defaults
 
 …we’ll hook into this settings folder cleanly through something like:
 
-from profile_analysis.core.settings import config_utils
+from profcalc.core.settings import config_utils
 Would you like me to give you the small config_utils.py helper that reads/writes this JSON config safely and caches it for other tools?
 
 You said:
@@ -15682,9 +15682,9 @@ ChatGPT said:
 Here’s why and what actually changed (so you’re totally in control of it 👇):
 
 🧱 Current (your setup)
-profile_analysis/
+profcalc/
 └── src/
-    └── profile_analysis/
+    └── profcalc/
         ├── core/
         │   ├── config.json
         │   ├── config_utils.py
@@ -15735,10 +15735,10 @@ Would you like me to drop in the small helper config_utils.py next (to safely lo
 You said:
 Folder PATH listing for volume OS
 Volume serial number is BCC2-6963
-C:\__PROJECTS\SCRIPTS\PYTHON\COASTAL\PROFILE_ANALYSIS\SRC
-+---profile_analysis
+C:\__PROJECTS\SCRIPTS\PYTHON\COASTAL\profcalc\SRC
++---profcalc
     ¦   __init__.py
-    ¦   
+    ¦
     +---core
     ¦   ¦   config.json
     ¦   ¦   config_utils.py
@@ -15746,33 +15746,33 @@ C:\__PROJECTS\SCRIPTS\PYTHON\COASTAL\PROFILE_ANALYSIS\SRC
     ¦   ¦   io_reports.py
     ¦   ¦   resampling_core.py
     ¦   ¦   __init__.py
-    ¦   ¦   
+    ¦   ¦
     ¦   +---settings
     ¦           config.json
     ¦           __init__.py
-    ¦           
+    ¦
     +---docs
     ¦       ToolDevelopmentRoadmap.md
-    ¦       
+    ¦
     +---modules
     ¦   ¦   __init__.py
-    ¦   ¦   
+    ¦   ¦
     ¦   +---profiles
     ¦   ¦       tool_average.py
     ¦   ¦       tool_interpolate.py
     ¦   ¦       tool_translate.py
     ¦   ¦       __init__.py
-    ¦   ¦       
+    ¦   ¦
     ¦   +---reports
     ¦           tool_bar_properties.py
     ¦           tool_cut_fill.py
     ¦           tool_volume_above_contour.py
     ¦           tool_volume_xon_xoff.py
     ¦           __init__.py
-    ¦           
+    ¦
     +---tests
             __init__.py
-            
+
 ChatGPT said:
 Excellent — that’s a textbook-perfect structure, Rob 👏
 
@@ -15829,7 +15829,7 @@ Your updated README.md file has been generated to reflect your current folder st
 
 📄 Download README.md
 
-Let me know when you're ready for the updated ToolDevelopmentRoadmap.md. 
+Let me know when you're ready for the updated ToolDevelopmentRoadmap.md.
 
 You said:
 u need to paste them in the chat in chunks
@@ -15845,7 +15845,7 @@ This is a modular Python toolkit designed for analyzing coastal beach profile da
 
 ## 📁 Project Structure
 
-profile_analysis/
+profcalc/
 ├── core/ # Low-level utilities and shared components
 │ ├── config_utils.py
 │ ├── io_bmap_freeformat.py
@@ -15897,3 +15897,4 @@ Want to continue where we left off with the updated README.md and documentation?
 
 No file chosenNo file chosen
 ChatGPT can make mistakes. Check important info.
+

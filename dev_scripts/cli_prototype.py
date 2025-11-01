@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 CLI Prototype - Beach Profile Analysis Toolkit
 Demonstrates menu-driven interface with professional formatting
@@ -253,7 +253,7 @@ def annual_monitoring_menu():
         elif choice.lower() == 'b':
             break
         elif choice == '1':
-            profile_analysis_menu()
+            profcalc_profcalc_menu()
         elif choice == '2':
             volumetric_analysis_menu()
         elif choice == '3':
@@ -351,7 +351,7 @@ def general_analysis_menu():
         elif choice.lower() == 'b':
             break
         elif choice == '1':
-            profile_analysis_menu()
+            profcalc_profcalc_menu()
         elif choice == '2':
             volumetric_analysis_menu()
         elif choice == '3':
@@ -445,7 +445,7 @@ def manage_database_menu():
     input(Fore.YELLOW + "  Press Enter to continue..." + Style.RESET_ALL)
 
 
-def profile_analysis_menu():
+def profcalc_profcalc_menu():
     """Display profile analysis options (single survey or comparison)."""
     while True:
         clear_screen()
@@ -468,7 +468,7 @@ def profile_analysis_menu():
         elif choice.lower() == 'b':
             break
         elif choice == '1':
-            single_profile_analysis()
+            single_profcalc()
         elif choice == '2':
             compare_profiles()
         elif choice == '3':
@@ -538,7 +538,7 @@ def shoreline_analysis_menu():
             input(Fore.YELLOW + "Press Enter to continue..." + Style.RESET_ALL)
 
 
-def single_profile_analysis():
+def single_profcalc():
     """Placeholder for single profile analysis."""
     print(Fore.YELLOW + "\n  Feature coming soon..." + Style.RESET_ALL)
     input(Fore.YELLOW + "  Press Enter to continue..." + Style.RESET_ALL)
@@ -827,3 +827,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

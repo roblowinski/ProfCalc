@@ -19,6 +19,7 @@ import pytest
 try:
     import geopandas as gpd
     from shapely.geometry import LineString, Point
+
     GEOPANDAS_AVAILABLE = True
 except ImportError:
     GEOPANDAS_AVAILABLE = False
@@ -35,7 +36,12 @@ def test_point_shapefile_from_csv():
     )
 
     # Read test CSV with Y coordinates
-    csv_file = Path(__file__).parent.parent.parent.parent / "data" / "input_examples" / "test_profiles.csv"
+    csv_file = (
+        Path(__file__).parent.parent.parent.parent
+        / "data"
+        / "input_examples"
+        / "test_profiles.csv"
+    )
     if not csv_file.exists():
         pytest.skip("Test data not found")
 
@@ -54,10 +60,18 @@ def test_point_shapefile_from_csv():
         gdf = gpd.read_file(output_path)
 
         # Check geometry type
-        assert all(isinstance(geom, Point) for geom in gdf.geometry), "Not all geometries are Points"
+        assert all(isinstance(geom, Point) for geom in gdf.geometry), (
+            "Not all geometries are Points"
+        )
 
         # Check required columns
-        required_cols = ['profile_id', 'survey_dat', 'point_num', 'distance_f', 'z']
+        required_cols = [
+            "profile_id",
+            "survey_dat",
+            "point_num",
+            "distance_f",
+            "z",
+        ]
         for col in required_cols:
             assert col in gdf.columns, f"Missing column: {col}"
 
@@ -79,8 +93,18 @@ def test_line_shapefile_from_csv():
     )
 
     # Read test CSV
-    csv_file = Path(__file__).parent.parent.parent.parent / "data" / "input_examples" / "test_profiles.csv"
-    baselines_file = Path(__file__).parent.parent.parent.parent / "data" / "temp" / "test_baselines.csv"
+    csv_file = (
+        Path(__file__).parent.parent.parent.parent
+        / "data"
+        / "input_examples"
+        / "test_profiles.csv"
+    )
+    baselines_file = (
+        Path(__file__).parent.parent.parent.parent
+        / "data"
+        / "temp"
+        / "test_baselines.csv"
+    )
 
     if not csv_file.exists() or not baselines_file.exists():
         pytest.skip("Test data not found")
@@ -89,13 +113,14 @@ def test_line_shapefile_from_csv():
 
     # Load baselines and add to metadata
     import pandas as pd
+
     baselines_df = pd.read_csv(baselines_file)
     baselines = {}
     for _, row in baselines_df.iterrows():
-        baselines[row['Profile']] = {
-            'origin_x': row['Origin_X'],
-            'origin_y': row['Origin_Y'],
-            'azimuth': row['Azimuth']
+        baselines[row["Profile"]] = {
+            "origin_x": row["Origin_X"],
+            "origin_y": row["Origin_Y"],
+            "azimuth": row["Azimuth"],
         }
 
     # Add baseline metadata to profiles
@@ -104,9 +129,9 @@ def test_line_shapefile_from_csv():
             baseline = baselines[profile.name]
             if profile.metadata is None:
                 profile.metadata = {}
-            profile.metadata['origin_x'] = baseline['origin_x']
-            profile.metadata['origin_y'] = baseline['origin_y']
-            profile.metadata['azimuth'] = baseline['azimuth']
+            profile.metadata["origin_x"] = baseline["origin_x"]
+            profile.metadata["origin_y"] = baseline["origin_y"]
+            profile.metadata["azimuth"] = baseline["azimuth"]
 
     with tempfile.TemporaryDirectory() as tmpdir:
         output_path = Path(tmpdir) / "test_lines.shp"
@@ -121,10 +146,20 @@ def test_line_shapefile_from_csv():
         gdf = gpd.read_file(output_path)
 
         # Check geometry type (should be LineString or LineStringZ)
-        assert all(isinstance(geom, LineString) for geom in gdf.geometry), "Not all geometries are LineStrings"
+        assert all(isinstance(geom, LineString) for geom in gdf.geometry), (
+            "Not all geometries are LineStrings"
+        )
 
         # Check required columns
-        required_cols = ['profile_id', 'survey_dat', 'azimuth', 'length_ft', 'num_vertic', 'z_min', 'z_max']
+        required_cols = [
+            "profile_id",
+            "survey_dat",
+            "azimuth",
+            "length_ft",
+            "num_vertic",
+            "z_min",
+            "z_max",
+        ]
         for col in required_cols:
             assert col in gdf.columns, f"Missing column: {col}"
 
@@ -134,11 +169,15 @@ def test_line_shapefile_from_csv():
         # Check 3D geometry (LineStringZ should have Z coordinates)
         first_line = gdf.geometry.iloc[0]
         coords = list(first_line.coords)
-        assert len(coords[0]) == 3, "Line geometry is not 3D (missing Z coordinate)"
+        assert len(coords[0]) == 3, (
+            "Line geometry is not 3D (missing Z coordinate)"
+        )
 
         print(f"✓ Line shapefile created with {len(gdf)} lines")
         print(f"  Columns: {list(gdf.columns)}")
-        print(f"  First line has {len(coords)} vertices (3D: {len(coords[0]) == 3})")
+        print(
+            f"  First line has {len(coords)} vertices (3D: {len(coords[0]) == 3})"
+        )
 
 
 def test_convert_csv_to_point_shapefile():
@@ -148,7 +187,12 @@ def test_convert_csv_to_point_shapefile():
 
     from profcalc.cli.quick_tools.convert import convert_format
 
-    csv_file = Path(__file__).parent.parent.parent.parent / "data" / "input_examples" / "test_profiles.csv"
+    csv_file = (
+        Path(__file__).parent.parent.parent.parent
+        / "data"
+        / "input_examples"
+        / "test_profiles.csv"
+    )
 
     if not csv_file.exists():
         pytest.skip("Test data not found")
@@ -162,7 +206,7 @@ def test_convert_csv_to_point_shapefile():
             output_file=str(output_path),
             from_format="csv",
             to_format="shp-points",
-            crs="EPSG:6347"
+            crs="EPSG:6347",
         )
 
         # Verify output
@@ -170,9 +214,13 @@ def test_convert_csv_to_point_shapefile():
 
         gdf = gpd.read_file(output_path)
         assert len(gdf) > 0, "No features in output shapefile"
-        assert all(isinstance(geom, Point) for geom in gdf.geometry), "Wrong geometry type"
+        assert all(isinstance(geom, Point) for geom in gdf.geometry), (
+            "Wrong geometry type"
+        )
 
-        print(f"✓ CSV → Point Shapefile conversion successful ({len(gdf)} points)")
+        print(
+            f"✓ CSV → Point Shapefile conversion successful ({len(gdf)} points)"
+        )
 
 
 def test_convert_csv_to_line_shapefile():
@@ -182,8 +230,18 @@ def test_convert_csv_to_line_shapefile():
 
     from profcalc.cli.quick_tools.convert import convert_format
 
-    csv_file = Path(__file__).parent.parent.parent.parent / "data" / "input_examples" / "test_profiles.csv"
-    baselines_file = Path(__file__).parent.parent.parent.parent / "data" / "temp" / "test_baselines.csv"
+    csv_file = (
+        Path(__file__).parent.parent.parent.parent
+        / "data"
+        / "input_examples"
+        / "test_profiles.csv"
+    )
+    baselines_file = (
+        Path(__file__).parent.parent.parent.parent
+        / "data"
+        / "temp"
+        / "test_baselines.csv"
+    )
 
     if not csv_file.exists() or not baselines_file.exists():
         pytest.skip("Test data not found")
@@ -198,7 +256,7 @@ def test_convert_csv_to_line_shapefile():
             from_format="csv",
             to_format="shp-lines",
             baselines_file=str(baselines_file),
-            crs="EPSG:6347"
+            crs="EPSG:6347",
         )
 
         # Verify output
@@ -206,14 +264,18 @@ def test_convert_csv_to_line_shapefile():
 
         gdf = gpd.read_file(output_path)
         assert len(gdf) > 0, "No features in output shapefile"
-        assert all(isinstance(geom, LineString) for geom in gdf.geometry), "Wrong geometry type"
+        assert all(isinstance(geom, LineString) for geom in gdf.geometry), (
+            "Wrong geometry type"
+        )
 
         # Verify 3D
         first_line = gdf.geometry.iloc[0]
         coords = list(first_line.coords)
         assert len(coords[0]) == 3, "Line is not 3D"
 
-        print(f"✓ CSV → Line Shapefile conversion successful ({len(gdf)} lines)")
+        print(
+            f"✓ CSV → Line Shapefile conversion successful ({len(gdf)} lines)"
+        )
         print(f"  First line: {len(coords)} vertices (3D)")
 
 
@@ -224,7 +286,12 @@ def test_line_shapefile_requires_baselines():
 
     from profcalc.cli.quick_tools.convert import convert_format
 
-    csv_file = Path(__file__).parent.parent.parent.parent / "data" / "input_examples" / "test_profiles.csv"
+    csv_file = (
+        Path(__file__).parent.parent.parent.parent
+        / "data"
+        / "input_examples"
+        / "test_profiles.csv"
+    )
 
     if not csv_file.exists():
         pytest.skip("Test data not found")
@@ -239,7 +306,7 @@ def test_line_shapefile_requires_baselines():
                 output_file=str(output_path),
                 from_format="csv",
                 to_format="shp-lines",
-                crs="EPSG:6347"
+                crs="EPSG:6347",
             )
 
         print("✓ Correctly requires origin azimuths for line shapefile export")
@@ -255,7 +322,12 @@ def test_crs_parameter():
         write_survey_points_shapefile,
     )
 
-    csv_file = Path(__file__).parent.parent.parent.parent / "data" / "input_examples" / "test_profiles.csv"
+    csv_file = (
+        Path(__file__).parent.parent.parent.parent
+        / "data"
+        / "input_examples"
+        / "test_profiles.csv"
+    )
 
     if not csv_file.exists():
         pytest.skip("Test data not found")
@@ -335,4 +407,3 @@ if __name__ == "__main__":
 
     print("=" * 60)
     print("Testing complete!")
-

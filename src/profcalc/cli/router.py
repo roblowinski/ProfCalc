@@ -45,26 +45,43 @@ Examples:
 
     # Add global options
     parser.add_argument(
-        "--verbose", "-v", action="store_true",
-        help="Enable verbose logging (INFO level)"
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Enable verbose logging (INFO level)",
     )
 
     # Add mutually exclusive tool flags
     tool_group = parser.add_mutually_exclusive_group()
     tool_group.add_argument(
-        "-b", "--bounds", action="store_true", help="Find common X bounds per profile"
+        "-b",
+        "--bounds",
+        action="store_true",
+        help="Find common X bounds per profile",
     )
     tool_group.add_argument(
-        "-c", "--convert", action="store_true", help="Convert between file formats"
+        "-c",
+        "--convert",
+        action="store_true",
+        help="Convert between file formats",
     )
     tool_group.add_argument(
-        "-i", "--inventory", action="store_true", help="Generate file inventory report"
+        "-i",
+        "--inventory",
+        action="store_true",
+        help="Generate file inventory report",
     )
     tool_group.add_argument(
-        "-a", "--assign", action="store_true", help="Assign XYZ points to profiles"
+        "-a",
+        "--assign",
+        action="store_true",
+        help="Assign XYZ points to profiles",
     )
     tool_group.add_argument(
-        "-f", "--fix-bmap", action="store_true", help="Fix incorrect point counts in BMAP file"
+        "-f",
+        "--fix-bmap",
+        action="store_true",
+        help="Fix incorrect point counts in BMAP file",
     )
 
     # Parse just the tool flag first
@@ -72,9 +89,13 @@ Examples:
 
     # Configure logging based on verbose flag
     if args.verbose:
-        logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+        logging.basicConfig(
+            level=logging.INFO, format="%(levelname)s: %(message)s"
+        )
     else:
-        logging.basicConfig(level=logging.WARNING, format='%(levelname)s: %(message)s')
+        logging.basicConfig(
+            level=logging.WARNING, format="%(levelname)s: %(message)s"
+        )
 
     # Route to appropriate quick tool handler
     try:
@@ -109,4 +130,3 @@ Examples:
 
 if __name__ == "__main__":
     main()
-

@@ -12,7 +12,9 @@ import numpy as np
 import pandas as pd
 
 
-def compute_interpolate(profile: pd.DataFrame, dx: float = 5.0) -> pd.DataFrame:
+def compute_interpolate(
+    profile: pd.DataFrame, dx: float = 5.0
+) -> pd.DataFrame:
     """
     Interpolate a single profile to a uniform Δx spacing.
 
@@ -40,4 +42,3 @@ def compute_interpolate(profile: pd.DataFrame, dx: float = 5.0) -> pd.DataFrame:
     resampled = pd.DataFrame({"X": new_x, "Z": new_z})
     resampled.attrs["dx"] = dx
     return resampled
-

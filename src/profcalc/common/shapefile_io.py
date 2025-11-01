@@ -95,7 +95,10 @@ def write_survey_points_shapefile(
 
     # Validate profiles have Y coordinates
     for profile in profiles:
-        if profile.metadata is None or ("y" not in profile.metadata and "y_coordinates" not in profile.metadata):
+        if profile.metadata is None or (
+            "y" not in profile.metadata
+            and "y_coordinates" not in profile.metadata
+        ):
             raise ValueError(
                 f"Profile '{profile.name}' missing Y coordinates.\n"
                 f"Y coordinates required for point shapefile export.\n"
@@ -123,7 +126,9 @@ def write_survey_points_shapefile(
             continue
 
         # Get Y coordinates - check both 'y' and 'y_coordinates' keys
-        y_coords = profile.metadata.get("y") or profile.metadata.get("y_coordinates")
+        y_coords = profile.metadata.get("y") or profile.metadata.get(
+            "y_coordinates"
+        )
         if y_coords is None:
             continue
 
@@ -165,7 +170,11 @@ def write_survey_points_shapefile(
             attributes["z"].append(z)
 
             # Add extra field values if present
-            if extra_field_data and profile.metadata and "extra_columns" in profile.metadata:
+            if (
+                extra_field_data
+                and profile.metadata
+                and "extra_columns" in profile.metadata
+            ):
                 extra_data = profile.metadata["extra_columns"].get("data", [])
                 if idx < len(extra_data) and extra_data[idx]:
                     for field_idx, field_name in enumerate(extra_field_names):
@@ -194,9 +203,7 @@ def write_survey_points_shapefile(
     try:
         gdf.to_file(output_path, driver="ESRI Shapefile")
     except Exception as e:
-        raise ValueError(
-            f"Failed to write point shapefile: {e}"
-        ) from e
+        raise ValueError(f"Failed to write point shapefile: {e}") from e
 
     print(f"✅ Wrote {total_points:,} survey points to {output_path}")
     print("   Geometry type: PointZ (3D points with elevation)")
@@ -310,7 +317,9 @@ def write_profile_lines_shapefile(
 
         # Populate attributes
         attributes["profile_id"].append(profile.name)
-        attributes["survey_dat"].append(str(profile.date) if profile.date else "")
+        attributes["survey_dat"].append(
+            str(profile.date) if profile.date else ""
+        )
         attributes["azimuth"].append(azimuth_deg)
         attributes["length_ft"].append(float(max(profile.x)))
         attributes["num_vertic"].append(len(coords_3d))
@@ -326,9 +335,7 @@ def write_profile_lines_shapefile(
     try:
         gdf.to_file(output_path, driver="ESRI Shapefile")
     except Exception as e:
-        raise ValueError(
-            f"Failed to write line shapefile: {e}"
-        ) from e
+        raise ValueError(f"Failed to write line shapefile: {e}") from e
 
     print(f"✅ Wrote {len(profiles)} profile lines (3D) to {output_path}")
     print("   Geometry type: PolyLineZ (Z-enabled)")
@@ -410,7 +417,10 @@ def validate_shapefile_export_requirements(
     # Check for missing Y coordinates (needed for point shapefile)
     missing_y = []
     for profile in profiles:
-        if profile.metadata is None or ("y" not in profile.metadata and "y_coordinates" not in profile.metadata):
+        if profile.metadata is None or (
+            "y" not in profile.metadata
+            and "y_coordinates" not in profile.metadata
+        ):
             missing_y.append(profile.name)
 
     if missing_y:
@@ -575,7 +585,6 @@ def read_line_shapefile(shapefile_path: Path) -> List[Profile]:
         geom = row.geometry
         if geom is None:
             continue
-
 
         # Get profile name
         if "profile" in row:

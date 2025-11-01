@@ -1,4 +1,5 @@
 """Test command-line --columns argument parsing."""
+
 import sys
 from pathlib import Path
 
@@ -52,4 +53,3 @@ for input_str, description in invalid_cases:
 print("\n" + "=" * 80)
 print("All _parse_column_order() tests complete!")
 print("=" * 80)
-

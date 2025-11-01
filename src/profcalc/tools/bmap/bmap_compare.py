@@ -139,4 +139,3 @@ def compute_compare_profiles(
     )
 
     return diff_df, report
-

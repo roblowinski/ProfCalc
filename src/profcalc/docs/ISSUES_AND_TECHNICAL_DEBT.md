@@ -17,11 +17,11 @@
 
 **Locations:**
 
-```
-- src/profile_analysis/common/ninecol_io.py:168
-- src/profile_analysis/common/config_utils.py:15
-- src/profile_analysis/common/bmap_io.py:210, 298, 308
-- src/profile_analysis/cli/quick_tools/convert.py:401
+```text
+- src/profcalc/common/ninecol_io.py:168
+- src/profcalc/common/config_utils.py:15
+- src/profcalc/common/bmap_io.py:210, 298, 308
+- src/profcalc/cli/quick_tools/convert.py:401
 ```
 
 **Issue:**
@@ -64,7 +64,7 @@ All changes maintain existing behavior while providing better error visibility a
 ### 2. Silent Error Suppression (Priority: HIGH)
 
 **Severity:** Critical
-**Location:** `src/profile_analysis/common/bmap_io.py:570`
+**Location:** `src/profcalc/common/bmap_io.py:570`
 
 **Issue:**
 
@@ -119,7 +119,7 @@ The fix prevents silent data corruption while providing comprehensive feedback a
 ### 3. Test Comments Refer to Fixed Bug (Priority: MEDIUM)
 
 **Severity:** Low (documentation only)
-**Location:** `src/profile_analysis/tests/test_profile_names_with_spaces.py:186-193`
+**Location:** `src/profcalc/tests/test_profile_names_with_spaces.py:186-193`
 
 **Issue:**
 
@@ -200,7 +200,7 @@ print(f"⚠️  KNOWN BUG: {e}")
 
 ✅ **PARTIALLY COMPLETED** - Added comprehensive test framework for BMAP analysis tools:
 
-**New Test File:** `src/profile_analysis/tests/test_bmap_analysis_tools.py`
+**New Test File:** `src/profcalc/tests/test_bmap_analysis_tools.py`
 
 - **Volume Above Contour Testing:** Tests calculation with real BMAP data, validates results with sanity checks
 - **Framework for Cut/Fill & Bar Properties:** Test structure created, ready for implementation when data loading is fixed
@@ -292,7 +292,7 @@ All suppressions remain in place as they prevent false positive type errors whil
 
 **BMAP Tools (production code):**
 
-```
+```text
 - tools/bmap/bmap_vol_above_contour.py:96
 - tools/bmap/bmap_vol_xon_xoff.py:116
 - tools/bmap/bmap_cut_fill.py:198
@@ -301,7 +301,7 @@ All suppressions remain in place as they prevent false positive type errors whil
 
 **Tests (acceptable):**
 
-```
+```text
 - tests/test_*.py (multiple files - OK for tests)
 ```
 
@@ -368,7 +368,7 @@ logger.info(f"Volume Above Contour report written to: {args.output}")
 | File | Lines | Status | Notes |
 |------|-------|--------|-------|
 | `dev_scripts/error_handler_enhanced.py` | 1504 | Prototype | Enhanced version |
-| `src/profile_analysis/common/error_handler.py` | 1400+ | Active | Production version |
+| `src/profcalc/common/error_handler.py` | 1400+ | Active | Production version |
 | `dev_scripts/validation_enhanced.py` | 568 | Prototype | Enhanced validation |
 
 **Issue:** Unclear which version is canonical, features may diverge
@@ -410,11 +410,11 @@ logger.info(f"Volume Above Contour report written to: {args.output}")
 
 **Multiple Config Files Found:**
 
-1. `src/profile_analysis/common/config.json`
+1. `src/profcalc/common/config.json`
    - Content: `{"dx": 10.0}`
    - Purpose: Analysis grid spacing
 
-2. `src/profile_analysis/settings/config.json`
+2. `src/profcalc/settings/config.json`
    - Content: Project metadata, paths, units
    - Purpose: Application-level configuration
 

@@ -32,22 +32,26 @@ def calculate_point_profile_offset(
     origin_y: float,
     azimuth: float,
     point_x: float,
-    point_y: float
+    point_y: float,
 ) -> float:
     """Calculate the cross-shore distance of a point from a profile baseline.
 
-    The profile baseline is defined by an origin point (origin_x, origin_y) and
-    an azimuth angle (direction of the baseline in degrees from north).
+    Computes the perpendicular distance from a point to a profile baseline defined
+    by an origin point and azimuth angle. Positive distances indicate points
+    seaward of the baseline, negative distances indicate landward points.
 
     Args:
-        origin_x: X-coordinate of profile origin
-        origin_y: Y-coordinate of profile origin
-        azimuth: Azimuth angle in degrees (0 = north, 90 = east)
-        point_x: X-coordinate of the point
-        point_y: Y-coordinate of the point
+        origin_x: X-coordinate of the profile origin point (baseline start).
+        origin_y: Y-coordinate of the profile origin point (baseline start).
+        azimuth: Azimuth angle of the baseline in degrees (0° = north, 90° = east,
+            clockwise positive).
+        point_x: X-coordinate of the point to measure from the baseline.
+        point_y: Y-coordinate of the point to measure from the baseline.
 
     Returns:
-        Cross-shore distance from baseline (positive = seaward, negative = landward)
+        Cross-shore distance from the baseline in the same units as input
+        coordinates. Positive values indicate seaward direction, negative
+        values indicate landward direction.
     """
     # Convert azimuth to radians (0 = north, clockwise positive)
     azimuth_rad = np.radians(azimuth)
@@ -77,7 +81,7 @@ def convert_3d_to_2d_profile(
     z_coords: np.ndarray,
     origin_x: float,
     origin_y: float,
-    azimuth: float
+    azimuth: float,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Convert 3D survey points to 2D profile coordinates.
 
@@ -98,23 +102,22 @@ def convert_3d_to_2d_profile(
     if len(x_coords) != len(y_coords) or len(x_coords) != len(z_coords):
         raise BeachProfileError(
             f"Coordinate arrays must have same length: X={len(x_coords)}, Y={len(y_coords)}, Z={len(z_coords)}",
-            category=ErrorCategory.SPATIAL
+            category=ErrorCategory.SPATIAL,
         )
 
     # Calculate cross-shore distances for all points
-    cross_shore_distances = np.array([
-        calculate_point_profile_offset(origin_x, origin_y, azimuth, x, y)
-        for x, y in zip(x_coords, y_coords)
-    ])
+    cross_shore_distances = np.array(
+        [
+            calculate_point_profile_offset(origin_x, origin_y, azimuth, x, y)
+            for x, y in zip(x_coords, y_coords)
+        ]
+    )
 
     return cross_shore_distances, z_coords
 
 
 def transform_profile_to_2d(
-    profile: Profile,
-    origin_x: float,
-    origin_y: float,
-    azimuth: float
+    profile: Profile, origin_x: float, origin_y: float, azimuth: float
 ) -> Profile:
     """Transform a 3D profile to 2D profile coordinates.
 
@@ -134,17 +137,23 @@ def transform_profile_to_2d(
         CoordinateTransformError: If profile doesn't have required 3D coordinates
     """
     # Check if profile has Y coordinates in metadata
-    if not hasattr(profile, 'metadata') or profile.metadata is None:
-        raise BeachProfileError("Profile must have metadata with Y coordinates", category=ErrorCategory.SPATIAL)
+    if not hasattr(profile, "metadata") or profile.metadata is None:
+        raise BeachProfileError(
+            "Profile must have metadata with Y coordinates",
+            category=ErrorCategory.SPATIAL,
+        )
 
-    y_coords = profile.metadata.get('y_coordinates')
+    y_coords = profile.metadata.get("y_coordinates")
     if y_coords is None:
-        raise BeachProfileError("Profile metadata must contain 'y_coordinates'", category=ErrorCategory.SPATIAL)
+        raise BeachProfileError(
+            "Profile metadata must contain 'y_coordinates'",
+            category=ErrorCategory.SPATIAL,
+        )
 
     if len(y_coords) != len(profile.x):
         raise BeachProfileError(
             f"Y coordinate array length ({len(y_coords)}) doesn't match X coordinates ({len(profile.x)})",
-            category=ErrorCategory.SPATIAL
+            category=ErrorCategory.SPATIAL,
         )
 
     # Convert to 2D coordinates
@@ -154,14 +163,14 @@ def transform_profile_to_2d(
 
     # Create new profile with 2D coordinates
     new_metadata = profile.metadata.copy()
-    new_metadata['original_3d_coords'] = {
-        'x': profile.x.copy(),
-        'y': y_coords.copy(),
-        'z': profile.z.copy()
+    new_metadata["original_3d_coords"] = {
+        "x": profile.x.copy(),
+        "y": y_coords.copy(),
+        "z": profile.z.copy(),
     }
-    new_metadata['profile_origin'] = {'x': origin_x, 'y': origin_y}
-    new_metadata['profile_azimuth'] = azimuth
-    new_metadata['transformation'] = '3D_to_2D'
+    new_metadata["profile_origin"] = {"x": origin_x, "y": origin_y}
+    new_metadata["profile_azimuth"] = azimuth
+    new_metadata["transformation"] = "3D_to_2D"
 
     # Update description to indicate transformation
     new_description = profile.description or ""
@@ -175,34 +184,40 @@ def transform_profile_to_2d(
         description=new_description,
         x=cross_shore_distances,
         z=elevations,
-        metadata=new_metadata
+        metadata=new_metadata,
     )
 
     return new_profile
 
 
 def batch_transform_profiles_to_2d(
-    profiles: List[Profile],
-    origin_x: float,
-    origin_y: float,
-    azimuth: float
+    profiles: List[Profile], origin_x: float, origin_y: float, azimuth: float
 ) -> List[Profile]:
-    """Transform multiple 3D profiles to 2D coordinates.
+    """Transform multiple 3D profiles to 2D coordinates with error handling.
+
+    Applies 3D-to-2D coordinate transformation to a list of Profile objects.
+    Profiles that fail transformation are logged as warnings and skipped,
+    allowing the batch process to continue with successful transformations.
 
     Args:
-        profiles: List of Profile objects with 3D coordinates
-        origin_x: X-coordinate of profile origin
-        origin_y: Y-coordinate of profile origin
-        azimuth: Profile azimuth in degrees
+        profiles: List of Profile objects containing 3D coordinate data in
+            metadata. Each profile must have 'y_coordinates' in metadata.
+        origin_x: X-coordinate of the profile origin point for all profiles.
+        origin_y: Y-coordinate of the profile origin point for all profiles.
+        azimuth: Azimuth angle in degrees for the baseline direction
+            (0° = north, 90° = east).
 
     Returns:
-        List of transformed 2D Profile objects
+        List of successfully transformed Profile objects with 2D coordinates.
+        Failed transformations are omitted from the result with warning logs.
     """
     transformed_profiles = []
 
     for profile in profiles:
         try:
-            transformed = transform_profile_to_2d(profile, origin_x, origin_y, azimuth)
+            transformed = transform_profile_to_2d(
+                profile, origin_x, origin_y, azimuth
+            )
             transformed_profiles.append(transformed)
         except BeachProfileError as e:
             logger = get_logger(LogComponent.SPATIAL)
@@ -213,8 +228,7 @@ def batch_transform_profiles_to_2d(
 
 
 def estimate_profile_baseline(
-    x_coords: np.ndarray,
-    y_coords: np.ndarray
+    x_coords: np.ndarray, y_coords: np.ndarray
 ) -> Tuple[float, float, float]:
     """Estimate profile baseline from a set of points.
 
@@ -229,8 +243,8 @@ def estimate_profile_baseline(
         Tuple of (origin_x, origin_y, azimuth)
     """
     # Center the points
-    x_mean = float(np.mean(x_coords))
-    y_mean = float(np.mean(y_coords))
+    x_mean: float = float(np.mean(x_coords))
+    y_mean: float = float(np.mean(y_coords))
     x_centered = x_coords - x_mean
     y_centered = y_coords - y_mean
 
@@ -245,7 +259,9 @@ def estimate_profile_baseline(
     # Calculate azimuth from principal component
     # Principal component gives direction vector
     dx, dy = principal_component
-    azimuth = np.degrees(np.arctan2(dx, dy))  # atan2(dx, dy) gives angle from north
+    azimuth = np.degrees(
+        np.arctan2(dx, dy)
+    )  # atan2(dx, dy) gives angle from north
 
     # Ensure azimuth is between 0 and 360
     if azimuth < 0:
@@ -253,10 +269,12 @@ def estimate_profile_baseline(
 
     # Find origin as the point with minimum cross-shore distance
     # (assuming the profile extends seaward from the origin)
-    cross_shore_distances = np.array([
-        calculate_point_profile_offset(x_mean, y_mean, azimuth, x, y)
-        for x, y in zip(x_coords, y_coords)
-    ])
+    cross_shore_distances = np.array(
+        [
+            calculate_point_profile_offset(x_mean, y_mean, azimuth, x, y)
+            for x, y in zip(x_coords, y_coords)
+        ]
+    )
 
     min_distance_idx = np.argmin(cross_shore_distances)
     origin_x = x_coords[min_distance_idx]
@@ -265,7 +283,9 @@ def estimate_profile_baseline(
     return origin_x, origin_y, azimuth
 
 
-def load_profile_baselines(baseline_file_path: str) -> dict:
+def load_profile_baselines(
+    baseline_file_path: str,
+) -> dict[str, dict[str, float]]:
     """Load profile baseline configurations from CSV file.
 
     Args:
@@ -278,34 +298,46 @@ def load_profile_baselines(baseline_file_path: str) -> dict:
     df = pd.read_csv(baseline_file_path)
 
     # Validate required columns
-    required_cols = ['profile_name', 'x0', 'y0', 'azimuth']
+    required_cols = ["profile_name", "x0", "y0", "azimuth"]
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
-        raise ValueError(f"Baseline file missing required columns: {missing_cols}")
+        raise ValueError(
+            f"Baseline file missing required columns: {missing_cols}"
+        )
 
     baselines = {}
     for _, row in df.iterrows():
-        baselines[row['profile_name']] = {
-            'x0': float(row['x0']),
-            'y0': float(row['y0']),
-            'azimuth': float(row['azimuth'])
+        baselines[row["profile_name"]] = {
+            "x0": float(row["x0"]),
+            "y0": float(row["y0"]),
+            "azimuth": float(row["azimuth"]),
         }
 
     return baselines
 
 
 def transform_profiles_with_baselines(
-    profiles: List[Profile],
-    baseline_file_path: str
+    profiles: List[Profile], baseline_file_path: str
 ) -> List[Profile]:
-    """Transform multiple 3D profiles to 2D using baseline configurations from file.
+    """Transform multiple 3D profiles to 2D using individual baseline configurations.
+
+    Loads profile-specific baseline parameters from a CSV file and applies
+    customized 3D-to-2D transformations for each profile. Profiles without
+    matching baselines in the file are skipped with warnings.
 
     Args:
-        profiles: List of Profile objects with 3D coordinates
-        baseline_file_path: Path to CSV file containing profile baselines
+        profiles: List of Profile objects containing 3D coordinate data.
+            Each profile must have 'y_coordinates' in metadata.
+        baseline_file_path: Path to CSV file containing baseline configurations.
+            Must include columns: 'profile_name', 'x0', 'y0', 'azimuth'.
 
     Returns:
-        List of transformed 2D Profile objects
+        List of successfully transformed Profile objects with 2D coordinates.
+        Profiles without matching baselines are omitted with warning logs.
+
+    Raises:
+        ValueError: If the baseline file is missing required columns or
+            cannot be read.
     """
     baselines = load_profile_baselines(baseline_file_path)
     transformed_profiles = []
@@ -314,15 +346,14 @@ def transform_profiles_with_baselines(
         baseline = baselines.get(profile.name)
         if baseline is None:
             logger = get_logger(LogComponent.SPATIAL)
-            logger.warning(f"No baseline found for profile {profile.name}, skipping transformation")
+            logger.warning(
+                f"No baseline found for profile {profile.name}, skipping transformation"
+            )
             continue
 
         try:
             transformed = transform_profile_to_2d(
-                profile,
-                baseline['x0'],
-                baseline['y0'],
-                baseline['azimuth']
+                profile, baseline["x0"], baseline["y0"], baseline["azimuth"]
             )
             transformed_profiles.append(transformed)
         except Exception as e:
@@ -337,7 +368,7 @@ def convert_2d_to_3d_profile(
     elevations: np.ndarray,
     origin_x: float,
     origin_y: float,
-    azimuth: float
+    azimuth: float,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Convert 2D profile coordinates back to 3D survey points.
 
@@ -360,7 +391,7 @@ def convert_2d_to_3d_profile(
     if len(cross_shore_distances) != len(elevations):
         raise BeachProfileError(
             f"Coordinate arrays must have same length: cross_shore={len(cross_shore_distances)}, elevations={len(elevations)}",
-            category=ErrorCategory.SPATIAL
+            category=ErrorCategory.SPATIAL,
         )
 
     # Convert azimuth to radians (0 = north, clockwise positive)
@@ -370,8 +401,8 @@ def convert_2d_to_3d_profile(
     # To convert back to 3D coordinates, place the point at that perpendicular distance
     # The direction perpendicular to the baseline is azimuth + 90°
 
-    cos_perp = np.cos(azimuth_rad + np.pi/2)  # cos(a + 90°) = -sin(a)
-    sin_perp = np.sin(azimuth_rad + np.pi/2)  # sin(a + 90°) = cos(a)
+    cos_perp = np.cos(azimuth_rad + np.pi / 2)  # cos(a + 90°) = -sin(a)
+    sin_perp = np.sin(azimuth_rad + np.pi / 2)  # sin(a + 90°) = cos(a)
 
     # Project cross-shore distance in the perpendicular direction
     x_coords = origin_x + cross_shore_distances * cos_perp
@@ -381,27 +412,29 @@ def convert_2d_to_3d_profile(
 
 
 def transform_profile_to_3d(
-    profile: Profile,
-    origin_x: float,
-    origin_y: float,
-    azimuth: float
+    profile: Profile, origin_x: float, origin_y: float, azimuth: float
 ) -> Profile:
     """Transform a 2D profile back to 3D coordinates.
 
-    Takes a Profile object with 2D coordinates and transforms it back to 3D
-    coordinates suitable for export to 3D formats like 9-column ASCII.
+    Converts a Profile object with 2D coordinates (cross-shore distance, elevation)
+    back to 3D coordinates (X, Y, Z) using the specified profile baseline.
+    This is useful for exporting 2D analysis results back to 3D formats.
 
     Args:
-        profile: Profile object with 2D coordinates
-        origin_x: X-coordinate of profile origin
-        origin_y: Y-coordinate of profile origin
-        azimuth: Profile azimuth in degrees
+        profile: Profile object with 2D coordinates (cross-shore distances in
+            x attribute, elevations in z attribute).
+        origin_x: X-coordinate of the profile origin point.
+        origin_y: Y-coordinate of the profile origin point.
+        azimuth: Azimuth angle in degrees for the baseline direction
+            (0° = north, 90° = east).
 
     Returns:
-        New Profile object with 3D coordinates
+        New Profile object with 3D coordinates (X, Y, Z) and updated metadata
+        indicating the transformation.
 
     Raises:
-        CoordinateTransformError: If transformation fails
+        BeachProfileError: If the coordinate transformation fails due to
+            invalid input data.
     """
     # Convert 2D coordinates back to 3D
     x_coords, y_coords, z_coords = convert_2d_to_3d_profile(
@@ -410,8 +443,8 @@ def transform_profile_to_3d(
 
     # Create new profile with 3D coordinates
     new_metadata = profile.metadata.copy() if profile.metadata else {}
-    new_metadata['y_coordinates'] = y_coords
-    new_metadata['transformation'] = '2D_to_3D'
+    new_metadata["y_coordinates"] = y_coords
+    new_metadata["transformation"] = "2D_to_3D"
 
     # Update description to indicate transformation
     new_description = profile.description or ""
@@ -425,34 +458,40 @@ def transform_profile_to_3d(
         description=new_description,
         x=x_coords,
         z=z_coords,
-        metadata=new_metadata
+        metadata=new_metadata,
     )
 
     return new_profile
 
 
 def batch_transform_profiles_to_3d(
-    profiles: List[Profile],
-    origin_x: float,
-    origin_y: float,
-    azimuth: float
+    profiles: List[Profile], origin_x: float, origin_y: float, azimuth: float
 ) -> List[Profile]:
-    """Transform multiple 2D profiles back to 3D coordinates.
+    """Transform multiple 2D profiles back to 3D coordinates with error handling.
+
+    Applies 2D-to-3D coordinate transformation to a list of Profile objects.
+    Profiles that fail transformation are logged as warnings and skipped,
+    allowing the batch process to continue with successful transformations.
 
     Args:
-        profiles: List of Profile objects with 2D coordinates
-        origin_x: X-coordinate of profile origin
-        origin_y: Y-coordinate of profile origin
-        azimuth: Profile azimuth in degrees
+        profiles: List of Profile objects containing 2D coordinate data
+            (cross-shore distances in x, elevations in z).
+        origin_x: X-coordinate of the profile origin point for all profiles.
+        origin_y: Y-coordinate of the profile origin point for all profiles.
+        azimuth: Azimuth angle in degrees for the baseline direction
+            (0° = north, 90° = east).
 
     Returns:
-        List of transformed 3D Profile objects
+        List of successfully transformed Profile objects with 3D coordinates.
+        Failed transformations are omitted from the result with warning logs.
     """
     transformed_profiles = []
 
     for profile in profiles:
         try:
-            transformed = transform_profile_to_3d(profile, origin_x, origin_y, azimuth)
+            transformed = transform_profile_to_3d(
+                profile, origin_x, origin_y, azimuth
+            )
             transformed_profiles.append(transformed)
         except BeachProfileError as e:
             logger = get_logger(LogComponent.SPATIAL)
@@ -460,4 +499,3 @@ def batch_transform_profiles_to_3d(
             continue
 
     return transformed_profiles
-

@@ -153,4 +153,3 @@ def smooth_profile(
         return smooth_spline(x, z, **kwargs)
     else:
         raise ValueError(f"Unknown smoothing method: {method}")
-

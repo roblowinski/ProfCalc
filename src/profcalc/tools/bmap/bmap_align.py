@@ -118,4 +118,3 @@ def compute_align_profiles(
     }
 
     return aligned_df
-

@@ -1,4 +1,5 @@
 """Comprehensive test of all conversion enhancements."""
+
 import sys
 from pathlib import Path
 
@@ -31,7 +32,9 @@ convert_format(
 )
 
 # Read XYZ to verify extra columns
-print("\n✅ CSV → XYZ: Extra columns preserved (slope, roughness, sediment_type)")
+print(
+    "\n✅ CSV → XYZ: Extra columns preserved (slope, roughness, sediment_type)"
+)
 with open("data/temp/comprehensive_test.xyz") as f:
     print("   First point:", f.readlines()[1].strip())
 
@@ -62,7 +65,9 @@ convert_format(
     baselines_file="data/temp/test_baselines.csv",
 )
 
-print("\n✅ BMAP → XYZ with origin azimuths: Real-world coordinates calculated")
+print(
+    "\n✅ BMAP → XYZ with origin azimuths: Real-world coordinates calculated"
+)
 with open("data/temp/comprehensive_bmap_to_xyz.xyz") as f:
     lines = f.readlines()
     print(f"   Profile: {lines[0].strip()}")
@@ -91,8 +96,12 @@ print("-" * 80)
 
 # The .txt extensions should not matter - content is detected
 print("✅ Format detection from content:")
-print("   - test_extra_columns.csv → Detected as CSV (has comma-separated headers)")
-print("   - test_bmap_with_baseline.txt → Detected as BMAP (name/count/coords)")
+print(
+    "   - test_extra_columns.csv → Detected as CSV (has comma-separated headers)"
+)
+print(
+    "   - test_bmap_with_baseline.txt → Detected as BMAP (name/count/coords)"
+)
 print("   - comprehensive_test.xyz → Detected as XYZ (3+ numbers per line)")
 
 print("\n" + "=" * 80)
@@ -100,11 +109,16 @@ print(" ALL TESTS PASSED ✅")
 print("=" * 80)
 
 print("\n📊 RESULTS SUMMARY:")
-print("  ✓ Extra columns (slope, roughness, sediment_type) preserved in CSV↔XYZ")
+print(
+    "  ✓ Extra columns (slope, roughness, sediment_type) preserved in CSV↔XYZ"
+)
 print("  ✓ Y coordinates preserved in all CSV and XYZ formats")
-print("  ✓ Baseline transformation calculates real-world X,Y from cross-shore distances")
+print(
+    "  ✓ Baseline transformation calculates real-world X,Y from cross-shore distances"
+)
 print("  ✓ Data loss warnings displayed when converting to BMAP format")
 print("  ✓ Format detection works regardless of file extension")
-print("  ✓ Origin azimuth transformation calculates real-world X,Y from cross-shore distances")
+print(
+    "  ✓ Origin azimuth transformation calculates real-world X,Y from cross-shore distances"
+)
 print("\n")
-

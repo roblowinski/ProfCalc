@@ -28,7 +28,9 @@ def execute_from_cli(args: list[str]) -> None:
         description="Generate comprehensive inventory report for BMAP files",
     )
     parser.add_argument("file", help="BMAP file to inventory")
-    parser.add_argument("-o", "--output", required=True, help="Output report file path")
+    parser.add_argument(
+        "-o", "--output", required=True, help="Output report file path"
+    )
     parser.add_argument(
         "-v",
         "--verbose",
@@ -40,7 +42,9 @@ def execute_from_cli(args: list[str]) -> None:
 
     # Execute inventory
     print(f"🔍 Analyzing {parsed_args.file}...")
-    report = generate_inventory_report(parsed_args.file, verbose=parsed_args.verbose)
+    report = generate_inventory_report(
+        parsed_args.file, verbose=parsed_args.verbose
+    )
 
     # Write output
     Path(parsed_args.output).write_text(report)
@@ -106,7 +110,9 @@ def _calculate_file_statistics(
 
     min_elev = min(all_elevations) if all_elevations else 0.0
     max_elev = max(all_elevations) if all_elevations else 0.0
-    avg_elev = sum(all_elevations) / len(all_elevations) if all_elevations else 0.0
+    avg_elev = (
+        sum(all_elevations) / len(all_elevations) if all_elevations else 0.0
+    )
 
     # Calculate X coordinate statistics
     all_x = []
@@ -120,7 +126,11 @@ def _calculate_file_statistics(
     points_per_profile = [len(p.x) for p in profiles]
     min_points = min(points_per_profile) if points_per_profile else 0
     max_points = max(points_per_profile) if points_per_profile else 0
-    avg_points = sum(points_per_profile) / len(points_per_profile) if points_per_profile else 0
+    avg_points = (
+        sum(points_per_profile) / len(points_per_profile)
+        if points_per_profile
+        else 0
+    )
 
     return {
         "total_profiles": total_profiles,
@@ -178,7 +188,9 @@ def _format_inventory_report(
     if stats["dates"]:
         lines.append("SURVEY DATES")
         lines.append("-" * 80)
-        lines.append(f"Date Range: {stats['dates'][0]} to {stats['dates'][-1]}")
+        lines.append(
+            f"Date Range: {stats['dates'][0]} to {stats['dates'][-1]}"
+        )
         lines.append(f"Total Survey Dates: {len(stats['dates'])}")
         if len(stats["dates"]) <= 10:
             lines.append("Dates: " + ", ".join(stats["dates"]))
@@ -235,16 +247,22 @@ def _format_inventory_report(
 
         for i, profile in enumerate(profiles, 1):
             lines.append(f"\nSurvey #{i}: {profile.name}")
-            lines.append(f"  Date: {profile.date if profile.date else 'Not specified'}")
+            lines.append(
+                f"  Date: {profile.date if profile.date else 'Not specified'}"
+            )
             lines.append(
                 f"  Description: {profile.description if profile.description else 'None'}"
             )
             lines.append(f"  Points: {len(profile.x)}")
-            lines.append(f"  X Range: {min(profile.x):.2f} to {max(profile.x):.2f} ft")
+            lines.append(
+                f"  X Range: {min(profile.x):.2f} to {max(profile.x):.2f} ft"
+            )
             lines.append(
                 f"  Z Range: {min(profile.z):.2f} to {max(profile.z):.2f} ft NAVD88"
             )
-            lines.append(f"  Avg Elevation: {sum(profile.z) / len(profile.z):.2f} ft NAVD88")
+            lines.append(
+                f"  Avg Elevation: {sum(profile.z) / len(profile.z):.2f} ft NAVD88"
+            )
 
         lines.append("")
 
@@ -262,7 +280,11 @@ def execute_from_menu() -> None:
     input_file = input("Enter BMAP file path: ").strip()
     output_file = input("Enter output report file path: ").strip()
 
-    verbose_input = input("Include detailed per-profile information? (y/n) [n]: ").strip().lower()
+    verbose_input = (
+        input("Include detailed per-profile information? (y/n) [n]: ")
+        .strip()
+        .lower()
+    )
     verbose = verbose_input == "y"
 
     try:
@@ -282,4 +304,3 @@ def execute_from_menu() -> None:
         print(f"\n❌ Unexpected error: {e}")
 
     input("\nPress Enter to continue...")
-

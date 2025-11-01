@@ -43,4 +43,3 @@ def interpolate_to_common_grid(
     z2_interp = np.interp(x_common, prof2["X"], prof2["Z"])
 
     return x_common, z1_interp, z2_interp
-

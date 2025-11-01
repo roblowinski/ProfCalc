@@ -22,17 +22,18 @@ import numpy as np
 import pandas as pd
 
 from .bmap_io import Profile
+from .data_validation import validate_array_properties
 from .error_handler import (
     BeachProfileError,
     ErrorCategory,
     LogComponent,
     get_logger,
-    validate_array_properties,
 )
 
 
 class NineColImportError(Exception):
     """Raised when 9-column import fails."""
+
     pass
 
 
@@ -92,7 +93,7 @@ class NineColumnParser:
         if header_idx is None:
             raise BeachProfileError(
                 "Could not find header row containing 'PROFILE ID'",
-                category=ErrorCategory.FILE_IO
+                category=ErrorCategory.FILE_IO,
             )
 
         # Use the header line to name columns
@@ -105,7 +106,7 @@ class NineColumnParser:
         if missing_columns:
             raise BeachProfileError(
                 f"Missing required columns: {missing_columns}",
-                category=ErrorCategory.FILE_IO
+                category=ErrorCategory.FILE_IO,
             )
 
         return df
@@ -131,16 +132,23 @@ class NineColumnParser:
             grouped = df.groupby(["PROFILE ID", "DATE"])
 
             for (profile_id, date_str), profile_points in grouped:
-                profile = self._convert_to_profile(profile_id, date_str, profile_points)
+                profile = self._convert_to_profile(
+                    profile_id, date_str, profile_points
+                )
                 if profile:
                     profiles.append(profile)
 
             return profiles
 
         except Exception as e:
-            raise BeachProfileError(f"Failed to parse 9-column file: {e}", category=ErrorCategory.FILE_IO) from e
+            raise BeachProfileError(
+                f"Failed to parse 9-column file: {e}",
+                category=ErrorCategory.FILE_IO,
+            ) from e
 
-    def _convert_to_profile(self, profile_id: str, date_str: str, profile_points: pd.DataFrame) -> Optional[Profile]:
+    def _convert_to_profile(
+        self, profile_id: str, date_str: str, profile_points: pd.DataFrame
+    ) -> Optional[Profile]:
         """Convert grouped profile data to Profile object.
 
         Args:
@@ -160,9 +168,14 @@ class NineColumnParser:
             # Parse date
             date_obj = None
             try:
-                if len(str(date_str).strip()) == 8 and str(date_str).strip().isdigit():
+                if (
+                    len(str(date_str).strip()) == 8
+                    and str(date_str).strip().isdigit()
+                ):
                     # YYYYMMDD format
-                    date_obj = pd.to_datetime(str(date_str).strip(), format="%Y%m%d")
+                    date_obj = pd.to_datetime(
+                        str(date_str).strip(), format="%Y%m%d"
+                    )
                 else:
                     date_obj = pd.to_datetime(date_str)
             except (ValueError, TypeError) as e:
@@ -170,27 +183,43 @@ class NineColumnParser:
                     f"Could not parse date '{date_str}' for profile {profile_name}: {e}"
                 )
 
-            date_str_formatted = date_obj.strftime("%Y-%m-%d") if date_obj else None
+            date_str_formatted = (
+                date_obj.strftime("%Y-%m-%d") if date_obj else None
+            )
 
             # Sort points by point number
             profile_points = profile_points.sort_values("POINT #")
 
             # Extract coordinates
-            x_coords = profile_points["EASTING (X)"].values
-            y_coords = profile_points["NORTHING (Y)"].values
-            z_coords = profile_points["ELEVATION (Z)"].values
+            x_coords = np.array(
+                profile_points["EASTING (X)"].values, dtype=float
+            )
+            y_coords = np.array(
+                profile_points["NORTHING (Y)"].values, dtype=float
+            )
+            z_coords = np.array(
+                profile_points["ELEVATION (Z)"].values, dtype=float
+            )
 
             if len(x_coords) == 0:
-                self.logger.warning(f"No coordinate data found for profile {profile_name}")
+                self.logger.warning(
+                    f"No coordinate data found for profile {profile_name}"
+                )
                 return None
 
             # Validate coordinate arrays
-            x_validation = validate_array_properties(x_coords, "x_coordinates", allow_nan=False)
-            z_validation = validate_array_properties(z_coords, "z_coordinates", allow_nan=False)
+            x_validation = validate_array_properties(
+                x_coords, "x_coordinates", allow_nan=False
+            )
+            z_validation = validate_array_properties(
+                z_coords, "z_coordinates", allow_nan=False
+            )
 
             if x_validation or z_validation:
                 all_errors = x_validation + z_validation
-                self.logger.warning(f"Coordinate validation errors for profile {profile_name}: {all_errors}")
+                self.logger.warning(
+                    f"Coordinate validation errors for profile {profile_name}: {all_errors}"
+                )
                 # Continue processing but log the issues
 
             # Create metadata
@@ -207,7 +236,12 @@ class NineColumnParser:
                 metadata["point_types"] = types
 
             if "DESCRIPTION" in profile_points.columns:
-                descriptions = profile_points["DESCRIPTION"].fillna("").astype(str).tolist()
+                descriptions = (
+                    profile_points["DESCRIPTION"]
+                    .fillna("")
+                    .astype(str)
+                    .tolist()
+                )
                 metadata["point_descriptions"] = descriptions
 
             # Create description
@@ -219,19 +253,23 @@ class NineColumnParser:
                 name=profile_name,
                 date=date_str_formatted,
                 description=description,
-                x=np.array(x_coords, dtype=float),
-                z=np.array(z_coords, dtype=float),
-                metadata=metadata
+                x=x_coords,
+                z=z_coords,
+                metadata=metadata,
             )
 
             return profile
 
         except Exception as e:
-            self.logger.error(f"Failed to convert 9-column data to Profile object: {e}")
+            self.logger.error(
+                f"Failed to convert 9-column data to Profile object: {e}"
+            )
             return None
 
 
-def read_9col_profiles(file_path: str | Path, config: dict[str, Any] | None = None) -> List[Profile]:
+def read_9col_profiles(
+    file_path: str | Path, config: dict[str, Any] | None = None
+) -> List[Profile]:
     """Read beach profile data from a 9-column ASCII file.
 
     Args:
@@ -248,7 +286,9 @@ def read_9col_profiles(file_path: str | Path, config: dict[str, Any] | None = No
     return parser.parse_file(file_path)
 
 
-def write_9col_profiles(profiles: List[Profile], file_path: str | Path) -> None:
+def write_9col_profiles(
+    profiles: List[Profile], file_path: str | Path
+) -> None:
     """Write beach profile data to a 9-column ASCII file.
 
     Args:
@@ -259,17 +299,19 @@ def write_9col_profiles(profiles: List[Profile], file_path: str | Path) -> None:
         BeachProfileError: If writing fails
     """
     try:
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             # Write header
-            f.write("PROFILE ID\tDATE\tPOINT #\tEASTING (X)\tNORTHING (Y)\tELEVATION (Z)\tTYPE\tDESCRIPTION\n")
+            f.write(
+                "PROFILE ID\tDATE\tPOINT #\tEASTING (X)\tNORTHING (Y)\tELEVATION (Z)\tTYPE\tDESCRIPTION\n"
+            )
 
             point_counter = 1
 
             for profile in profiles:
                 # Get Y coordinates from metadata if available, otherwise use zeros
                 y_coords = None
-                if profile.metadata and 'y_coordinates' in profile.metadata:
-                    y_coords = profile.metadata['y_coordinates']
+                if profile.metadata and "y_coordinates" in profile.metadata:
+                    y_coords = profile.metadata["y_coordinates"]
                 else:
                     y_coords = np.zeros_like(profile.x)
 
@@ -282,25 +324,47 @@ def write_9col_profiles(profiles: List[Profile], file_path: str | Path) -> None:
                 descriptions = [""] * len(profile.x)
 
                 if profile.metadata:
-                    if 'point_types' in profile.metadata and profile.metadata['point_types']:
-                        point_types = profile.metadata['point_types'][:len(profile.x)]
-                        point_types.extend([""] * (len(profile.x) - len(point_types)))
+                    if (
+                        "point_types" in profile.metadata
+                        and profile.metadata["point_types"]
+                    ):
+                        point_types = profile.metadata["point_types"][
+                            : len(profile.x)
+                        ]
+                        point_types.extend(
+                            [""] * (len(profile.x) - len(point_types))
+                        )
 
-                    if 'point_descriptions' in profile.metadata and profile.metadata['point_descriptions']:
-                        descriptions = profile.metadata['point_descriptions'][:len(profile.x)]
-                        descriptions.extend([""] * (len(profile.x) - len(descriptions)))
+                    if (
+                        "point_descriptions" in profile.metadata
+                        and profile.metadata["point_descriptions"]
+                    ):
+                        descriptions = profile.metadata["point_descriptions"][
+                            : len(profile.x)
+                        ]
+                        descriptions.extend(
+                            [""] * (len(profile.x) - len(descriptions))
+                        )
 
                 # Format date
-                date_str = profile.date or "19000101"  # Default date if none provided
+                date_str = (
+                    profile.date or "19000101"
+                )  # Default date if none provided
 
                 # Write each point
-                for i, (x, y, z) in enumerate(zip(profile.x, y_coords, profile.z)):
+                for i, (x, y, z) in enumerate(
+                    zip(profile.x, y_coords, profile.z)
+                ):
                     point_type = point_types[i] if i < len(point_types) else ""
                     desc = descriptions[i] if i < len(descriptions) else ""
 
-                    f.write(f"{profile.name}\t{date_str}\t{point_counter}\t{x:.3f}\t{y:.3f}\t{z:.3f}\t{point_type}\t{desc}\n")
+                    f.write(
+                        f"{profile.name}\t{date_str}\t{point_counter}\t{x:.3f}\t{y:.3f}\t{z:.3f}\t{point_type}\t{desc}\n"
+                    )
                     point_counter += 1
 
     except Exception as e:
-        raise BeachProfileError(f"Failed to write 9-column file {file_path}: {e}", category=ErrorCategory.FILE_IO) from e
-
+        raise BeachProfileError(
+            f"Failed to write 9-column file {file_path}: {e}",
+            category=ErrorCategory.FILE_IO,
+        ) from e

@@ -1,4 +1,5 @@
 """Test baseline-aware coordinate transformations."""
+
 import sys
 from pathlib import Path
 
@@ -49,6 +50,7 @@ print("-" * 70)
 
 print("\n✅ All baseline tests complete!")
 print("\nExpected behavior:")
-print("  - Test 1: X and Y coordinates should be transformed to real-world coordinates")
+print(
+    "  - Test 1: X and Y coordinates should be transformed to real-world coordinates"
+)
 print("  - Test 2: Y coordinates should default to 0.0 with a warning message")
-

@@ -44,15 +44,15 @@ from .data_validation import (
 from .error_handler import (
     BeachProfileError,
     LogComponent,
-    check_array_lengths,
     get_logger,
-    setup_module_logger,
 )
+from .error_handling import check_array_lengths
 from .io_reports import (
     write_bar_properties_report,
     write_cutfill_detailed_report,
     write_volume_report,
 )
+from .logging_utils import setup_module_logger
 from .ninecol_io import read_9col_profiles, write_9col_profiles
 from .resampling_core import interpolate_to_common_grid
 
@@ -93,4 +93,3 @@ __all__ = [
     "get_logger",
     "LogComponent",
 ]
-

@@ -1,8 +1,8 @@
-# =============================================================================  # noqa: D100
+﻿# =============================================================================  # noqa: D100
 # Beach Profile Database - Enhanced Centralized Logging and Error Handling Utilities
 # =============================================================================
 #
-# ENHANCED VERSION: Incorporates valuable patterns from Profile_Analysis project
+# ENHANCED VERSION: Incorporates valuable patterns from profcalc project
 #
 # PURPOSE:
 # This module provides a comprehensive logging and error handling system that ensures
@@ -1445,7 +1445,7 @@ def get_logger(component: LogComponent) -> StructuredLogger:
     return _global_error_handler.get_component_logger(component)
 
 
-# ENHANCED FEATURES from Profile_Analysis project
+# ENHANCED FEATURES from profcalc project
 # ===============================================
 
 def validate_array_properties(
@@ -1457,7 +1457,7 @@ def validate_array_properties(
     max_length: Optional[int] = None,
     dtype: Optional[Any] = None
 ) -> List[str]:
-    """ENHANCED: Generic array validation from Profile_Analysis.
+    """ENHANCED: Generic array validation from profcalc.
 
     Validate basic properties of a numpy array with flexible configuration.
     This enhancement provides more generic array validation capabilities.
@@ -1505,7 +1505,7 @@ def run_validation_checks(
     checks: List[Callable[[], List[str]]],
     logger: Optional[StructuredLogger] = None
 ) -> List[str]:
-    """ENHANCED: Validation runner pattern from Profile_Analysis.
+    """ENHANCED: Validation runner pattern from profcalc.
 
     Run multiple validation checks and collect all errors with optional logging.
     This provides a clean way to run comprehensive validation suites.
@@ -1537,7 +1537,7 @@ def run_validation_checks(
 
 
 def safe_file_operation(operation_func: Callable, file_path, *args, **kwargs):
-    """ENHANCED: Safe file operation wrapper from Profile_Analysis.
+    """ENHANCED: Safe file operation wrapper from profcalc.
 
     Execute a file operation with comprehensive error handling.
     This provides consistent file I/O error handling across the application.
@@ -1567,7 +1567,7 @@ def safe_file_operation(operation_func: Callable, file_path, *args, **kwargs):
 
 
 def log_operation(logger: StructuredLogger, operation: str, **context):
-    """ENHANCED: Context manager for operation logging from Profile_Analysis.
+    """ENHANCED: Context manager for operation logging from profcalc.
 
     Context manager for logging operation start/completion with automatic timing.
     This complements the existing PerformanceTimer with simpler operation tracking.
@@ -1608,9 +1608,9 @@ def log_operation(logger: StructuredLogger, operation: str, **context):
     return _log_operation_context()
 
 
-# Backward compatibility functions for Profile_Analysis
+# Backward compatibility functions for profcalc
 def setup_module_logger(module_name: str, level: int = logging.INFO) -> StructuredLogger:
-    """Backward compatibility function for Profile_Analysis.
+    """Backward compatibility function for profcalc.
 
     Maps old setup_module_logger to new get_logger with appropriate component mapping.
     """
@@ -1647,3 +1647,4 @@ def check_array_lengths(*arrays, names=None) -> None:
                 f"{array_name} has {len(array)} elements",
                 category=ErrorCategory.VALIDATION
             )
+

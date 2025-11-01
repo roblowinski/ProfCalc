@@ -45,4 +45,3 @@ def compute_translate(
 
     profile_shifted.attrs["translation"] = {"dx": dx, "dz": dz}
     return profile_shifted
-

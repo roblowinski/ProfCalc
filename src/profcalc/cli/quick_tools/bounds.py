@@ -9,21 +9,26 @@ import glob
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 
 from profcalc.common.bmap_io import read_bmap_freeformat
 from profcalc.core.profile_stats import calculate_common_ranges
 
 
-def _profiles_to_dict(profiles) -> Dict[str, List[List[Tuple[float, float]]]]:
-    """
-    Convert Profile objects to the dict format expected by calculate_common_ranges.
+def _profiles_to_dict(
+    profiles: Iterable[Any],
+) -> Dict[str, List[List[Tuple[float, float]]]]:
+    """Convert profile objects to the dict format expected by
+    `calculate_common_ranges`.
 
     Args:
-        profiles: List of Profile objects from read_bmap_freeformat
+        profiles: An iterable of profile objects returned by
+            ``read_bmap_freeformat``. Each object must expose ``x`` and
+            ``z`` sequence attributes (coordinates) and a string ``name``.
 
     Returns:
-        Dictionary mapping profile names to lists of point lists
+        Mapping from profile name to list of surveys. Each survey is a list
+        of ``(x, z)`` tuples (floats).
     """
     result = defaultdict(list)
     for profile in profiles:
@@ -34,17 +39,30 @@ def _profiles_to_dict(profiles) -> Dict[str, List[List[Tuple[float, float]]]]:
 
 
 def execute_from_cli(args: List[str]) -> None:
-    """
-    Execute bounds finder from command line.
+    """Run the bounds finder from the command line.
+
+    This parses CLI arguments, reads BMAP free-format file(s), computes the
+    common X ranges for each profile, formats the results and writes them to
+    disk.
 
     Args:
-        args: Command-line arguments (excluding the -b flag)
+        args: List of command-line arguments (typically ``sys.argv[1:]``).
+
+    Raises:
+        SystemExit: If no files are found or no valid profiles are parsed.
     """
     parser = argparse.ArgumentParser(
-        prog="profcalc -b", description="Find common X coordinate bounds per profile"
+        prog="profcalc -b",
+        description="Find common X coordinate bounds per profile",
     )
-    parser.add_argument("files", nargs="+", help="BMAP file(s) to analyze (wildcards supported)")
-    parser.add_argument("-o", "--output", required=True, help="Output file path")
+    parser.add_argument(
+        "files",
+        nargs="+",
+        help="BMAP file(s) to analyze (wildcards supported)",
+    )
+    parser.add_argument(
+        "-o", "--output", required=True, help="Output file path"
+    )
     parser.add_argument(
         "-f",
         "--format",
@@ -53,7 +71,9 @@ def execute_from_cli(args: List[str]) -> None:
         help="Output format (default: table)",
     )
     parser.add_argument(
-        "--mhw", type=float, help="Optional MHW elevation (ft NAVD88) for additional metrics"
+        "--mhw",
+        type=float,
+        help="Optional MHW elevation (ft NAVD88) for additional metrics",
     )
 
     parsed_args = parser.parse_args(args)
@@ -74,7 +94,7 @@ def execute_from_cli(args: List[str]) -> None:
 
     # Parse all files and combine profiles
     print(f"📂 Reading {len(all_files)} file(s)...")
-    all_profiles = {}
+    all_profiles: dict[str, list] = {}
 
     for file_path in all_files:
         try:
@@ -95,13 +115,19 @@ def execute_from_cli(args: List[str]) -> None:
 
     # Calculate common ranges
     print(f"📊 Analyzing {len(all_profiles)} profile(s)...")
-    common_ranges = calculate_common_ranges(all_profiles, mhw_elev=parsed_args.mhw)
+    common_ranges = calculate_common_ranges(
+        all_profiles, mhw_elev=parsed_args.mhw
+    )
 
     # Format output
     if parsed_args.format == "csv":
-        output = _format_csv(common_ranges, mhw_provided=parsed_args.mhw is not None)
+        output = _format_csv(
+            common_ranges, mhw_provided=parsed_args.mhw is not None
+        )
     else:
-        output = _format_table(common_ranges, mhw_provided=parsed_args.mhw is not None)
+        output = _format_table(
+            common_ranges, mhw_provided=parsed_args.mhw is not None
+        )
 
     # Write output
     Path(parsed_args.output).write_text(output)
@@ -132,7 +158,18 @@ def _format_table(
     ],
     mhw_provided: bool = False,
 ) -> str:
-    """Format results as ASCII table."""
+    """Format the computed ranges into a human-readable ASCII table.
+
+    Args:
+        ranges: Mapping from profile name to a statistics tuple. The tuple
+            layout is produced by :func:`calculate_common_ranges` (see that
+            function for precise ordering of elements).
+        mhw_provided: If True, include the beach type / MHW-related column in
+            the output.
+
+    Returns:
+        A multi-line string containing the formatted table.
+    """
     lines = ["=" * 80]
     lines.append("BMAP COMMON BOUNDS ANALYSIS")
     lines.append("=" * 80)
@@ -197,7 +234,16 @@ def _format_csv(
     ],
     mhw_provided: bool = False,
 ) -> str:
-    """Format results as CSV."""
+    """Format the computed ranges as CSV.
+
+    Args:
+        ranges: Mapping from profile name to a statistics tuple.
+        mhw_provided: Whether MHW elevation was supplied and CSV should
+            include the beach type column.
+
+    Returns:
+        CSV text where each row corresponds to one profile's summary.
+    """
     if mhw_provided:
         lines = ["profile,xmin_ft,xmax_ft,range_ft,num_surveys,beach_type"]
     else:
@@ -209,15 +255,24 @@ def _format_csv(
         range_ft = xmax - xmin
 
         if mhw_provided:
-            lines.append(f"{profile_name},{xmin:.2f},{xmax:.2f},{range_ft:.2f},{num_surveys},{beach_type}")
+            lines.append(
+                f"{profile_name},{xmin:.2f},{xmax:.2f},{range_ft:.2f},{num_surveys},{beach_type}"
+            )
         else:
-            lines.append(f"{profile_name},{xmin:.2f},{xmax:.2f},{range_ft:.2f},{num_surveys}")
+            lines.append(
+                f"{profile_name},{xmin:.2f},{xmax:.2f},{range_ft:.2f},{num_surveys}"
+            )
 
     return "\n".join(lines)
 
 
 def execute_from_menu() -> None:
-    """Execute bounds finder from interactive menu."""
+    """Interactive menu wrapper for the bounds finder.
+
+    Prompts the user for a file pattern, output destination and optional
+    MHW elevation, then forwards the constructed arguments to
+    :func:`execute_from_cli`.
+    """
     print("\n" + "=" * 60)
     print("FIND COMMON BOUNDS")
     print("=" * 60)
@@ -229,7 +284,9 @@ def execute_from_menu() -> None:
     format_input = input("Output format (table/csv) [table]: ").strip().lower()
     format_type = "csv" if format_input == "csv" else "table"
 
-    mhw_input = input("Enter MHW elevation (ft NAVD88) [optional, press Enter to skip]: ").strip()
+    mhw_input = input(
+        "Enter MHW elevation (ft NAVD88) [optional, press Enter to skip]: "
+    ).strip()
     mhw_elev = float(mhw_input) if mhw_input else None
 
     try:
@@ -245,4 +302,3 @@ def execute_from_menu() -> None:
         print(f"\n❌ Error: {e}")
 
     input("\nPress Enter to continue...")
-

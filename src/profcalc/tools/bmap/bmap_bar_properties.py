@@ -52,6 +52,7 @@ from profcalc.common.io_reports import write_bar_properties_report
 # Small helpers
 # ----------------------------
 
+
 def _label(p) -> str:
     parts = [p.name]
     if p.date:
@@ -60,11 +61,17 @@ def _label(p) -> str:
         parts.append(p.description)
     return " ".join(parts).strip()
 
-def _ensure_sorted(x: np.ndarray, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+
+def _ensure_sorted(
+    x: np.ndarray, z: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
     idx = np.argsort(x)
     return x[idx], z[idx]
 
-def _interp1d_flat_extend(x: np.ndarray, z: np.ndarray, xg: np.ndarray) -> np.ndarray:
+
+def _interp1d_flat_extend(
+    x: np.ndarray, z: np.ndarray, xg: np.ndarray
+) -> np.ndarray:
     """
     Linear interpolation with flat extension beyond native bounds.
     """
@@ -75,6 +82,7 @@ def _interp1d_flat_extend(x: np.ndarray, z: np.ndarray, xg: np.ndarray) -> np.nd
     if xg[-1] > x[-1]:
         zg[xg >= x[-1]] = z[-1]
     return zg
+
 
 def _build_common_grid(p1, p2, dx: float) -> np.ndarray:
     """
@@ -87,7 +95,10 @@ def _build_common_grid(p1, p2, dx: float) -> np.ndarray:
         xmax = xmin + dx
     return np.arange(xmin, xmax + dx, dx)
 
-def _zero_crossings(xg: np.ndarray, yr: np.ndarray, ys: np.ndarray) -> List[float]:
+
+def _zero_crossings(
+    xg: np.ndarray, yr: np.ndarray, ys: np.ndarray
+) -> List[float]:
     """
     Find zero crossings of (yr - ys) along xg using linear interpolation.
     Returns a sorted list of crossing X locations (landward->seaward).
@@ -118,6 +129,7 @@ def _zero_crossings(xg: np.ndarray, yr: np.ndarray, ys: np.ndarray) -> List[floa
             dedup.append(val)
     return dedup
 
+
 def _pair_crossings(xs: List[float]) -> List[Tuple[float, float]]:
     """
     Pair consecutive crossings: (x1,x2), (x3,x4), ...
@@ -133,20 +145,23 @@ def _pair_crossings(xs: List[float]) -> List[Tuple[float, float]]:
 # Bar properties on Specific profile
 # ----------------------------
 
+
 @dataclass
 class BarProps:
     xstart_ft: float
     xend_ft: float
     length_ft: float
-    min_depth_ft: float          # positive magnitude (abs trough Z)
+    min_depth_ft: float  # positive magnitude (abs trough Z)
     min_depth_x_ft: float
-    max_height_ft: float         # crestZ - troughZ
-    max_height_x_ft: float       # crest X
+    max_height_ft: float  # crestZ - troughZ
+    max_height_x_ft: float  # crest X
     volume_cuyd_per_ft: float
-    centroid_x_ft: float         # NaN if volume ~ 0
+    centroid_x_ft: float  # NaN if volume ~ 0
 
 
-def _interp_clip(x: np.ndarray, z: np.ndarray, x1: float, x2: float, dx: float):
+def _interp_clip(
+    x: np.ndarray, z: np.ndarray, x1: float, x2: float, dx: float
+):
     x, z = _ensure_sorted(x, z)
     if x2 <= x1:
         raise ValueError("xend must be greater than xstart")
@@ -155,12 +170,16 @@ def _interp_clip(x: np.ndarray, z: np.ndarray, x1: float, x2: float, dx: float):
     return xg, zg
 
 
-def compute_bar_properties_specific(profile, xstart: float, xend: float, dx: float) -> BarProps:
+def compute_bar_properties_specific(
+    profile, xstart: float, xend: float, dx: float
+) -> BarProps:
     """
     Compute bar properties within [xstart, xend] using SPECIFIC profile elevations.
     Baseline is horizontal at the trough elevation in that window.
     """
-    xg, zg = _interp_clip(np.asarray(profile.x), np.asarray(profile.z), xstart, xend, dx)
+    xg, zg = _interp_clip(
+        np.asarray(profile.x), np.asarray(profile.z), xstart, xend, dx
+    )
 
     # Trough (minimum Z) and Crest (maximum Z) in the window
     i_tr = int(np.argmin(zg))
@@ -189,7 +208,7 @@ def compute_bar_properties_specific(profile, xstart: float, xend: float, dx: flo
         xstart_ft=float(xstart),
         xend_ft=float(xend),
         length_ft=float(xend - xstart),
-        min_depth_ft=abs(z_tr),          # report positive magnitude like BMAP
+        min_depth_ft=abs(z_tr),  # report positive magnitude like BMAP
         min_depth_x_ft=x_tr,
         max_height_ft=float(z_cr - z_tr),
         max_height_x_ft=x_cr,
@@ -202,19 +221,55 @@ def compute_bar_properties_specific(profile, xstart: float, xend: float, dx: flo
 # CLI
 # ----------------------------
 
+
 def main():
-    ap = argparse.ArgumentParser(description="BMAP-style Bar Properties (with crossing pairs).")
-    ap.add_argument("--input1", help="File containing REFERENCE profile (BMAP Free Format). Use 'none' to skip.")
-    ap.add_argument("--sel1", help='Selector for Reference profile (e.g., "OC117 27SEP2021 (AME)"). Use "none" to skip.')
-    ap.add_argument("--input2", required=True, help="File containing SPECIFIC profile (BMAP Free Format)")
-    ap.add_argument("--sel2", required=True, help='Selector for Specific profile (e.g., "OC117 16SEP2022 (AME)")')
-    ap.add_argument("--pair", type=int, help="Select crossing pair index (1-based). Requires Reference mode.")
-    ap.add_argument("--list_pairs", action="store_true", help="List crossing pairs and exit (Reference mode).")
-    ap.add_argument("--xstart", type=float, help="Manual Bar XStart (ft) (Reference=None mode)")
-    ap.add_argument("--xend", type=float, help="Manual Bar XEnd (ft) (Reference=None mode)")
+    ap = argparse.ArgumentParser(
+        description="BMAP-style Bar Properties (with crossing pairs)."
+    )
+    ap.add_argument(
+        "--input1",
+        help="File containing REFERENCE profile (BMAP Free Format). Use 'none' to skip.",
+    )
+    ap.add_argument(
+        "--sel1",
+        help='Selector for Reference profile (e.g., "OC117 27SEP2021 (AME)"). Use "none" to skip.',
+    )
+    ap.add_argument(
+        "--input2",
+        required=True,
+        help="File containing SPECIFIC profile (BMAP Free Format)",
+    )
+    ap.add_argument(
+        "--sel2",
+        required=True,
+        help='Selector for Specific profile (e.g., "OC117 16SEP2022 (AME)")',
+    )
+    ap.add_argument(
+        "--pair",
+        type=int,
+        help="Select crossing pair index (1-based). Requires Reference mode.",
+    )
+    ap.add_argument(
+        "--list_pairs",
+        action="store_true",
+        help="List crossing pairs and exit (Reference mode).",
+    )
+    ap.add_argument(
+        "--xstart",
+        type=float,
+        help="Manual Bar XStart (ft) (Reference=None mode)",
+    )
+    ap.add_argument(
+        "--xend", type=float, help="Manual Bar XEnd (ft) (Reference=None mode)"
+    )
     ap.add_argument("--output", help="ASCII report path to write")
     ap.add_argument("--title", default="Untitled", help="Report title")
-    ap.add_argument("--dx", type=float, default=None, help="Analysis spacing in feet (default from config.json)")
+    ap.add_argument(
+        "--dx",
+        type=float,
+        default=None,
+        help="Analysis spacing in feet (default from config.json)",
+    )
     args = ap.parse_args()
 
     dx = args.dx if args.dx is not None else get_dx()
@@ -232,7 +287,12 @@ def main():
         raise SystemExit(f"No Specific profile matched: {args.sel2}")
 
     # Reference mode?
-    ref_mode = args.sel1 and args.sel1.strip().lower() != "none" and args.input1 and args.input1.strip().lower() != "none"
+    ref_mode = (
+        args.sel1
+        and args.sel1.strip().lower() != "none"
+        and args.input1
+        and args.input1.strip().lower() != "none"
+    )
 
     if ref_mode:
         # Load Reference profile; must be different from Specific
@@ -248,13 +308,15 @@ def main():
             raise SystemExit(f"No Reference profile matched: {args.sel1}")
 
         if _label(p_ref) == _label(p_spec):
-            raise SystemExit("Reference and Specific profiles must be different (or set Reference to 'none').")
+            raise SystemExit(
+                "Reference and Specific profiles must be different (or set Reference to 'none')."
+            )
 
         # Build common grid and compute directional crossings of (Z_ref - Z_spec)
         xg = _build_common_grid(p_ref, p_spec, dx)
         zr = _interp1d_flat_extend(p_ref.x, p_ref.z, xg)
         zs = _interp1d_flat_extend(p_spec.x, p_spec.z, xg)
-        xs = _zero_crossings(xg, zr, zs)        # landward->seaward
+        xs = _zero_crossings(xg, zr, zs)  # landward->seaward
         pairs = _pair_crossings(xs)
 
         if args.list_pairs or not args.pair:
@@ -273,13 +335,17 @@ def main():
         # Pair selection (1-based)
         idx = args.pair
         if idx is None or idx < 1 or idx > len(pairs):
-            raise SystemExit(f"--pair must be between 1 and {len(pairs)} (found {len(pairs)} pairs).")
+            raise SystemExit(
+                f"--pair must be between 1 and {len(pairs)} (found {len(pairs)} pairs)."
+            )
         xstart, xend = pairs[idx - 1]
 
     else:
         # Manual window mode (Reference=None)
         if args.xstart is None or args.xend is None:
-            raise SystemExit("Reference=None mode requires --xstart and --xend.")
+            raise SystemExit(
+                "Reference=None mode requires --xstart and --xend."
+            )
         xstart, xend = float(args.xstart), float(args.xend)
 
     # Compute properties on Specific within [xstart, xend]
@@ -322,4 +388,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

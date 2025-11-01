@@ -46,18 +46,11 @@ import json
 import logging
 import sys
 import time
-from datetime import datetime
+from datetime import UTC, datetime, timezone
 from enum import Enum
 from pathlib import Path
 from types import TracebackType
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING or sys.version_info >= (3, 11):
-    from datetime import (
-        UTC,  # type: ignore[attr-defined]  # UTC only available in Python 3.11+
-    )
-else:
-    UTC = UTC
+from typing import Any
 
 
 class LogLevel(Enum):
@@ -144,7 +137,9 @@ class StructuredLogger:
     monitoring, debugging, and analytics. Compatible with standard logging.Logger interface.
     """
 
-    def __init__(self, component: LogComponent, base_logger: logging.Logger) -> None:
+    def __init__(
+        self, component: LogComponent, base_logger: logging.Logger
+    ) -> None:
         """Initialize the structured logger for a specific component.
 
         This method creates a new StructuredLogger instance that wraps a standard
@@ -198,7 +193,7 @@ class StructuredLogger:
             {"timestamp": "2023-10-15T10:30:00Z", "level": "INFO", ...}
         """
         log_entry = {
-            "timestamp": datetime.now(UTC).isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
             "level": level,
             "component": self.component.value,
             "message": message,
@@ -229,7 +224,9 @@ class StructuredLogger:
             >>> logger.debug("Query execution time", {"query": "SELECT * FROM profiles", "time_ms": 150})
         """
         if self.base_logger.isEnabledFor(logging.DEBUG):
-            structured_msg = self._format_structured_message("DEBUG", message, extra)
+            structured_msg = self._format_structured_message(
+                "DEBUG", message, extra
+            )
             self.base_logger.debug(structured_msg)
 
     def info(self, message: str, extra: dict[str, Any] | None = None) -> None:
@@ -254,10 +251,14 @@ class StructuredLogger:
             >>> logger.info("API request processed", {"endpoint": "/profiles", "method": "GET", "status": 200})
         """
         if self.base_logger.isEnabledFor(logging.INFO):
-            structured_msg = self._format_structured_message("INFO", message, extra)
+            structured_msg = self._format_structured_message(
+                "INFO", message, extra
+            )
             self.base_logger.info(structured_msg)
 
-    def warning(self, message: str, extra: dict[str, Any] | None = None) -> None:
+    def warning(
+        self, message: str, extra: dict[str, Any] | None = None
+    ) -> None:
         """Log a warning message with structured format.
 
         This method logs a message at the WARNING level using structured JSON formatting.
@@ -279,7 +280,9 @@ class StructuredLogger:
             >>> logger.warning("Invalid coordinate format detected", {"field": "latitude", "value": "91.5"})
         """
         if self.base_logger.isEnabledFor(logging.WARNING):
-            structured_msg = self._format_structured_message("WARNING", message, extra)
+            structured_msg = self._format_structured_message(
+                "WARNING", message, extra
+            )
             self.base_logger.warning(structured_msg)
 
     def error(self, message: str, extra: dict[str, Any] | None = None) -> None:
@@ -305,32 +308,38 @@ class StructuredLogger:
             >>> logger.error("Database connection failed", {"error_code": "ECONNREFUSED", "host": "localhost"})
         """
         if self.base_logger.isEnabledFor(logging.ERROR):
-            structured_msg = self._format_structured_message("ERROR", message, extra)
+            structured_msg = self._format_structured_message(
+                "ERROR", message, extra
+            )
             self.base_logger.error(structured_msg)
 
-    def critical(self, message: str, extra: dict[str, Any] | None = None) -> None:
+    def critical(
+        self, message: str, extra: dict[str, Any] | None = None
+    ) -> None:
         """Log a critical message with structured format.
 
         This method logs a message at the CRITICAL level using structured JSON formatting.
-        Critical messages indicate severe failures that may cause the application to
-        terminate or require immediate intervention. The message is only logged if the
-        logger's level is set to CRITICAL or lower.
+        Critical messages indicate serious failures that may prevent continued operation.
+        The message is only logged if the logger's level is set to CRITICAL or lower.
 
         Parameters:
-            message (str): The critical message to log. Should describe severe failures
-                or conditions requiring immediate attention.
+            message (str): The critical message to log. Should describe serious failures
+                or conditions that prevent operation.
             extra (dict[str, Any] | None, optional): Additional context data to include
-                in the structured log entry. Defaults to None.
+                in the structured log entry, such as error details or system state.
+                Defaults to None.
 
         Returns:
             None
 
         Example:
             >>> logger = StructuredLogger(LogComponent.SYSTEM, base_logger)
-            >>> logger.critical("Application shutting down due to critical error", {"uptime": "2h 15m"})
+            >>> logger.critical("Database connection lost", {"error_code": "ECONNLOST", "attempts": 5})
         """
         if self.base_logger.isEnabledFor(logging.CRITICAL):
-            structured_msg = self._format_structured_message("CRITICAL", message, extra)
+            structured_msg = self._format_structured_message(
+                "CRITICAL", message, extra
+            )
             self.base_logger.critical(structured_msg)
 
     def log(self, level: int, message: str, *args: Any, **kwargs: Any) -> None:
@@ -390,6 +399,7 @@ class StructuredLogger:
             >>> logger.setLevel(logging.DEBUG)  # Enable all log levels
             >>> logger.setLevel(logging.ERROR)  # Only log errors and critical messages
         """
+        # Set the level on the underlying base logger wrapped by StructuredLogger
         self.base_logger.setLevel(level)
 
     def addHandler(self, handler: logging.Handler) -> None:
@@ -511,7 +521,10 @@ class StructuredLogger:
             "duration_ms": round(duration * 1000, 2),
             **(extra or {}),
         }
-        self.info(f"Performance: {operation}", {"performance": perf_data})
+        # Use the StructuredLogger's info method for performance messages
+        self.info(
+            f"Performance: {operation}", extra={"performance": perf_data}
+        )
 
     def audit(
         self,
@@ -520,21 +533,17 @@ class StructuredLogger:
         resource: str | None = None,
         extra: dict[str, Any] | None = None,
     ) -> None:
-        """Log audit events using the global error handler.
+        """Log an audit event for security and compliance tracking.
 
-        This function logs security and compliance-related events through the
-        centralized logging system. Audit logs track user actions and system
-        changes for accountability and regulatory compliance.
+        Records an audit event with user, action, and resource information for
+        security monitoring and compliance purposes.
 
-        Parameters:
-            action (str): The action being performed.
-            user (str | None, optional): The user performing the action.
-            resource (str | None, optional): The resource being acted upon.
-            component (LogComponent, optional): The application component.
-            extra (dict[str, Any] | None, optional): Additional context data.
-
-        Returns:
-            None
+        Args:
+            action: The action being performed (e.g., "login", "data_export").
+            user: Optional identifier of the user performing the action.
+            resource: Optional identifier of the resource being accessed.
+            component: Application component where the action occurred.
+            extra: Optional additional context data for the audit log.
         """
         audit_data = {
             "action": action,
@@ -543,6 +552,7 @@ class StructuredLogger:
             "timestamp": datetime.now(UTC).isoformat() + "Z",
             **(extra or {}),
         }
+        # Use the StructuredLogger's info method for audit messages
         self.info(f"Audit: {action}", extra={"audit": audit_data})
 
 
@@ -735,7 +745,9 @@ class BeachProfileLogger:
         # Component loggers cache
         self._component_loggers: dict[LogComponent, StructuredLogger] = {}
 
-    def get_component_logger(self, component: LogComponent) -> StructuredLogger:
+    def get_component_logger(
+        self, component: LogComponent
+    ) -> StructuredLogger:
         """Get a component-specific structured logger instance.
 
         This method returns a StructuredLogger for the specified component,
@@ -992,13 +1004,19 @@ class ErrorHandler:
         )
 
         # For backward compatibility, keep a reference to the base logger
-        self.logger = self.beach_logger.base_logger
-        self.logger.debug("ErrorHandler.__init__ called")
+        # Use consistent name `base_logger` across logger classes
+        self.base_logger = self.beach_logger.base_logger
+        self.base_logger.debug("ErrorHandler.__init__ called")
+
+        # Compatibility alias for older code that referenced `logger`
+        self.logger = self.base_logger
 
         # Component loggers for different types of operations
         self._component_loggers: dict[LogComponent, StructuredLogger] = {}
 
-    def get_component_logger(self, component: LogComponent) -> StructuredLogger:
+    def get_component_logger(
+        self, component: LogComponent
+    ) -> StructuredLogger:
         """Get a component-specific logger for general logging operations.
 
         This method returns a StructuredLogger for the specified component,
@@ -1104,22 +1122,16 @@ class ErrorHandler:
         component: LogComponent = LogComponent.SYSTEM,
         extra: dict[str, Any] | None = None,
     ) -> None:
-        """Log a debug message using the global error handler.
+        """Log a debug message for detailed diagnostic information.
 
-        This function logs a message at the DEBUG level through the centralized
-        logging system. Debug messages provide detailed information for troubleshooting
-        and development, typically not shown in production environments.
+        Records a debug-level message containing detailed diagnostic information
+        useful for development and troubleshooting. Debug messages are typically
+        not shown in production environments.
 
-        Parameters:
-            message (str): The debug message to log. This should include detailed
-                information useful for debugging.
-            component (LogComponent, optional): The application component associated
-                with the debug message. Defaults to LogComponent.SYSTEM.
-            extra (dict[str, Any] | None, optional): Additional context data to include
-                in the log entry. Defaults to None.
-
-        Returns:
-            None
+        Args:
+            message: The debug message to log.
+            component: Application component where the debug event occurred.
+            extra: Optional additional context data for the log entry.
         """
         logger = self.get_component_logger(component)
         logger.debug(message, extra)
@@ -1130,76 +1142,222 @@ class ErrorHandler:
         component: LogComponent = LogComponent.SYSTEM,
         extra: dict[str, Any] | None = None,
     ) -> None:
-        """Log a critical message using the global error handler.
+        """Log a critical error that may prevent continued operation.
 
-        This function logs a message at the CRITICAL level through the centralized
-        logging system. Critical messages indicate severe failures that may cause
-        the application to terminate or require immediate intervention.
+        Records a critical-level error message indicating a serious problem
+        that may prevent the application from continuing normal operation.
 
-        Parameters:
-            message (str): The critical message to log. This should describe the
-                severe failure or condition.
-            component (LogComponent, optional): The application component associated
-                with the critical message. Defaults to LogComponent.SYSTEM.
-            extra (dict[str, Any] | None, optional): Additional context data to include
-                in the log entry. Defaults to None.
-
-        Returns:
-            None
+        Args:
+            message: The critical error message to log.
+            component: Application component where the error occurred.
+            extra: Optional additional context data for the log entry.
         """
         logger = self.get_component_logger(component)
         logger.critical(message, extra)
 
-    def log_performance(
-        self,
-        operation: str,
-        duration: float,
-        component: LogComponent = LogComponent.SYSTEM,
-        extra: dict[str, Any] | None = None,
-    ) -> None:
-        """Log performance metrics using the global error handler.
+    def log(self, level: int, message: str, *args: Any, **kwargs: Any) -> None:
+        """Standard logging log method for compatibility.
 
-        This function logs performance information including operation duration
-        through the centralized logging system. It helps monitor application
-        performance and identify bottlenecks.
+        This method provides compatibility with the standard Python logging.Logger
+        interface, allowing StructuredLogger to be used as a drop-in replacement.
+        It delegates to the underlying base logger.
 
         Parameters:
-            operation (str): The name or description of the operation being timed.
-            duration (float): The duration of the operation in seconds.
-            component (LogComponent, optional): The application component associated
-                with the performance metric. Defaults to LogComponent.SYSTEM.
-            extra (dict[str, Any] | None, optional): Additional context data to include
-                in the log entry, such as input size or system metrics. Defaults to None.
+            level (int): The logging level (e.g., logging.INFO).
+            message (str): The log message.
+            *args: Variable positional arguments passed to the base logger.
+            **kwargs: Variable keyword arguments passed to the base logger.
 
         Returns:
             None
-        """
-        logger = self.get_component_logger(component)
-        logger.performance(operation, duration, extra)
 
-    def log_audit(
+        Note:
+            This method does not use structured formatting. For structured logging,
+            use the level-specific methods (debug, info, warning, error, critical).
+        """
+        self.base_logger.log(level, message, *args, **kwargs)
+
+    def isEnabledFor(self, level: int) -> bool:
+        """Check if logging is enabled for the given level.
+
+        This method checks whether the underlying logger is configured to log
+        messages at the specified level, allowing callers to avoid expensive
+        message formatting when logging is disabled.
+
+        Parameters:
+            level (int): The logging level to check (e.g., logging.DEBUG).
+
+        Returns:
+            bool: True if logging is enabled for the level, False otherwise.
+
+        Example:
+            >>> if logger.isEnabledFor(logging.DEBUG):
+            ...     logger.debug("Expensive debug info", {"data": expensive_computation()})
+        """
+        return self.base_logger.isEnabledFor(level)
+
+    def setLevel(self, level: int) -> None:
+        """Set the logging level for this logger.
+
+        This method sets the minimum logging level for the underlying logger.
+        Messages below this level will be filtered out and not logged.
+
+        Parameters:
+            level (int): The logging level to set (e.g., logging.INFO).
+
+        Returns:
+            None
+
+        Example:
+            >>> logger.setLevel(logging.DEBUG)  # Enable all log levels
+            >>> logger.setLevel(logging.ERROR)  # Only log errors and critical messages
+        """
+
+        # ErrorHandler stores a reference to the base logger on self.base_logger
+        # (assigned from beach_logger.base_logger during initialization)
+        self.base_logger.setLevel(level)
+
+    def addHandler(self, handler: logging.Handler) -> None:
+        """Add a handler to the logger.
+
+        This method adds a logging handler to the underlying logger, allowing
+        customization of log output destinations and formats.
+
+        Parameters:
+            handler (logging.Handler): The handler to add (e.g., StreamHandler, FileHandler).
+
+        Returns:
+            None
+
+        Example:
+            >>> import logging
+            >>> handler = logging.FileHandler("app.log")
+            >>> logger.addHandler(handler)
+        """
+        self.base_logger.addHandler(handler)
+
+    def removeHandler(self, handler: logging.Handler) -> None:
+        """Remove a handler from the logger.
+
+        This method removes a previously added logging handler from the underlying logger.
+
+        Parameters:
+            handler (logging.Handler): The handler to remove.
+
+        Returns:
+            None
+
+        Example:
+            >>> logger.removeHandler(file_handler)
+        """
+        self.base_logger.removeHandler(handler)
+
+    def hasHandlers(self) -> bool:
+        """Check if the logger has any handlers configured.
+
+        This method checks whether the underlying logger has any handlers attached,
+        which determines whether log messages will be output anywhere.
+
+        Parameters:
+            None
+
+        Returns:
+            bool: True if the logger has handlers, False otherwise.
+
+        Example:
+            >>> if not logger.hasHandlers():
+            ...     logger.addHandler(logging.StreamHandler())
+        """
+        return self.base_logger.hasHandlers()
+
+    @property
+    def level(self) -> int:
+        """Get the current logging level.
+
+        This property returns the current logging level of the underlying logger.
+
+        Parameters:
+            None
+
+        Returns:
+            int: The current logging level (e.g., logging.INFO).
+
+        Example:
+            >>> current_level = logger.level
+            >>> print(f"Current level: {logging.getLevelName(current_level)}")
+        """
+        return self.base_logger.level
+
+    @property
+    def handlers(self) -> list:
+        """Get the list of handlers attached to the logger.
+
+        This property returns a list of all logging handlers currently attached
+        to the underlying logger.
+
+        Parameters:
+            None
+
+        Returns:
+            list: List of logging.Handler objects attached to the logger.
+
+        Example:
+            >>> handlers = logger.handlers
+            >>> print(f"Number of handlers: {len(handlers)}")
+        """
+        return self.base_logger.handlers
+
+    def performance(
+        self,
+        operation: str,
+        duration: float,
+        extra: dict[str, Any] | None = None,
+    ) -> None:
+        """Log performance metrics with structured format.
+
+        This method logs performance information including operation duration
+        and additional metrics. Performance logs help monitor application
+        performance and identify bottlenecks.
+
+        Parameters:
+            operation (str): The name or description of the operation being measured.
+            duration (float): The duration of the operation in seconds.
+            extra (dict[str, Any] | None, optional): Additional performance metrics
+                or context data to include in the log entry. Defaults to None.
+
+        Returns:
+            None
+
+        Example:
+            >>> logger.performance("database_query", 0.125, {"rows_returned": 150, "query_type": "SELECT"})
+        """
+        perf_data = {
+            "operation": operation,
+            "duration_ms": round(duration * 1000, 2),
+            **(extra or {}),
+        }
+        self.log_info(
+            f"Performance: {operation}", extra={"performance": perf_data}
+        )
+
+    def audit(
         self,
         action: str,
         user: str | None = None,
         resource: str | None = None,
-        component: LogComponent = LogComponent.SYSTEM,
         extra: dict[str, Any] | None = None,
     ) -> None:
-        """Log audit events using the global error handler.
+        """Log an audit event for security and compliance tracking.
 
-        This function logs security and compliance-related events through the
-        centralized logging system. Audit logs track user actions and system
-        changes for accountability and regulatory compliance.
+        Records an audit event with user, action, and resource information for
+        security monitoring and compliance purposes.
 
-        Parameters:
-            action (str): The action being performed.
-            user (str | None, optional): The user performing the action.
-            resource (str | None, optional): The resource being acted upon.
-            component (LogComponent, optional): The application component.
-            extra (dict[str, Any] | None, optional): Additional context data.
-
-        Returns:
-            None
+        Args:
+            action: The action being performed (e.g., "login", "data_export").
+            user: Optional identifier of the user performing the action.
+            resource: Optional identifier of the resource being accessed.
+            component: Application component where the action occurred.
+            extra: Optional additional context data for the audit log.
         """
         audit_data = {
             "action": action,
@@ -1211,7 +1369,32 @@ class ErrorHandler:
         self.log_info(f"Audit: {action}", extra={"audit": audit_data})
 
 
-# Global error handler instance for standalone function access
+def handle_database_error(
+    error: Exception,
+    operation: str,
+    context: dict[str, Any] | None = None,
+) -> None:
+    """Handle database-specific errors with appropriate logging and user messaging.
+
+    Provides specialized error handling for database operations, categorizing
+    the error appropriately and generating user-friendly messages for database
+    connection and operation failures.
+
+    Args:
+        error: The database exception that occurred.
+        operation: Description of the database operation that failed.
+        context: Optional additional context about the database operation.
+    """
+    handle_error(
+        f"Database operation failed: {operation} - {str(error)}",
+        severity="ERROR",
+        category="DATABASE",
+        user_message=f"Database operation failed: {operation}. Please check your database connection and try again.",
+        context=context,
+    )
+
+
+# Global error handler instance for convenience functions
 _global_error_handler = ErrorHandler()
 
 
@@ -1282,146 +1465,6 @@ def handle_error(
     _global_error_handler.log_error(str(error), component, context)
 
 
-def log_audit(
-    action: str,
-    user: str | None = None,
-    resource: str | None = None,
-    component: LogComponent = LogComponent.SYSTEM,
-    extra: dict[str, Any] | None = None,
-) -> None:
-    """Standalone wrapper for ErrorHandler.log_audit."""
-    _global_error_handler.log_audit(action, user, resource, component, extra)
-
-
-def log_critical(
-    message: str,
-    component: LogComponent = LogComponent.SYSTEM,
-    extra: dict[str, Any] | None = None,
-) -> None:
-    """Standalone wrapper for ErrorHandler.log_critical."""
-    _global_error_handler.log_critical(message, component, extra)
-
-
-def log_debug(
-    message: str,
-    component: LogComponent = LogComponent.SYSTEM,
-    extra: dict[str, Any] | None = None,
-) -> None:
-    """Standalone wrapper for ErrorHandler.log_debug."""
-    _global_error_handler.log_debug(message, component, extra)
-
-
-def log_error(
-    message: str,
-    component: LogComponent = LogComponent.SYSTEM,
-    extra: dict[str, Any] | None = None,
-) -> None:
-    """Standalone wrapper for ErrorHandler.log_error."""
-    _global_error_handler.log_error(message, component, extra)
-
-
-def log_info(
-    message: str,
-    component: LogComponent = LogComponent.SYSTEM,
-    extra: dict[str, Any] | None = None,
-) -> None:
-    """Standalone wrapper for ErrorHandler.log_info."""
-    _global_error_handler.log_info(message, component, extra)
-
-
-def log_performance(
-    operation: str,
-    duration: float,
-    component: LogComponent = LogComponent.SYSTEM,
-    extra: dict[str, Any] | None = None,
-) -> None:
-    """Standalone wrapper for ErrorHandler.log_performance."""
-    _global_error_handler.log_performance(
-        operation, duration, component, extra
-    )
-
-
-def log_warning(
-    message: str,
-    component: LogComponent = LogComponent.SYSTEM,
-    extra: dict[str, Any] | None = None,
-) -> None:
-    """Standalone wrapper for ErrorHandler.log_warning."""
-    _global_error_handler.log_warning(message, component, extra)
-
-
-def handle_database_error(
-    error: Exception,
-    operation: str,
-    context: dict[str, Any] | None = None,
-) -> None:
-    """Handle database-specific errors with appropriate logging and user messaging.
-
-    This function provides specialized handling for database-related exceptions,
-    categorizing them appropriately and providing user-friendly error messages.
-
-    Parameters:
-        error (Exception): The database exception that occurred.
-        operation (str): Description of the operation that failed.
-        context (dict[str, Any] | None): Additional context about the operation.
-    """
-    handle_error(
-        f"Database operation failed: {operation} - {str(error)}",
-        severity="ERROR",
-        category="DATABASE",
-        user_message=f"Database operation failed: {operation}. Please check your database connection and try again.",
-        context=context,
-    )
-
-
-def handle_spatial_error(
-    error: Exception,
-    operation: str,
-    context: dict[str, Any] | None = None,
-) -> None:
-    """Handle spatial/geometric errors with appropriate logging and user messaging.
-
-    This function provides specialized handling for spatial data processing exceptions,
-    categorizing them appropriately and providing user-friendly error messages.
-
-    Parameters:
-        error (Exception): The spatial exception that occurred.
-        operation (str): Description of the spatial operation that failed.
-        context (dict[str, Any] | None): Additional context about the operation.
-    """
-    handle_error(
-        f"Spatial operation failed: {operation} - {str(error)}",
-        severity="ERROR",
-        category="SPATIAL",
-        user_message=f"Spatial operation failed: {operation}. Please check your coordinate data and try again.",
-        context=context,
-    )
-
-
-def handle_processing_error(
-    error: Exception,
-    operation: str,
-    context: dict[str, Any] | None = None,
-) -> None:
-    """Handle data processing errors with appropriate logging and user messaging.
-
-    This function provides specialized handling for data processing exceptions,
-    categorizing them appropriately and providing user-friendly error messages.
-
-    Parameters:
-        error (Exception): The processing exception that occurred.
-        operation (str): Description of the processing operation that failed.
-        context (dict[str, Any] | None): Additional context about the operation.
-    """
-    handle_error(
-        f"Data processing failed: {operation} - {str(error)}",
-        severity="ERROR",
-        category="PROCESSING",
-        user_message=f"Data processing failed: {operation}. Please check your data and try again.",
-        context=context,
-    )
-
-
 def get_logger(component: LogComponent) -> StructuredLogger:
     """Standalone function to get a component-specific logger.
 
@@ -1439,75 +1482,3 @@ def get_logger(component: LogComponent) -> StructuredLogger:
         >>> db_logger.info("Database connection established")
     """
     return _global_error_handler.get_component_logger(component)
-
-
-# Backward compatibility functions for profcalc
-def setup_module_logger(module_name: str, level: int = logging.INFO) -> StructuredLogger:
-    """Backward compatibility function for profcalc.
-
-    Maps old setup_module_logger to new get_logger with appropriate component mapping.
-    """
-    # Map module names to components
-    component_map = {
-        "csv_io": LogComponent.FILE_IO,
-        "bmap_io": LogComponent.FILE_IO,
-        "ninecol_io": LogComponent.FILE_IO,
-        "coordinate_transforms": LogComponent.SPATIAL,
-        "data_validation": LogComponent.VALIDATION,
-        "io_reports": LogComponent.DATA_PROCESSING,
-        "resampling_core": LogComponent.DATA_PROCESSING,
-    }
-
-    component = component_map.get(module_name, LogComponent.SYSTEM)
-    logger = get_logger(component)
-    logger.setLevel(level)
-    return logger
-
-
-def check_array_lengths(*arrays, names=None) -> None:
-    """Backward compatibility function for array length checking."""
-    if len(arrays) < 2:
-        return
-
-    first_length = len(arrays[0])
-    first_name = names[0] if names and len(names) > 0 else "array_0"
-
-    for i, array in enumerate(arrays[1:], 1):
-        if len(array) != first_length:
-            array_name = names[i] if names and len(names) > i else f"array_{i}"
-            raise BeachProfileError(
-                f"Array length mismatch: {first_name} has {first_length} elements, "
-                f"{array_name} has {len(array)} elements",
-                category=ErrorCategory.VALIDATION
-            )
-
-
-def validate_array_properties(array, name="array", allow_nan=True, allow_inf=True,
-                            min_length=None, max_length=None, dtype=None) -> list[str]:
-    """Backward compatibility function for array validation."""
-    errors = []
-
-    # Check if it's actually a numpy array
-    if not hasattr(array, 'shape'):  # Simple check for array-like
-        errors.append(f"{name} must be a numpy array, got {type(array)}")
-        return errors
-
-    # Check length constraints
-    if min_length is not None and len(array) < min_length:
-        errors.append(f"{name} length {len(array)} is below minimum {min_length}")
-
-    if max_length is not None and len(array) > max_length:
-        errors.append(f"{name} length {len(array)} exceeds maximum {max_length}")
-
-    # Check for NaN values
-    if not allow_nan and hasattr(array, 'isnan') and array.isnan().any():
-        nan_count = array.isnan().sum() if hasattr(array, 'sum') else 0
-        errors.append(f"{name} contains {nan_count} NaN values (not allowed)")
-
-    # Check for infinite values
-    if not allow_inf and hasattr(array, 'isinf') and array.isinf().any():
-        inf_count = array.isinf().sum() if hasattr(array, 'sum') else 0
-        errors.append(f"{name} contains {inf_count} infinite values (not allowed)")
-
-    return errors
-

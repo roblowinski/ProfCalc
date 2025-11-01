@@ -21,30 +21,37 @@ import numpy as np
 
 class DataProcessingError(Exception):
     """Base exception for data processing operations."""
+
     pass
 
 
 class FileOperationError(DataProcessingError):
     """Raised when file operations fail."""
+
     pass
 
 
 class ValidationError(DataProcessingError):
     """Raised when data validation fails."""
+
     pass
 
 
 class CoordinateError(DataProcessingError):
     """Raised when coordinate operations fail."""
+
     pass
 
 
 class FormatError(DataProcessingError):
     """Raised when data format parsing fails."""
+
     pass
 
 
-def check_array_lengths(*arrays: np.ndarray, names: Optional[List[str]] = None) -> None:
+def check_array_lengths(
+    *arrays: np.ndarray, names: Optional[List[str]] = None
+) -> None:
     """Check that all arrays have the same length.
 
     Args:
@@ -69,7 +76,11 @@ def check_array_lengths(*arrays: np.ndarray, names: Optional[List[str]] = None) 
             )
 
 
-def check_array_types(*arrays: np.ndarray, expected_dtype: Optional[np.dtype] = None, names: Optional[List[str]] = None) -> None:
+def check_array_types(
+    *arrays: np.ndarray,
+    expected_dtype: Optional[np.dtype] = None,
+    names: Optional[List[str]] = None,
+) -> None:
     """Check that arrays have compatible data types.
 
     Args:
@@ -84,7 +95,9 @@ def check_array_types(*arrays: np.ndarray, expected_dtype: Optional[np.dtype] = 
         array_name = names[i] if names and len(names) > i else f"array_{i}"
 
         if not isinstance(array, np.ndarray):
-            raise ValidationError(f"{array_name} must be a numpy array, got {type(array)}")
+            raise ValidationError(
+                f"{array_name} must be a numpy array, got {type(array)}"
+            )
 
         if expected_dtype is not None:
             try:
@@ -96,7 +109,9 @@ def check_array_types(*arrays: np.ndarray, expected_dtype: Optional[np.dtype] = 
                 ) from e
 
 
-def check_file_exists(file_path: Union[str, Path], operation: str = "operation") -> None:
+def check_file_exists(
+    file_path: Union[str, Path], operation: str = "operation"
+) -> None:
     """Check if a file exists and is accessible.
 
     Args:
@@ -110,20 +125,26 @@ def check_file_exists(file_path: Union[str, Path], operation: str = "operation")
     path = Path(file_path)
 
     if not path.exists():
-        raise FileNotFoundError(f"File required for {operation} does not exist: {file_path}")
+        raise FileNotFoundError(
+            f"File required for {operation} does not exist: {file_path}"
+        )
 
     if not path.is_file():
         raise FileOperationError(f"Path is not a file: {file_path}")
 
     # Check if file is readable
     try:
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             f.read(1)  # Try to read one character
     except (PermissionError, OSError) as e:
         raise FileOperationError(f"File is not readable: {file_path} - {e}")
 
 
-def check_directory_exists(dir_path: Union[str, Path], operation: str = "operation", create_if_missing: bool = False) -> None:
+def check_directory_exists(
+    dir_path: Union[str, Path],
+    operation: str = "operation",
+    create_if_missing: bool = False,
+) -> None:
     """Check if a directory exists and is accessible.
 
     Args:
@@ -143,9 +164,13 @@ def check_directory_exists(dir_path: Union[str, Path], operation: str = "operati
                 path.mkdir(parents=True, exist_ok=True)
                 return
             except OSError as e:
-                raise FileOperationError(f"Could not create directory {dir_path}: {e}")
+                raise FileOperationError(
+                    f"Could not create directory {dir_path}: {e}"
+                )
         else:
-            raise FileNotFoundError(f"Directory required for {operation} does not exist: {dir_path}")
+            raise FileNotFoundError(
+                f"Directory required for {operation} does not exist: {dir_path}"
+            )
 
     if not path.is_dir():
         raise FileOperationError(f"Path is not a directory: {dir_path}")
@@ -157,7 +182,7 @@ def check_numeric_value(
     min_val: Optional[Union[int, float]] = None,
     max_val: Optional[Union[int, float]] = None,
     allow_zero: bool = True,
-    allow_negative: bool = True
+    allow_negative: bool = True,
 ) -> None:
     """Check that a numeric value meets specified constraints.
 
@@ -192,7 +217,7 @@ def check_coordinate_bounds(
     coords: np.ndarray,
     coord_type: str,
     min_val: Optional[float] = None,
-    max_val: Optional[float] = None
+    max_val: Optional[float] = None,
 ) -> None:
     """Check that coordinates are within reasonable bounds.
 
@@ -206,7 +231,9 @@ def check_coordinate_bounds(
         CoordinateError: If coordinates are out of bounds
     """
     if not isinstance(coords, np.ndarray):
-        raise ValidationError(f"Coordinates must be numpy array, got {type(coords)}")
+        raise ValidationError(
+            f"Coordinates must be numpy array, got {type(coords)}"
+        )
 
     # Set default bounds based on coordinate type
     if coord_type.lower() == "longitude":
@@ -218,7 +245,9 @@ def check_coordinate_bounds(
     elif coord_type.lower() == "elevation" and min_val is None:
         # Allow negative elevations (below sea level) but set a reasonable upper bound
         min_val = -1000.0  # Deepest point on Earth
-        max_val = max_val if max_val is not None else 10000.0  # Highest mountain + buffer
+        max_val = (
+            max_val if max_val is not None else 10000.0
+        )  # Highest mountain + buffer
 
     if min_val is not None:
         out_of_bounds = np.sum(coords < min_val)
@@ -235,7 +264,9 @@ def check_coordinate_bounds(
             )
 
 
-def safe_file_operation(operation_func: Callable, file_path: Union[str, Path], *args, **kwargs) -> Any:
+def safe_file_operation(
+    operation_func: Callable, file_path: Union[str, Path], *args, **kwargs
+) -> Any:
     """Execute a file operation with comprehensive error handling.
 
     Args:
@@ -255,14 +286,24 @@ def safe_file_operation(operation_func: Callable, file_path: Union[str, Path], *
     except FileNotFoundError as e:
         raise FileOperationError(f"File not found: {file_path}") from e
     except PermissionError as e:
-        raise FileOperationError(f"Permission denied accessing file: {file_path}") from e
+        raise FileOperationError(
+            f"Permission denied accessing file: {file_path}"
+        ) from e
     except OSError as e:
-        raise FileOperationError(f"OS error accessing file {file_path}: {e}") from e
+        raise FileOperationError(
+            f"OS error accessing file {file_path}: {e}"
+        ) from e
     except Exception as e:
-        raise FileOperationError(f"Unexpected error accessing file {file_path}: {e}") from e
+        raise FileOperationError(
+            f"Unexpected error accessing file {file_path}: {e}"
+        ) from e
 
 
-def format_error_message(error: Exception, context: Optional[str] = None, include_traceback: bool = False) -> str:
+def format_error_message(
+    error: Exception,
+    context: Optional[str] = None,
+    include_traceback: bool = False,
+) -> str:
     """Format an exception into a user-friendly error message.
 
     Args:
@@ -280,15 +321,20 @@ def format_error_message(error: Exception, context: Optional[str] = None, includ
     else:
         message = f"{error_type}: {str(error)}"
 
-    if include_traceback and hasattr(error, '__traceback__'):
+    if include_traceback and hasattr(error, "__traceback__"):
         import traceback
-        tb_lines = traceback.format_exception(type(error), error, error.__traceback__)
+
+        tb_lines = traceback.format_exception(
+            type(error), error, error.__traceback__
+        )
         message += "\n\nTraceback:\n" + "".join(tb_lines)
 
     return message
 
 
-def validate_and_convert_type(value: Any, target_type: type, name: str = "value") -> Any:
+def validate_and_convert_type(
+    value: Any, target_type: type, name: str = "value"
+) -> Any:
     """Safely convert a value to a target type with error handling.
 
     Args:
@@ -307,9 +353,9 @@ def validate_and_convert_type(value: Any, target_type: type, name: str = "value"
             # Special handling for boolean conversion
             if isinstance(value, str):
                 lower_val = value.lower()
-                if lower_val in ('true', '1', 'yes', 'on'):
+                if lower_val in ("true", "1", "yes", "on"):
                     return True
-                elif lower_val in ('false', '0', 'no', 'off'):
+                elif lower_val in ("false", "0", "no", "off"):
                     return False
                 else:
                     raise ValueError(f"Cannot convert '{value}' to boolean")
@@ -318,10 +364,14 @@ def validate_and_convert_type(value: Any, target_type: type, name: str = "value"
         else:
             return target_type(value)
     except (ValueError, TypeError) as e:
-        raise ValidationError(f"Cannot convert {name} '{value}' to {target_type.__name__}: {e}") from e
+        raise ValidationError(
+            f"Cannot convert {name} '{value}' to {target_type.__name__}: {e}"
+        ) from e
 
 
-def check_memory_usage_threshold(current_mb: float, threshold_mb: float, operation: str = "operation") -> None:
+def check_memory_usage_threshold(
+    current_mb: float, threshold_mb: float, operation: str = "operation"
+) -> None:
     """Check if memory usage exceeds a threshold.
 
     Args:
@@ -337,4 +387,3 @@ def check_memory_usage_threshold(current_mb: float, threshold_mb: float, operati
             f"Memory usage ({current_mb:.1f} MB) exceeds threshold ({threshold_mb:.1f} MB) "
             f"during {operation}. Consider processing data in smaller chunks."
         )
-

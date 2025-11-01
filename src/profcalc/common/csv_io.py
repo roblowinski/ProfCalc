@@ -22,38 +22,59 @@ import numpy as np
 import pandas as pd
 
 from .bmap_io import Profile
+from .data_validation import validate_array_properties
 from .error_handler import (
     BeachProfileError,
     ErrorCategory,
     LogComponent,
     get_logger,
-    validate_array_properties,
 )
 from .file_parser import ParsedFile
 from .file_parser import parse_file as parse_file_centralized
 
+# Type alias: mapping values may be a column name (str) or a list of extra column names
+ColumnMapping = dict[str, str | list[str]]
+
 
 class CSVImportError(Exception):
-    """Raised when CSV import fails."""
+    """Exception raised when CSV import operations fail.
+
+    This exception is raised when there are issues reading, parsing, or
+    validating CSV files containing beach profile data. It provides
+    detailed error information to help diagnose import problems.
+    """
+
     pass
 
 
 class CSVParser:
     """Parser for CSV beach profile data files.
 
-    Handles the parsing and validation of CSV files containing beach
-    profile survey data. Supports flexible column mapping and various
-    CSV formats commonly used for beach profile data.
+    Handles the parsing and validation of CSV files containing beach profile
+    survey data. Supports flexible column mapping for various CSV formats
+    commonly used for beach profile data, including automatic detection of
+    coordinate columns and metadata fields.
+
+    The parser can handle CSV files with different column naming conventions
+    and automatically maps them to standard internal representations. It
+    supports both single-profile and multi-profile CSV files.
+
+    Attributes:
+        config: Optional configuration dictionary for parsing options.
+        required_columns: List of column names that must be present in the CSV.
+        optional_columns: List of optional column names for metadata.
+        logger: Logger instance for recording parsing operations and errors.
     """
 
     def __init__(self, config: dict[str, Any] | None = None):
         """Initialize the CSV parser.
 
         Args:
-            config: Optional configuration dictionary for parsing options
+            config: Optional configuration dictionary for parsing options.
+                Currently unused but reserved for future customization.
         """
         self.config = config or {}
-        self.required_columns = ['x', 'y']  # At minimum need coordinates
+        self.required_columns = ["x", "y"]  # At minimum need coordinates
         self.optional_columns = [
             "z",
             "profile_id",
@@ -68,21 +89,30 @@ class CSVParser:
     def parse_file(self, file_path: str | Path) -> List[Profile]:
         """Parse a CSV file and extract beach profile data.
 
+        Reads a CSV file, automatically detects column mappings, validates
+        required columns, and converts the data into Profile objects. Supports
+        both single-profile files (all data treated as one profile) and
+        multi-profile files (grouped by profile_id column).
+
         Args:
-            file_path: Path to the CSV file
+            file_path: Path to the CSV file to parse. Can be a string or Path object.
 
         Returns:
-            List of Profile objects
+            List of Profile objects extracted from the CSV file. Each profile
+            contains coordinate data and associated metadata.
 
         Raises:
-            BeachProfileError: If parsing fails
+            BeachProfileError: If the file cannot be read, parsed, or contains
+                invalid data structure (missing required columns, empty file, etc.).
         """
         try:
             # Read CSV file with pandas
             df = pd.read_csv(file_path)
 
             if df.empty:
-                raise BeachProfileError("CSV file is empty", category=ErrorCategory.FILE_IO)
+                raise BeachProfileError(
+                    "CSV file is empty", category=ErrorCategory.FILE_IO
+                )
 
             # Detect column mapping
             column_mapping = self._detect_column_mapping(df.columns.tolist())
@@ -97,7 +127,7 @@ class CSVParser:
                 raise BeachProfileError(
                     f"Missing required columns: {', '.join(missing_cols)}. "
                     f"Available columns: {', '.join(df.columns)}",
-                    category=ErrorCategory.FILE_IO
+                    category=ErrorCategory.FILE_IO,
                 )
 
             # Parse profiles from CSV data
@@ -106,13 +136,22 @@ class CSVParser:
             return profiles
 
         except pd.errors.EmptyDataError as e:
-            raise BeachProfileError("CSV file is empty or contains no valid data", category=ErrorCategory.FILE_IO) from e
+            raise BeachProfileError(
+                "CSV file is empty or contains no valid data",
+                category=ErrorCategory.FILE_IO,
+            ) from e
         except pd.errors.ParserError as e:
-            raise BeachProfileError(f"Failed to parse CSV file: {e}", category=ErrorCategory.FILE_IO) from e
+            raise BeachProfileError(
+                f"Failed to parse CSV file: {e}",
+                category=ErrorCategory.FILE_IO,
+            ) from e
         except Exception as e:
-            raise BeachProfileError(f"Unexpected error parsing CSV file: {e}", category=ErrorCategory.FILE_IO) from e
+            raise BeachProfileError(
+                f"Unexpected error parsing CSV file: {e}",
+                category=ErrorCategory.FILE_IO,
+            ) from e
 
-    def _detect_column_mapping(self, columns: list[str]) -> dict[str, str]:
+    def _detect_column_mapping(self, columns: list[str]) -> ColumnMapping:
         """Detect column mapping from CSV headers.
 
         Args:
@@ -120,8 +159,9 @@ class CSVParser:
 
         Returns:
             Dictionary mapping standard names to actual column names
+            (values are str for standard mapped columns, and list[str] for "_extra_columns")
         """
-        mapping = {}
+        mapping: ColumnMapping = {}
         columns_lower = [col.lower().strip() for col in columns]
 
         # Common column name variations
@@ -228,11 +268,15 @@ class CSVParser:
         standard_cols = set(mapping.values())
         extra_cols = [col for col in columns if col not in standard_cols]
         if extra_cols:
-            mapping["_extra_columns"] = extra_cols  # type: ignore[assignment]  # Stores list of extra column names in dict[str, str]
+            mapping["_extra_columns"] = (
+                extra_cols  # Store list[str] under special key
+            )
 
         return mapping
 
-    def _parse_csv_data(self, df: pd.DataFrame, column_mapping: dict[str, str]) -> List[Profile]:
+    def _parse_csv_data(
+        self, df: pd.DataFrame, column_mapping: ColumnMapping
+    ) -> List[Profile]:
         """Parse CSV data into Profile objects.
 
         Args:
@@ -246,20 +290,26 @@ class CSVParser:
 
         # Group by profile_id if available
         profile_groups: Any
-        if 'profile_id' in column_mapping:
-            profile_groups = df.groupby(column_mapping['profile_id'])
+        if "profile_id" in column_mapping and isinstance(
+            column_mapping["profile_id"], str
+        ):
+            profile_groups = df.groupby(column_mapping["profile_id"])
         else:
             # If no profile_id, treat entire file as one profile
-            profile_groups = [('default_profile', df)]
+            profile_groups = [("default_profile", df)]
 
         for profile_id, profile_df in profile_groups:
-            profile = self._parse_single_profile(profile_df, column_mapping, str(profile_id))
+            profile = self._parse_single_profile(
+                profile_df, column_mapping, str(profile_id)
+            )
             if profile:
                 profiles.append(profile)
 
         return profiles
 
-    def _parse_single_profile(self, df: pd.DataFrame, column_mapping: dict[str, str], profile_id: str) -> Optional[Profile]:
+    def _parse_single_profile(
+        self, df: pd.DataFrame, column_mapping: ColumnMapping, profile_id: str
+    ) -> Optional[Profile]:
         """Parse a single profile from CSV data.
 
         Args:
@@ -272,24 +322,36 @@ class CSVParser:
         """
         try:
             # Extract metadata
-            metadata = {}
-            survey_date_str = None
-            if 'survey_date' in column_mapping:
-                survey_date_str = df[column_mapping['survey_date']].iloc[0]
-                metadata['survey_date'] = self._parse_date(survey_date_str)
+            metadata: dict[str, Any] = {}
+            if "survey_date" in column_mapping and isinstance(
+                column_mapping["survey_date"], str
+            ):
+                survey_date_str: Any = df[column_mapping["survey_date"]].iloc[
+                    0
+                ]  # type: ignore
+                if pd.notna(survey_date_str):  # type: ignore
+                    metadata["survey_date"] = self._parse_date(
+                        str(survey_date_str)
+                    )
 
-            for col in ['surveyor', 'project']:
-                if col in column_mapping:
-                    val = df[column_mapping[col]].iloc[0]
-                    if pd.notna(val):
+            for col in ["surveyor", "project"]:
+                if col in column_mapping and isinstance(
+                    column_mapping[col], str
+                ):
+                    val: Any = df[column_mapping[col]].iloc[0]  # type: ignore
+                    if pd.notna(val):  # type: ignore
                         metadata[col] = str(val)
 
             # Set default profile_id if not provided
-            if profile_id == 'default_profile':
+            if profile_id == "default_profile":
                 profile_id = f"csv_profile_{uuid.uuid4().hex[:8]}"
 
             # Check for extra columns
-            extra_column_names = column_mapping.get("_extra_columns", [])  # type: ignore[arg-type]  # _extra_columns stores list[str] in dict[str, str]
+            extra_val = column_mapping.get("_extra_columns")
+            if isinstance(extra_val, list):
+                extra_column_names: list[str] = extra_val
+            else:
+                extra_column_names = []
 
             # Collect coordinate arrays and extra data
             x_coords = []
@@ -301,16 +363,20 @@ class CSVParser:
                 try:
                     point = self._parse_point(row, column_mapping, row_num + 1)
                     if point:
-                        x_coords.append(point['x'])
-                        y_coords.append(point['y'])
-                        z_coords.append(point['z'])
+                        x_coords.append(point["x"])
+                        y_coords.append(point["y"])
+                        z_coords.append(point["z"])
 
                         # Collect extra columns
                         if extra_column_names:
-                            extra_values = []
+                            extra_values: list = []
                             for col_name in extra_column_names:
-                                val = row.get(col_name)
-                                if pd.notna(val):
+                                # row.get works with Pandas Series
+                                # Removed unused variable `extra_value`
+                                # Ensure val is a scalar if it's a Series
+                                if isinstance(val, pd.Series):
+                                    val = val.iloc[0] if len(val) > 0 else None
+                                if pd.notna(val):  # type: ignore
                                     # Try to convert to float, otherwise keep as string
                                     try:
                                         extra_values.append(float(val))
@@ -327,39 +393,47 @@ class CSVParser:
                     continue
 
             if not x_coords:
-                self.logger.warning(f"No valid points found for profile {profile_id}")
+                self.logger.warning(
+                    f"No valid points found for profile {profile_id}"
+                )
                 return None
 
             # Validate coordinate arrays
             x_array = np.array(x_coords, dtype=float)
             z_array = np.array(z_coords, dtype=float)
 
-            x_validation = validate_array_properties(x_array, "x_coordinates", allow_nan=False)
-            z_validation = validate_array_properties(z_array, "z_coordinates", allow_nan=False)
+            x_validation = validate_array_properties(
+                x_array, "x_coordinates", allow_nan=False
+            )
+            z_validation = validate_array_properties(
+                z_array, "z_coordinates", allow_nan=False
+            )
 
             if x_validation or z_validation:
                 all_errors = x_validation + z_validation
-                self.logger.warning(f"Coordinate validation errors for profile {profile_id}: {all_errors}")
+                self.logger.warning(
+                    f"Coordinate validation errors for profile {profile_id}: {all_errors}"
+                )
                 # Continue processing but log the issues
 
             # Create Profile object
             # Use profile_id as name
             date_str = survey_date_str if survey_date_str else None
             description = None
-            if 'surveyor' in metadata or 'project' in metadata:
+            if "surveyor" in metadata or "project" in metadata:
                 desc_parts = []
-                if 'surveyor' in metadata:
+                if "surveyor" in metadata:
                     desc_parts.append(f"Surveyor: {metadata['surveyor']}")
-                if 'project' in metadata:
+                if "project" in metadata:
                     desc_parts.append(f"Project: {metadata['project']}")
                 description = "; ".join(desc_parts)
 
             # Add y_coords to metadata
-            metadata["y_coordinates"] = np.array(y_coords, dtype=float)  # type: ignore[assignment]  # metadata dict allows Any values
+            metadata["y_coordinates"] = np.array(y_coords, dtype=float)
 
             # Add extra columns to metadata if present
             if extra_column_names and extra_data:
-                metadata["extra_columns"] = {  # type: ignore[assignment]  # metadata dict allows Any values
+                metadata["extra_columns"] = {
                     "names": extra_column_names,
                     "data": extra_data,
                 }
@@ -370,7 +444,7 @@ class CSVParser:
                 description=description,
                 x=x_array,
                 z=z_array,
-                metadata=metadata
+                metadata=metadata,
             )
 
             return profile
@@ -379,7 +453,9 @@ class CSVParser:
             self.logger.error(f"Failed to parse profile {profile_id}: {e}")
             return None
 
-    def _parse_point(self, row: pd.Series, column_mapping: dict[str, str], row_idx: int) -> dict[str, Any] | None:
+    def _parse_point(
+        self, row: pd.Series, column_mapping: ColumnMapping, row_idx: int
+    ) -> dict[str, Any] | None:
         """Parse a single point from a CSV row.
 
         Args:
@@ -392,23 +468,28 @@ class CSVParser:
         """
         try:
             # Extract coordinates
-            x_val = row[column_mapping['x']]
-            x = float(x_val) if pd.notna(x_val) else 0.0
+            if not isinstance(column_mapping.get("x"), str) or not isinstance(
+                column_mapping.get("y"), str
+            ):
+                raise ValueError(
+                    "Column mapping must contain 'x' and 'y' string mappings"
+                )
 
-            y_val = row[column_mapping['y']]
-            y = float(y_val) if pd.notna(y_val) else 0.0
+            assert isinstance(column_mapping["x"], str)
+            assert isinstance(column_mapping["y"], str)
+            x_val: Any = row[column_mapping["x"]]
+            x = float(x_val) if pd.notna(x_val) else 0.0  # type: ignore
+
+            y_val: Any = row[column_mapping["y"]]
+            y = float(y_val) if pd.notna(y_val) else 0.0  # type: ignore
 
             z = 0.0
-            if 'z' in column_mapping:
-                z_val = row[column_mapping['z']]
-                if pd.notna(z_val):
-                    z = float(z_val)
+            if "z" in column_mapping and isinstance(column_mapping["z"], str):
+                z_val: Any = row[column_mapping["z"]]
+                if pd.notna(z_val):  # type: ignore
+                    z = float(z_val)  # type: ignore
 
-            return {
-                'x': x,
-                'y': y,
-                'z': z
-            }
+            return {"x": x, "y": y, "z": z}
 
         except (ValueError, KeyError, TypeError) as e:
             raise ValueError(
@@ -429,28 +510,28 @@ class CSVParser:
             BeachProfileError: If date format is invalid
         """
         if pd.isna(date_str):
-            return datetime.now().strftime('%Y-%m-%d')
+            return datetime.now().strftime("%Y-%m-%d")
 
         if isinstance(date_str, datetime):
-            return date_str.strftime('%Y-%m-%d')
+            return date_str.strftime("%Y-%m-%d")
 
-        if not date_str or date_str.strip() == '':
-            return datetime.now().strftime('%Y-%m-%d')
+        if not date_str or date_str.strip() == "":
+            return datetime.now().strftime("%Y-%m-%d")
 
         # Try common date formats
         formats = [
-            '%Y-%m-%d',
-            '%Y-%m-%dT%H:%M:%S',
-            '%Y-%m-%d %H:%M:%S',
-            '%m/%d/%Y',
-            '%d/%m/%Y',
-            '%Y/%m/%d'
+            "%Y-%m-%d",
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%d %H:%M:%S",
+            "%m/%d/%Y",
+            "%d/%m/%Y",
+            "%Y/%m/%d",
         ]
 
         for fmt in formats:
             try:
                 dt = datetime.strptime(date_str.strip(), fmt)
-                return dt.strftime('%Y-%m-%d')
+                return dt.strftime("%Y-%m-%d")
             except ValueError:
                 continue
 
@@ -462,14 +543,19 @@ class CSVParser:
 
 
 def _convert_parsed_file_to_profiles(parsed_file: ParsedFile) -> List[Profile]:
-    """
-    Convert a ParsedFile object to the legacy Profile format expected by existing tools.
+    """Convert a ParsedFile object to the legacy Profile format.
+
+    Converts data from the centralized parsing system (ParsedFile) to the
+    legacy Profile format expected by existing analysis tools. This function
+    bridges the gap between the new unified parsing system and legacy code.
 
     Args:
-        parsed_file: ParsedFile from the centralized parser
+        parsed_file: ParsedFile object from the centralized parser containing
+            standardized profile data.
 
     Returns:
-        List of Profile objects in the legacy format
+        List of Profile objects in the legacy format with coordinate arrays
+        and metadata. Only profiles with valid coordinate data are included.
     """
     profiles = []
 
@@ -527,18 +613,26 @@ def _convert_parsed_file_to_profiles(parsed_file: ParsedFile) -> List[Profile]:
     return profiles
 
 
-def read_csv_profiles(file_path: str | Path, config: dict[str, Any] | None = None) -> List[Profile]:
-    """Read beach profile data from a CSV file.
+def read_csv_profiles(
+    file_path: str | Path, config: dict[str, Any] | None = None
+) -> List[Profile]:
+    """Read beach profile data from a CSV file using centralized parsing.
+
+    High-level function that reads beach profile data from CSV files using
+    the centralized format detection and parsing system. Automatically
+    detects file format and column structure, then converts to Profile objects.
 
     Args:
-        file_path: Path to the CSV file
-        config: Optional configuration for parsing
+        file_path: Path to the CSV file to read. Can be a string or Path object.
+        config: Optional configuration dictionary for parsing options.
+            Currently unused but reserved for future customization.
 
     Returns:
-        List of Profile objects
+        List of Profile objects containing the parsed beach profile data.
 
     Note:
-        Now uses the centralized format detection and parsing system.
+        This function uses the centralized format detection and parsing system
+        for robust handling of various CSV formats and automatic column detection.
     """
     # Use the centralized parser
     parsed_file = parse_file_centralized(
@@ -549,16 +643,29 @@ def read_csv_profiles(file_path: str | Path, config: dict[str, Any] | None = Non
     return _convert_parsed_file_to_profiles(parsed_file)
 
 
-def write_csv_profiles(profiles: List[Profile], file_path: str | Path, config: dict[str, Any] | None = None) -> None:
+def write_csv_profiles(
+    profiles: List[Profile],
+    file_path: str | Path,
+    config: dict[str, Any] | None = None,
+) -> None:
     """Write beach profile data to a CSV file.
 
+    Exports Profile objects to a CSV file with standardized column formatting.
+    Includes coordinate data and metadata fields in a structured format.
+
     Args:
-        profiles: List of Profile objects to write
-        file_path: Path where the CSV file will be created
-        config: Optional configuration for output formatting
+        profiles: List of Profile objects to export to CSV format.
+        file_path: Path where the CSV file will be created. Can be a string
+            or Path object.
+        config: Optional configuration dictionary for output formatting options
+            such as column ordering, precision, or additional metadata fields.
+
+    Returns:
+        None
 
     Raises:
-        BeachProfileError: If writing fails
+        BeachProfileError: If the file cannot be written due to I/O errors,
+            invalid profile data, or DataFrame conversion failures.
     """
     try:
         # Convert profiles to DataFrame
@@ -569,10 +676,12 @@ def write_csv_profiles(profiles: List[Profile], file_path: str | Path, config: d
             df = _format_csv_output(df, config)
 
         # Write to CSV
-        df.to_csv(file_path, index=False, encoding='utf-8')
+        df.to_csv(file_path, index=False, encoding="utf-8")
 
     except Exception as e:
-        raise BeachProfileError(f"Failed to write CSV file: {e}", category=ErrorCategory.FILE_IO) from e
+        raise BeachProfileError(
+            f"Failed to write CSV file: {e}", category=ErrorCategory.FILE_IO
+        ) from e
 
 
 def _profiles_to_dataframe(profiles: List[Profile]) -> pd.DataFrame:
@@ -610,14 +719,14 @@ def _profiles_to_dataframe(profiles: List[Profile]) -> pd.DataFrame:
         # Create rows for each point
         for i in range(len(profile.x)):
             row = {
-                'profile_id': profile.name,
-                'survey_date': profile.date,
-                'surveyor': metadata.get('surveyor', ''),
-                'project': metadata.get('project', ''),
-                'x': profile.x[i],
-                'y': y_coords[i] if i < len(y_coords) else None,
-                'z': profile.z[i],
-                'point_number': i + 1
+                "profile_id": profile.name,
+                "survey_date": profile.date,
+                "surveyor": metadata.get("surveyor", ""),
+                "project": metadata.get("project", ""),
+                "x": profile.x[i],
+                "y": y_coords[i] if i < len(y_coords) else None,
+                "z": profile.z[i],
+                "point_number": i + 1,
             }
 
             # Add extra columns
@@ -633,7 +742,9 @@ def _profiles_to_dataframe(profiles: List[Profile]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _format_csv_output(df: pd.DataFrame, config: dict[str, Any]) -> pd.DataFrame:
+def _format_csv_output(
+    df: pd.DataFrame, config: dict[str, Any]
+) -> pd.DataFrame:
     """Format the CSV output DataFrame based on configuration.
 
     Args:
@@ -644,20 +755,31 @@ def _format_csv_output(df: pd.DataFrame, config: dict[str, Any]) -> pd.DataFrame
         Formatted DataFrame
     """
     # Handle missing values
-    df = df.fillna('')
+    df = df.fillna("")
 
     # Format dates if present
-    if 'survey_date' in df.columns:
-        df['survey_date'] = pd.to_datetime(df['survey_date'], errors='coerce').dt.strftime('%Y-%m-%d')
+    if "survey_date" in df.columns:
+        df["survey_date"] = pd.to_datetime(
+            df["survey_date"], errors="coerce"
+        ).dt.strftime("%Y-%m-%d")
 
     # Format numeric columns
-    numeric_columns = ['x', 'y', 'z']
+    numeric_columns = ["x", "y", "z"]
     for col in numeric_columns:
         if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce').round(3)
+            df[col] = pd.to_numeric(df[col], errors="coerce").round(3)
 
     # Column ordering
-    preferred_order = ['profile_id', 'survey_date', 'surveyor', 'project', 'point_number', 'x', 'y', 'z']
+    preferred_order = [
+        "profile_id",
+        "survey_date",
+        "surveyor",
+        "project",
+        "point_number",
+        "x",
+        "y",
+        "z",
+    ]
     existing_columns = [col for col in preferred_order if col in df.columns]
     other_columns = [col for col in df.columns if col not in existing_columns]
     df = df[existing_columns + other_columns]
@@ -925,4 +1047,3 @@ def _assign_points_to_profiles_by_distance(
         )
 
     return assigned_df
-

@@ -13,7 +13,6 @@ This document defines the generic, reusable calculation tools needed for coastal
 ---
 
 ## Tool Categories
-
 ### 1. Cross-Sectional Analysis Tools
 ### 2. Volumetric Calculation Tools
 ### 3. Shoreline Analysis Tools
@@ -737,7 +736,7 @@ export_to_excel(
 ## Implementation Notes
 
 ### Code Organization
-- Place all tools in `src/profile_analysis/tools/monitoring/`
+- Place all tools in `src/profcalc/tools/monitoring/`
 - Group related functions into modules:
   - `cross_sectional.py` - Area calculations
   - `volumetric.py` - Volume calculations
@@ -768,14 +767,8 @@ export_to_excel(
 - Unit tests for each tool with known inputs/outputs
 - Integration tests for composed workflows
 - Comparison tests against manual BMAP/Excel calculations
-
----
-
-## Next Steps
-
 1. Implement core cross-sectional tools first (foundation)
-2. Add volumetric calculations (build on cross-sectional)
 3. Implement shoreline analysis (parallel development)
-4. Add temporal comparison tools
+See `src/profcalc/modules/` for existing tools.
 5. Develop export utilities
 6. Create validation framework (compare against manual methods)

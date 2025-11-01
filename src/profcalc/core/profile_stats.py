@@ -10,11 +10,121 @@ Provides functions for calculating profile characteristics including:
 
 from typing import Dict, List, Optional, Tuple
 
+# Type alias for a list of (x, z) coordinate pairs
+Points = List[Tuple[float, float]]
+
+
+def _sorted_points(points: Points) -> Points:
+    """Return a new list of points sorted by X coordinate.
+
+    Keeps the original list unmodified.
+    """
+    return sorted(points, key=lambda p: p[0])
+
+
+def _avg_spacing_from_sorted(sorted_points: Points) -> float:
+    """Compute average spacing between consecutive sorted points.
+
+    Returns 0.0 when spacing cannot be computed.
+    """
+    if len(sorted_points) < 2:
+        return 0.0
+    spacings: List[float] = []
+    for i in range(1, len(sorted_points)):
+        spacing = sorted_points[i][0] - sorted_points[i - 1][0]
+        if spacing > 0:
+            spacings.append(spacing)
+    return sum(spacings) / len(spacings) if spacings else 0.0
+
+
+def _profile_length_from_sorted(sorted_points: Points) -> float:
+    """Compute the 2D profile length along sorted points.
+
+    Uses euclidean distances between consecutive points.
+    """
+    if len(sorted_points) < 2:
+        return 0.0
+    length = 0.0
+    for i in range(1, len(sorted_points)):
+        dx = sorted_points[i][0] - sorted_points[i - 1][0]
+        dy = sorted_points[i][1] - sorted_points[i - 1][1]
+        length += (dx**2 + dy**2) ** 0.5
+    return length
+
+
+def _elevation_stats(points: Points) -> Tuple[float, float, float, float]:
+    """Return (min, max, avg, range) for elevation values in points.
+
+    If points is empty all values default to 0.0.
+    """
+    if not points:
+        return 0.0, 0.0, 0.0, 0.0
+    elevations = [p[1] for p in points]
+    min_elev = min(elevations)
+    max_elev = max(elevations)
+    avg_elev = sum(elevations) / len(elevations)
+    elev_range = max_elev - min_elev
+    return min_elev, max_elev, avg_elev, elev_range
+
+
+def _compute_slopes(points: Points) -> List[float]:
+    """Compute absolute slopes between consecutive points.
+
+    Returns list of slopes (abs(dz/dx)). Zero is used when dx == 0.
+    """
+    slopes: List[float] = []
+    for i in range(1, len(points)):
+        dx = points[i][0] - points[i - 1][0]
+        dz = points[i][1] - points[i - 1][1]
+        slopes.append(abs(dz / dx) if dx > 0 else 0.0)
+    return slopes
+
+
+def _find_low_slope_segments(
+    pts: Points, slopes: List[float], threshold: float = 0.05
+) -> List[Points]:
+    """Return continuous low-slope segments from pts using slopes list.
+
+    A low-slope segment is a list of consecutive points where the
+    corresponding slope values are all below `threshold`.
+    """
+    low_slope_segments: List[Points] = []
+    current: Points = []
+    for i, s in enumerate(slopes):
+        if s < threshold:
+            current.append(pts[i])
+        else:
+            if len(current) >= 2:
+                low_slope_segments.append(current)
+            current = []
+    if len(current) >= 2:
+        low_slope_segments.append(current)
+    return low_slope_segments
+
 
 def calculate_common_ranges(
     profiles: Dict[str, List[List[Tuple[float, float]]]],
     mhw_elev: Optional[float] = None,
-) -> Dict[str, Tuple[float, float, int, float, float, float, float, float, float, float, float, float, float, float, str]]:
+) -> Dict[
+    str,
+    Tuple[
+        float,
+        float,
+        int,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        str,
+    ],
+]:
     """
     For each profile name, calculate comprehensive profile characteristics
     across all profiles with that name.
@@ -61,41 +171,39 @@ def calculate_common_ranges(
 
                 # Average point spacing
                 if len(all_points) > 1:
-                    sorted_points = sorted(all_points, key=lambda p: p[0])
-                    spacings = []
-                    for i in range(1, len(sorted_points)):
-                        spacing = sorted_points[i][0] - sorted_points[i - 1][0]
-                        if spacing > 0:
-                            spacings.append(spacing)
-                    avg_spacing = sum(spacings) / len(spacings) if spacings else 0.0
+                    sorted_points = _sorted_points(all_points)
+                    avg_spacing = _avg_spacing_from_sorted(sorted_points)
                 else:
                     avg_spacing = 0.0
 
                 # Total profile length (sum of all survey lengths)
-                total_length = sum(max_x - min_x for min_x, max_x in zip(min_xs, max_xs))
+                total_length = sum(
+                    max_x - min_x for min_x, max_x in zip(min_xs, max_xs)
+                )
 
                 # Data completeness
-                surveyed_range = max(max_xs) - min(min_xs) if max_xs and min_xs else 0.0
+                surveyed_range = (
+                    max(max_xs) - min(min_xs) if max_xs and min_xs else 0.0
+                )
                 common_range_length = xmax_common - xmin_common
                 completeness = (
-                    (common_range_length / surveyed_range) * 100 if surveyed_range > 0 else 0.0
+                    (common_range_length / surveyed_range) * 100
+                    if surveyed_range > 0
+                    else 0.0
                 )
 
                 # Elevation statistics
-                elevations = [p[1] for p in all_points]
-                min_elev = min(elevations) if elevations else 0.0
-                max_elev = max(elevations) if elevations else 0.0
-                avg_elev = sum(elevations) / len(elevations) if elevations else 0.0
-                elev_range = max_elev - min_elev
+                (
+                    min_elev,
+                    max_elev,
+                    avg_elev,
+                    elev_range,
+                ) = _elevation_stats(all_points)
 
                 # Profile length (actual distance)
                 if len(all_points) > 1:
-                    sorted_points = sorted(all_points, key=lambda p: p[0])
-                    profile_length = 0.0
-                    for i in range(1, len(sorted_points)):
-                        dx = sorted_points[i][0] - sorted_points[i - 1][0]
-                        dy = sorted_points[i][1] - sorted_points[i - 1][1]
-                        profile_length += (dx**2 + dy**2) ** 0.5
+                    sorted_points = _sorted_points(all_points)
+                    profile_length = _profile_length_from_sorted(sorted_points)
                 else:
                     profile_length = 0.0
 
@@ -113,7 +221,9 @@ def calculate_common_ranges(
 
                 if mhw_elev is not None:
                     berm_width = calculate_berm_width(all_points, mhw_elev)
-                    beach_face_slope = calculate_beach_face_slope(all_points, mhw_elev)
+                    beach_face_slope = calculate_beach_face_slope(
+                        all_points, mhw_elev
+                    )
                     beach_type = classify_beach_type(beach_face_slope)
 
                 common_ranges[profile_name] = (
@@ -137,7 +247,7 @@ def calculate_common_ranges(
     return common_ranges
 
 
-def calculate_berm_width(points: List[Tuple[float, float]], mhw_elev: float) -> float:
+def calculate_berm_width(points: Points, mhw_elev: float) -> float:
     """
     Calculate berm width using slope-based criteria above MHW.
 
@@ -196,29 +306,12 @@ def calculate_berm_width(points: List[Tuple[float, float]], mhw_elev: float) -> 
     if len(berm_candidates) < 3:
         return 0.0
 
-    # Calculate slopes between consecutive points
-    slopes = []
-    for i in range(1, len(berm_candidates)):
-        dx = berm_candidates[i][0] - berm_candidates[i - 1][0]
-        dz = berm_candidates[i][1] - berm_candidates[i - 1][1]
-        slope = abs(dz / dx) if dx > 0 else 0
-        slopes.append(slope)
+    # Sort berm candidates and compute slopes
+    berm_candidates = _sorted_points(berm_candidates)
+    slopes = _compute_slopes(berm_candidates)
 
     # Find continuous segments with low slope (<5%)
-    low_slope_segments = []
-    current_segment = []
-
-    for i, slope in enumerate(slopes):
-        if slope < 0.05:  # 5% slope threshold
-            current_segment.append(berm_candidates[i])
-        else:
-            if len(current_segment) >= 2:
-                low_slope_segments.append(current_segment)
-            current_segment = []
-
-    # Add final segment
-    if len(current_segment) >= 2:
-        low_slope_segments.append(current_segment)
+    low_slope_segments = _find_low_slope_segments(berm_candidates, slopes)
 
     # Return width of longest low-slope segment
     if low_slope_segments:
@@ -228,7 +321,7 @@ def calculate_berm_width(points: List[Tuple[float, float]], mhw_elev: float) -> 
     return 0.0
 
 
-def calculate_beach_face_slope(points: List[Tuple[float, float]], mhw_elev: float) -> float:
+def calculate_beach_face_slope(points: Points, mhw_elev: float) -> float:
     """
     Calculate beach face slope from MHW to the first point below MHW.
 
@@ -273,7 +366,7 @@ def calculate_beach_face_slope(points: List[Tuple[float, float]], mhw_elev: floa
         return 0.0
 
     # Sort points by x
-    sorted_points = sorted(points, key=lambda p: p[0])
+    sorted_points = _sorted_points(points)
 
     # Find MHW intercept (first point at or above MHW)
     mhw_point = None
@@ -286,7 +379,9 @@ def calculate_beach_face_slope(points: List[Tuple[float, float]], mhw_elev: floa
         return 0.0
 
     # Find the first point below MHW seaward of MHW point
-    seaward_points = [p for p in sorted_points if p[0] > mhw_point[0] and p[1] < mhw_elev]
+    seaward_points = [
+        p for p in sorted_points if p[0] > mhw_point[0] and p[1] < mhw_elev
+    ]
 
     if not seaward_points:
         return 0.0
@@ -302,4 +397,3 @@ def calculate_beach_face_slope(points: List[Tuple[float, float]], mhw_elev: floa
         return dz / dx  # Negative slope expected for beach face
 
     return 0.0
-

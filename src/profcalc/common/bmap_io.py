@@ -22,12 +22,12 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
+from .data_validation import validate_array_properties
 from .error_handler import (
     BeachProfileError,
     ErrorCategory,
     LogComponent,
     get_logger,
-    validate_array_properties,
 )
 from .file_parser import ParsedFile
 from .file_parser import parse_file as parse_file_centralized
@@ -130,6 +130,7 @@ def format_date_for_bmap(date_input: str | datetime) -> Optional[str]:
 @dataclass
 class Profile:
     """Represents a single beach profile from a BMAP free format file."""
+
     name: str
     date: Optional[str]
     description: Optional[str]
@@ -140,6 +141,7 @@ class Profile:
 
 class BMAPImportError(Exception):
     """Raised when BMAP import fails."""
+
     pass
 
 
@@ -177,7 +179,9 @@ class BMAPParser:
         self.config = config or {}
         self.logger = get_logger(LogComponent.FILE_IO)
 
-    def parse_header(self, header: str) -> tuple[str, Optional[datetime], str, str]:
+    def parse_header(
+        self, header: str
+    ) -> tuple[str, Optional[datetime], str, str]:
         """Parse a BMAP header line.
 
         Args:
@@ -360,9 +364,14 @@ class BMAPParser:
             return profiles
 
         except Exception as e:
-            raise BeachProfileError(f"Failed to parse BMAP file: {e}", category=ErrorCategory.FILE_IO) from e
+            raise BeachProfileError(
+                f"Failed to parse BMAP file: {e}",
+                category=ErrorCategory.FILE_IO,
+            ) from e
 
-    def _convert_to_profile(self, profile_data: dict[str, Any]) -> Optional[Profile]:
+    def _convert_to_profile(
+        self, profile_data: dict[str, Any]
+    ) -> Optional[Profile]:
         """Convert profile data dictionary to Profile object.
 
         Args:
@@ -379,7 +388,9 @@ class BMAPParser:
             # Extract coordinates from data pairs (x, z)
             data_pairs = profile_data.get("data", [])
             if not data_pairs:
-                self.logger.warning(f"No coordinate data found for profile {profile_name}")
+                self.logger.warning(
+                    f"No coordinate data found for profile {profile_name}"
+                )
                 return None
 
             x_coords = []
@@ -392,12 +403,18 @@ class BMAPParser:
             x_array = np.array(x_coords, dtype=float)
             z_array = np.array(z_coords, dtype=float)
 
-            x_validation = validate_array_properties(x_array, "x_coordinates", allow_nan=False)
-            z_validation = validate_array_properties(z_array, "z_coordinates", allow_nan=False)
+            x_validation = validate_array_properties(
+                x_array, "x_coordinates", allow_nan=False
+            )
+            z_validation = validate_array_properties(
+                z_array, "z_coordinates", allow_nan=False
+            )
 
             if x_validation or z_validation:
                 all_errors = x_validation + z_validation
-                self.logger.warning(f"Coordinate validation errors for profile {profile_name}: {all_errors}")
+                self.logger.warning(
+                    f"Coordinate validation errors for profile {profile_name}: {all_errors}"
+                )
                 # Continue processing but log the issues
 
             # Create metadata
@@ -423,7 +440,9 @@ class BMAPParser:
             if purpose:
                 description_parts.append(f"Purpose: {purpose}")
 
-            description = "; ".join(description_parts) if description_parts else None
+            description = (
+                "; ".join(description_parts) if description_parts else None
+            )
 
             profile = Profile(
                 name=profile_name,
@@ -431,17 +450,21 @@ class BMAPParser:
                 description=description,
                 x=x_array,
                 z=z_array,
-                metadata=metadata
+                metadata=metadata,
             )
 
             return profile
 
         except Exception as e:
-            self.logger.error(f"Failed to convert profile data to Profile object: {e}")
+            self.logger.error(
+                f"Failed to convert profile data to Profile object: {e}"
+            )
             return None
 
 
-def read_bmap_profiles(file_path: str | Path, config: dict[str, Any] | None = None) -> List[Profile]:
+def read_bmap_profiles(
+    file_path: str | Path, config: dict[str, Any] | None = None
+) -> List[Profile]:
     """Read beach profile data from a BMAP file.
 
     Args:
@@ -459,6 +482,7 @@ def read_bmap_profiles(file_path: str | Path, config: dict[str, Any] | None = No
 
 
 # Legacy BMAP free format functions (for backward compatibility)
+
 
 def is_header_line(line: str) -> bool:
     """
@@ -556,7 +580,7 @@ def parse_header(line: str):
     # If name is empty, use first word from original line as fallback
     if not name:
         parts = line.split()
-        name = parts[0] if parts else None
+        name = parts[0] if parts else None  # type: ignore[assignment]
 
     # Build description from collected parts
     desc = " ".join(desc_parts) if desc_parts else None
@@ -667,7 +691,7 @@ def write_bmap_profiles(
             )
             filename_identifier = f"from_{basename}"
 
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             for profile in profiles:
                 # Write header line: profile_name [date] [description]
                 header_parts = [profile.name]
@@ -693,18 +717,20 @@ def write_bmap_profiles(
                 if profile.description:
                     header_parts.append(profile.description)
 
-                f.write(' '.join(header_parts) + '\n')
+                f.write(" ".join(header_parts) + "\n")
 
                 # Write point count
-                f.write(f'{len(profile.x)}\n')
+                f.write(f"{len(profile.x)}\n")
 
                 # Write coordinate pairs
                 for x, z in zip(profile.x, profile.z):
-                    f.write(f'{x:.3f} {z:.3f}\n')
+                    f.write(f"{x:.3f} {z:.3f}\n")
 
                 # Add blank line between profiles
-                f.write('\n')
+                f.write("\n")
 
     except Exception as e:
-        raise BeachProfileError(f"Failed to write BMAP file {file_path}: {e}", category=ErrorCategory.FILE_IO)
-
+        raise BeachProfileError(
+            f"Failed to write BMAP file {file_path}: {e}",
+            category=ErrorCategory.FILE_IO,
+        )

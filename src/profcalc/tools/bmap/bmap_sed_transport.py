@@ -72,7 +72,9 @@ def compute_transport_rate(
 
     # --- Cumulative integral (trapezoidal rule) ---
     # Integral of elevation change from landward boundary to each x
-    cumulative_integral = np.cumsum(np.concatenate(([0], (dz[1:] + dz[:-1]) / 2 * dx)))
+    cumulative_integral = np.cumsum(
+        np.concatenate(([0], (dz[1:] + dz[:-1]) / 2 * dx))
+    )
 
     # --- Transport rate per unit width (ft²/hr) ---
     q_ft2_hr = -cumulative_integral / dtime_hr  # minus sign from continuity
@@ -114,4 +116,3 @@ def compute_transport_rate(
     }
 
     return profile_rate_df, report
-

@@ -1,4 +1,5 @@
 """Quick test for shapefile conversion without geopandas."""
+
 import sys
 from pathlib import Path
 
@@ -12,11 +13,15 @@ print("Test 1: Shapefile export without geopandas (expect error)")
 print("=" * 60)
 
 try:
-    execute_from_cli([
-        'data/input_examples/test_profiles.csv',
-        '--to', 'shp-points',
-        '-o', 'data/temp/test_points.shp'
-    ])
+    execute_from_cli(
+        [
+            "data/input_examples/test_profiles.csv",
+            "--to",
+            "shp-points",
+            "-o",
+            "data/temp/test_points.shp",
+        ]
+    )
 except SystemExit:
     pass  # argparse may exit
 
@@ -25,13 +30,16 @@ print("Test 2: CSV → CSV conversion (should work)")
 print("=" * 60)
 
 try:
-    execute_from_cli([
-        'data/input_examples/test_profiles.csv',
-        '--to', 'csv',
-        '-o', 'data/temp/test_roundtrip.csv'
-    ])
+    execute_from_cli(
+        [
+            "data/input_examples/test_profiles.csv",
+            "--to",
+            "csv",
+            "-o",
+            "data/temp/test_roundtrip.csv",
+        ]
+    )
 except SystemExit:
     pass
 
 print("\nTest complete!")
-

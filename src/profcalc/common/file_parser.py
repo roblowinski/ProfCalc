@@ -11,7 +11,7 @@ All parsers return standardized data structures for downstream processing.
 from pathlib import Path
 from typing import Any, Optional
 
-from profcalc.common.format_detection import (
+from .format_detection import (
     FormatDetectionResult,
     detect_csv_has_header,
     detect_file_format_detailed,
@@ -39,7 +39,7 @@ class ParsedFile:
         metadata: Optional[dict[str, Any]] = None,
         has_header: bool = False,
         column_mapping: Optional[dict[str, int]] = None,
-        delimiter: str = ',',
+        delimiter: str = ",",
     ):
         self.format_type = format_type
         self.profiles = profiles
@@ -96,7 +96,13 @@ def parse_file(file_path: Path, skip_confirmation: bool = False) -> ParsedFile:
             lines = [line.rstrip("\n\r") for line in f.readlines()]
     except UnicodeDecodeError:
         # Try with different encodings if UTF-8 fails
-        for encoding in ["utf-16", "utf-16-le", "utf-16-be", "latin-1", "cp1252"]:
+        for encoding in [
+            "utf-16",
+            "utf-16-le",
+            "utf-16-be",
+            "latin-1",
+            "cp1252",
+        ]:
             try:
                 with open(file_path, "r", encoding=encoding) as f:
                     lines = [line.rstrip("\n\r") for line in f.readlines()]
@@ -116,7 +122,9 @@ def parse_file(file_path: Path, skip_confirmation: bool = False) -> ParsedFile:
         raise ValueError(f"Unsupported format: {format_type}")
 
 
-def _confirm_format_detection(detection: FormatDetectionResult, file_path: Path) -> bool:
+def _confirm_format_detection(
+    detection: FormatDetectionResult, file_path: Path
+) -> bool:
     """
     Display format detection results and get user confirmation.
 
@@ -138,16 +146,20 @@ def _confirm_format_detection(detection: FormatDetectionResult, file_path: Path)
 
     # For high confidence, default to yes
     if detection.confidence == "high" and not detection.warnings:
-        response = input("Proceed with this format? [Y/n]: ").strip().lower()
+        response = input("Proceed with this format? [Y/n]: ")
+
         return response in ["", "y", "yes"]
     else:
         # For medium/low confidence or warnings, require explicit yes
-        response = input("Proceed with this format? [y/N]: ").strip().lower()
+        response = input("Proceed with this format? [y/N]: ")
+
         return response in ["y", "yes"]
 
 
 def parse_bmap(
-    lines: list[str], file_path: Path, detection_result: Optional[FormatDetectionResult] = None
+    lines: list[str],
+    file_path: Path,
+    detection_result: Optional[FormatDetectionResult] = None,
 ) -> ParsedFile:
     """
     Parse BMAP free format file.
@@ -165,8 +177,8 @@ def parse_bmap(
     Returns:
         ParsedFile with BMAP profiles
     """
-    profiles = []
-    i = 0
+    profiles: list[dict[str, Any]] = []
+    i: int = 0
 
     while i < len(lines):
         line = lines[i].strip()
@@ -190,7 +202,9 @@ def parse_bmap(
 
                     # Read coordinate pairs
                     coordinates = []
-                    for j in range(i + 2, min(i + 2 + point_count, len(lines))):
+                    for j in range(
+                        i + 2, min(i + 2 + point_count, len(lines))
+                    ):
                         coord_line = lines[j].strip()
                         if not coord_line:
                             continue
@@ -218,7 +232,10 @@ def parse_bmap(
 
         i += 1
 
-    metadata = {"source_file": str(file_path), "format_description": get_format_description("bmap")}
+    metadata = {
+        "source_file": str(file_path),
+        "format_description": get_format_description("bmap"),
+    }
 
     return ParsedFile(format_type="bmap", profiles=profiles, metadata=metadata)
 
@@ -233,9 +250,9 @@ def _parse_bmap_profile_header(header: str) -> dict[str, Any]:
     Returns:
         Dictionary with profile_id, date, purpose fields
     """
-    parts = header.split()
+    parts: list[str] = header.split()
 
-    profile_data = {
+    profile_data: dict[str, Any] = {
         "profile_id": parts[0] if parts else "UNKNOWN",
         "date": None,
         "purpose": None,
@@ -261,7 +278,9 @@ def _parse_bmap_profile_header(header: str) -> dict[str, Any]:
 
 
 def parse_csv(
-    lines: list[str], file_path: Path, detection_result: Optional[FormatDetectionResult] = None
+    lines: list[str],
+    file_path: Path,
+    detection_result: Optional[FormatDetectionResult] = None,
 ) -> ParsedFile:
     """
     Parse delimited file (CSV/TSV/space-delimited, 3-9 columns, with/without headers).
@@ -285,16 +304,16 @@ def parse_csv(
         ParsedFile with parsed profiles
     """
     # Get delimiter from detection result
-    delimiter = ','
-    if detection_result and 'delimiter' in detection_result.details:
-        delimiter = detection_result.details['delimiter']
+    delimiter = ","
+    if detection_result and "delimiter" in detection_result.details:
+        delimiter = detection_result.details["delimiter"]
 
     # Detect if file has headers
     has_header = detect_csv_has_header(lines, delimiter)
 
     # Find data start (skip metadata header lines if present)
-    data_start = 0
-    metadata_lines = []
+    data_start: int = 0
+    metadata_lines: list[str] = []
 
     if has_header:
         # Check for multi-line headers or metadata
@@ -322,13 +341,15 @@ def parse_csv(
             data_start = len(metadata_lines)
 
     # Get header line (last metadata line before data)
-    header_line = metadata_lines[-1] if metadata_lines else None
+    header_line: Optional[str] = metadata_lines[-1] if metadata_lines else None
 
     # Build column mapping from header
-    column_mapping = _build_column_mapping(header_line, delimiter) if header_line else {}
+    column_mapping: dict[str, int] = (
+        _build_column_mapping(header_line, delimiter) if header_line else {}
+    )
 
     # Parse data rows
-    profiles_dict = {}  # Group by profile ID
+    profiles_dict: dict[str, dict[str, Any]] = {}  # Group by profile ID
 
     for i in range(data_start, len(lines)):
         line = lines[i].strip()
@@ -342,7 +363,7 @@ def parse_csv(
             continue
 
         # Determine profile ID using flexible matching
-        profile_id = _extract_profile_id(parts, column_mapping)
+        profile_id: str = _extract_profile_id(parts, column_mapping)
 
         # Initialize profile if not exists
         if profile_id not in profiles_dict:
@@ -356,13 +377,22 @@ def parse_csv(
         # Extract coordinates using flexible column matching
         coord_data = _extract_coordinates(parts, column_mapping)
 
-        if coord_data and coord_data.get('x') is not None and coord_data.get('y') is not None:
+        if (
+            coord_data
+            and coord_data.get("x") is not None
+            and coord_data.get("y") is not None
+        ):
             profiles_dict[profile_id]["coordinates"].append(coord_data)
 
             # Extract date from first row if available
-            if not profiles_dict[profile_id]["date"] and "DATE" in column_mapping:
+            if (
+                not profiles_dict[profile_id]["date"]
+                and "DATE" in column_mapping
+            ):
                 try:
-                    profiles_dict[profile_id]["date"] = parts[column_mapping["DATE"]]
+                    profiles_dict[profile_id]["date"] = parts[
+                        column_mapping["DATE"]
+                    ]
                 except IndexError:
                     pass
 
@@ -404,7 +434,9 @@ def _is_numeric(value: str) -> bool:
         return False
 
 
-def _build_column_mapping(header_line: Optional[str], delimiter: str) -> dict[str, int]:
+def _build_column_mapping(
+    header_line: Optional[str], delimiter: str
+) -> dict[str, int]:
     """
     Build column mapping from header line with flexible column name matching.
 
@@ -425,8 +457,10 @@ def _build_column_mapping(header_line: Optional[str], delimiter: str) -> dict[st
     if not header_line:
         return {}
 
-    mapping = {}
-    headers = [h.strip().upper() for h in header_line.split(delimiter)]
+    mapping: dict[str, int] = {}
+    headers: list[str] = [
+        h.strip().upper() for h in header_line.split(delimiter)
+    ]
 
     for i, header in enumerate(headers):
         # Store original header
@@ -434,7 +468,9 @@ def _build_column_mapping(header_line: Optional[str], delimiter: str) -> dict[st
 
         # Profile ID variants
         if header in ("PROFILE", "NAME", "PROFILE_NAME", "PROFILE_ID", "ID"):
-            if "PROFILE_ID" not in mapping or header == "PROFILE":  # Prefer PROFILE
+            if (
+                "PROFILE_ID" not in mapping or header == "PROFILE"
+            ):  # Prefer PROFILE
                 mapping["PROFILE_ID"] = i
 
         # X coordinate variants
@@ -464,7 +500,9 @@ def _build_column_mapping(header_line: Optional[str], delimiter: str) -> dict[st
     return mapping
 
 
-def _extract_profile_id(parts: list[str], column_mapping: dict[str, int]) -> str:
+def _extract_profile_id(
+    parts: list[str], column_mapping: dict[str, int]
+) -> str:
     """
     Extract profile ID from data row using column mapping or heuristics.
 
@@ -489,7 +527,9 @@ def _extract_profile_id(parts: list[str], column_mapping: dict[str, int]) -> str
     return "UNKNOWN"
 
 
-def _extract_coordinates(parts: list[str], column_mapping: dict[str, int]) -> Optional[dict[str, Any]]:
+def _extract_coordinates(
+    parts: list[str], column_mapping: dict[str, int]
+) -> Optional[dict[str, Any]]:
     """
     Extract coordinate data from row parts using column mapping or heuristics.
 
@@ -500,7 +540,7 @@ def _extract_coordinates(parts: list[str], column_mapping: dict[str, int]) -> Op
     Returns:
         Dictionary with x, y, z and optional metadata fields
     """
-    coord = {}
+    coord: dict[str, Any] = {}
 
     # Try to extract using column mapping
     if "X" in column_mapping and "Y" in column_mapping:
@@ -511,13 +551,21 @@ def _extract_coordinates(parts: list[str], column_mapping: dict[str, int]) -> Op
                 coord["z"] = float(parts[column_mapping["Z"]])
 
             # Add optional metadata fields
-            if "TIME" in column_mapping and column_mapping["TIME"] < len(parts):
+            if "TIME" in column_mapping and column_mapping["TIME"] < len(
+                parts
+            ):
                 coord["time"] = parts[column_mapping["TIME"]]
-            if "POINT_NUM" in column_mapping and column_mapping["POINT_NUM"] < len(parts):
+            if "POINT_NUM" in column_mapping and column_mapping[
+                "POINT_NUM"
+            ] < len(parts):
                 coord["point_num"] = parts[column_mapping["POINT_NUM"]]
-            if "TYPE" in column_mapping and column_mapping["TYPE"] < len(parts):
+            if "TYPE" in column_mapping and column_mapping["TYPE"] < len(
+                parts
+            ):
                 coord["type"] = parts[column_mapping["TYPE"]]
-            if "DESCRIPTION" in column_mapping and column_mapping["DESCRIPTION"] < len(parts):
+            if "DESCRIPTION" in column_mapping and column_mapping[
+                "DESCRIPTION"
+            ] < len(parts):
                 coord["description"] = parts[column_mapping["DESCRIPTION"]]
 
             return coord
@@ -528,15 +576,21 @@ def _extract_coordinates(parts: list[str], column_mapping: dict[str, int]) -> Op
     try:
         if len(parts) == 3:
             # X, Y, Z
-            coord["x"] = float(parts[0])
-            coord["y"] = float(parts[1])
-            coord["z"] = float(parts[2])
+            x: float = float(parts[0])
+            y: float = float(parts[1])
+            z: float = float(parts[2])
+            coord["x"] = x
+            coord["y"] = y
+            coord["z"] = z
             return coord
         elif len(parts) == 4:
             # Profile ID, X, Y, Z
-            coord["x"] = float(parts[1])
-            coord["y"] = float(parts[2])
-            coord["z"] = float(parts[3])
+            x = float(parts[1])
+            y = float(parts[2])
+            z = float(parts[3])
+            coord["x"] = x
+            coord["y"] = y
+            coord["z"] = z
             return coord
         elif len(parts) >= 4:
             # Try to find X, Y, Z sequence
@@ -558,7 +612,9 @@ def _extract_coordinates(parts: list[str], column_mapping: dict[str, int]) -> Op
 
 
 def parse_csv_standard(
-    lines: list[str], file_path: Path, detection_result: Optional[FormatDetectionResult] = None
+    lines: list[str],
+    file_path: Path,
+    detection_result: Optional[FormatDetectionResult] = None,
 ) -> ParsedFile:
     """
     DEPRECATED: Use parse_csv() instead.
@@ -577,7 +633,9 @@ def parse_csv_standard(
 
 
 def parse_csv_9col(
-    lines: list[str], file_path: Path, detection_result: Optional[FormatDetectionResult] = None
+    lines: list[str],
+    file_path: Path,
+    detection_result: Optional[FormatDetectionResult] = None,
 ) -> ParsedFile:
     """
     DEPRECATED: Use parse_csv() instead.

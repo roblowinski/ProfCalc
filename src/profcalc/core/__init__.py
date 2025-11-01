@@ -20,4 +20,3 @@ __all__ = [
     "detect_gaps_and_outliers",
     "classify_beach_type",
 ]
-

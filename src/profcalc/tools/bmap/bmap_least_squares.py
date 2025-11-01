@@ -26,9 +26,7 @@ import pandas as pd
 
 
 def compute_least_squares(
-    profile: pd.DataFrame,
-    xon: float,
-    xoff: float
+    profile: pd.DataFrame, xon: float, xoff: float
 ) -> tuple[pd.DataFrame, str]:
     """
     Perform least-squares fit to h = A * x^(2/3) between Xon and Xoff.
@@ -60,7 +58,9 @@ def compute_least_squares(
     # --- Subset profile within range ---
     prof = profile[(profile["X"] >= xon) & (profile["X"] <= xoff)].copy()
     if len(prof) < 3:
-        raise ValueError("Not enough points within Xon/Xoff range for regression.")
+        raise ValueError(
+            "Not enough points within Xon/Xoff range for regression."
+        )
 
     x = np.array(prof["X"], dtype=float)
     z = np.array(prof["Z"], dtype=float)
@@ -74,10 +74,12 @@ def compute_least_squares(
     h_fit = h[mask]
 
     if len(x_fit) < 3:
-        raise ValueError("Insufficient valid submerged points within range for regression.")
+        raise ValueError(
+            "Insufficient valid submerged points within range for regression."
+        )
 
     # --- Linearize Dean equation: h^(3/2) = (A^(3/2)) * x ---
-    Y = h_fit ** 1.5
+    Y = h_fit**1.5
     X = x_fit
 
     n = len(X)
@@ -87,7 +89,9 @@ def compute_least_squares(
     sum_xy = np.sum(X * Y)
 
     slope = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x**2)
-    intercept = (sum_y - slope * sum_x) / n  # not used, included for completeness
+    intercept = (
+        sum_y - slope * sum_x
+    ) / n  # not used, included for completeness
 
     # --- A-parameter and correlation ---
     A = slope ** (2.0 / 3.0)
@@ -105,18 +109,16 @@ def compute_least_squares(
     h_est = A * (x_all ** (2.0 / 3.0))
     z_est = -h_est
 
-    fitted_df = pd.DataFrame({
-        "X": x_all,
-        "Z_observed": profile["Z"].values,
-        "Z_fitted": z_est
-    })
+    fitted_df = pd.DataFrame(
+        {"X": x_all, "Z_observed": profile["Z"].values, "Z_fitted": z_est}
+    )
 
     fitted_df.attrs["method"] = "Least Squares (Dean Fit)"
     fitted_df.attrs["parameters"] = {
         "A_ft13": float(A),
         "R2": float(R2),
         "d50_mm": float(d50_mm),
-        "fit_range_ft": [xon, xoff]
+        "fit_range_ft": [xon, xoff],
     }
 
     # --- Report string (BMAP format) ---
@@ -129,4 +131,3 @@ def compute_least_squares(
     )
 
     return fitted_df, report
-

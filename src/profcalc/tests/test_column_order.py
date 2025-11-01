@@ -1,4 +1,5 @@
 """Test column order and alternative naming."""
+
 import sys
 from pathlib import Path
 
@@ -110,4 +111,3 @@ print("  ✓ XYZ reader accepts custom column order (Y X Z)")
 print("  ✓ Column order works with numeric indices")
 print("  ✓ Default X Y Z order still works when no order specified")
 print()
-

@@ -10,7 +10,7 @@ Supported Formats:
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 
 class FormatDetectionResult:
@@ -42,7 +42,9 @@ class FormatDetectionResult:
     def get_summary(self) -> str:
         """Get human-readable summary for user confirmation."""
         lines = []
-        lines.append(f"Detected Format: {get_format_description(self.format_type)}")
+        lines.append(
+            f"Detected Format: {get_format_description(self.format_type)}"
+        )
         lines.append(f"Confidence: {self.confidence.upper()}")
 
         if self.details:
@@ -101,7 +103,13 @@ def detect_file_format_detailed(file_path: Path) -> FormatDetectionResult:
             lines = [line.rstrip("\n\r") for line in f.readlines()]
     except UnicodeDecodeError:
         # Try with different encodings if UTF-8 fails
-        for encoding in ["utf-16", "utf-16-le", "utf-16-be", "latin-1", "cp1252"]:
+        for encoding in [
+            "utf-16",
+            "utf-16-le",
+            "utf-16-be",
+            "latin-1",
+            "cp1252",
+        ]:
             try:
                 with open(file_path, "r", encoding=encoding) as f:
                     lines = [line.rstrip("\n\r") for line in f.readlines()]
@@ -137,7 +145,9 @@ def detect_file_format_detailed(file_path: Path) -> FormatDetectionResult:
     )
 
 
-def _check_bmap_format(lines: list[str], file_path: Path) -> FormatDetectionResult:
+def _check_bmap_format(
+    lines: list[str], file_path: Path
+) -> FormatDetectionResult:
     """
     Check if file content matches BMAP free format structure with detailed analysis.
 
@@ -157,9 +167,9 @@ def _check_bmap_format(lines: list[str], file_path: Path) -> FormatDetectionResu
     if len(lines) < 3:
         return FormatDetectionResult("unknown", confidence="low")
 
-    profiles_found = 0
-    warnings = []
-    details = {}
+    profiles_found: int = 0
+    warnings: list[str] = []
+    details: dict[str, Any] = {}
 
     # Look for pattern: text line, number line, coordinate pairs
     i = 0
@@ -226,12 +236,16 @@ def _check_bmap_format(lines: list[str], file_path: Path) -> FormatDetectionResu
         else:
             confidence = "high"
 
-        return FormatDetectionResult("bmap", confidence=confidence, details=details, warnings=warnings)
+        return FormatDetectionResult(
+            "bmap", confidence=confidence, details=details, warnings=warnings
+        )
 
     return FormatDetectionResult("unknown", confidence="low")
 
 
-def _check_delimited_format(lines: list[str], file_path: Path) -> FormatDetectionResult:
+def _check_delimited_format(
+    lines: list[str], file_path: Path
+) -> FormatDetectionResult:
     """
     Check if file content matches delimited format (CSV/TSV/space-delimited) with detailed analysis.
 
@@ -290,14 +304,16 @@ def _check_delimited_format(lines: list[str], file_path: Path) -> FormatDetectio
         return FormatDetectionResult("unknown", confidence="low")
 
     # Verify consistent column count across data rows
-    details = {}
-    warnings = []
+    details: dict[str, Any] = {}
+    warnings: list[str] = []
     consistent_count = 0
     inconsistent_lines = []
     sample_size = min(20, len(lines) - data_start_idx)
     checked = 0
 
-    for idx in range(data_start_idx, min(data_start_idx + sample_size + 10, len(lines))):
+    for idx in range(
+        data_start_idx, min(data_start_idx + sample_size + 10, len(lines))
+    ):
         line = lines[idx].strip()
         if not line:
             continue
@@ -320,7 +336,9 @@ def _check_delimited_format(lines: list[str], file_path: Path) -> FormatDetectio
 
     details["columns"] = col_count
     details["delimiter"] = delimiter  # Store actual delimiter character
-    details["delimiter_name"] = delimiter_name  # Also store human-readable name
+    details["delimiter_name"] = (
+        delimiter_name  # Also store human-readable name
+    )
     details["extension"] = file_path.suffix or "no extension"
     details["data_rows_sampled"] = checked
     details["consistent_rows"] = consistent_count
@@ -335,10 +353,15 @@ def _check_delimited_format(lines: list[str], file_path: Path) -> FormatDetectio
         confidence = "high"
     elif consistency_ratio >= 0.80:
         confidence = "medium"
-        warnings.append(f"Some rows have inconsistent column counts (lines: {inconsistent_lines[:5]})")
+        warnings.append(
+            f"Some rows have inconsistent column counts (lines: {inconsistent_lines[:5]})"
+        )
     else:
-        return FormatDetectionResult("unknown", confidence="low",
-                                     warnings=["Too many inconsistent rows for delimited format"])
+        return FormatDetectionResult(
+            "unknown",
+            confidence="low",
+            warnings=["Too many inconsistent rows for delimited format"],
+        )
 
     # Check if first data row looks like header
     numeric_count = 0
@@ -351,7 +374,9 @@ def _check_delimited_format(lines: list[str], file_path: Path) -> FormatDetectio
     else:
         details["header_detected"] = "no"
 
-    return FormatDetectionResult("csv", confidence=confidence, details=details, warnings=warnings)
+    return FormatDetectionResult(
+        "csv", confidence=confidence, details=details, warnings=warnings
+    )
 
 
 def _detect_delimiter(lines: list[str]) -> Optional[tuple[str, str]]:
@@ -377,13 +402,13 @@ def _detect_delimiter(lines: list[str]) -> Optional[tuple[str, str]]:
 
     # Count occurrences of potential delimiters
     delimiters = [
-        (',', 'comma'),
-        ('\t', 'tab'),
-        ('  ', 'space'),  # Two or more spaces
+        (",", "comma"),
+        ("\t", "tab"),
+        ("  ", "space"),  # Two or more spaces
     ]
 
     best_delimiter = None
-    best_score = 0
+    best_score = 0.0
 
     for delim_char, delim_name in delimiters:
         # Count how many lines have this delimiter
@@ -393,16 +418,19 @@ def _detect_delimiter(lines: list[str]) -> Optional[tuple[str, str]]:
         for line in sample_lines:
             if delim_char in line:
                 lines_with_delim += 1
-                if delim_char == '  ':
+                if delim_char == "  ":
                     # Count groups of spaces
                     import re
-                    total_count += len(re.findall(r' {2,}', line))
+
+                    total_count += len(re.findall(r" {2,}", line))
                 else:
                     total_count += line.count(delim_char)
 
         # Score: percentage of lines with delimiter * average count per line
         if lines_with_delim > 0:
-            score = (lines_with_delim / len(sample_lines)) * (total_count / lines_with_delim)
+            score = (lines_with_delim / len(sample_lines)) * (
+                total_count / lines_with_delim
+            )
             if score > best_score:
                 best_score = score
                 best_delimiter = (delim_char, delim_name)
@@ -441,7 +469,7 @@ def get_format_description(format_type: str) -> str:
     return descriptions.get(format_type, "Unknown format")
 
 
-def detect_csv_has_header(lines: list[str], delimiter: str = ',') -> bool:
+def detect_csv_has_header(lines: list[str], delimiter: str = ",") -> bool:
     """
     Detect if a delimited file has a header row.
 
@@ -477,4 +505,3 @@ def detect_csv_has_header(lines: list[str], delimiter: str = ',') -> bool:
 
     # If most parts are non-numeric, it's likely a header
     return numeric_count < len(parts) * 0.5
-

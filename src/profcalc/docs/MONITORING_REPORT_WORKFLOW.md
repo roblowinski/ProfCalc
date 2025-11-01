@@ -56,7 +56,7 @@ This document outlines the sequential steps needed to replicate the analysis res
 
 **Actions:**
 ```python
-from profile_analysis.common import (
+from profcalc.common import (
     read_csv_profiles,
     read_bmap_profiles,
     read_9col_profiles,
@@ -115,7 +115,7 @@ template_dict = {profile.name: profile for profile in templates}
 
 **Actions:**
 ```python
-from profile_analysis.common import load_analysis_bounds
+from profcalc.common import load_analysis_bounds
 
 bounds = load_analysis_bounds("config/analysis_bounds.json")
 ```
@@ -157,7 +157,7 @@ spacings = spacings_df['alongshore_distance_ft'].values
 
 **Actions:**
 ```python
-from profile_analysis.tools.bmap import calculate_cross_sectional_area
+from profcalc.tools.bmap import calculate_cross_sectional_area
 
 # For each surveyed profile
 for profile in survey_2020:
@@ -187,7 +187,7 @@ for profile in survey_2020:
 
 **Actions:**
 ```python
-from profile_analysis.tools.monitoring import compare_profile_to_template
+from profcalc.tools.monitoring import compare_profile_to_template
 
 results = []
 for profile in survey_2020:
@@ -227,7 +227,7 @@ R02     | 1550.2        | 1500.0        | 0.0     | 50.2   | 103.3%
 
 **Actions:**
 ```python
-from profile_analysis.tools.monitoring import calculate_temporal_changes
+from profcalc.tools.monitoring import calculate_temporal_changes
 
 # Compare 2020 vs 2019
 changes_df = calculate_temporal_changes(
@@ -261,7 +261,7 @@ Volume = (Area₁ + Area₂) / 2 × Distance
 
 **Actions:**
 ```python
-from profile_analysis.tools.monitoring import calculate_volume_between_profiles
+from profcalc.tools.monitoring import calculate_volume_between_profiles
 
 volumes = []
 for i in range(len(survey_2020) - 1):
@@ -292,7 +292,7 @@ volumes_df = pd.DataFrame(volumes)
 
 **Actions:**
 ```python
-from profile_analysis.tools.monitoring import calculate_project_totals
+from profcalc.tools.monitoring import calculate_project_totals
 
 project_results = calculate_project_totals(
     surveyed_profiles=survey_2020,
@@ -351,7 +351,7 @@ Period        | Volume Change | Annual Rate | Cumulative Since Baseline
 
 **Actions:**
 ```python
-from profile_analysis.tools.monitoring import extract_shoreline_position
+from profcalc.tools.monitoring import extract_shoreline_position
 
 shoreline_data = []
 for profile in survey_2020:
@@ -377,7 +377,7 @@ shoreline_df = pd.DataFrame(shoreline_data)
 
 **Actions:**
 ```python
-from profile_analysis.tools.monitoring import calculate_shoreline_metrics
+from profcalc.tools.monitoring import calculate_shoreline_metrics
 
 shoreline_metrics = calculate_shoreline_metrics(
     surveyed_profiles=survey_2020,
@@ -401,7 +401,7 @@ R02     | 285.2        | 275.0        | +10.2    | Seaward   | Yes
 
 **Actions:**
 ```python
-from profile_analysis.tools.monitoring import export_shoreline_shapefile
+from profcalc.tools.monitoring import export_shoreline_shapefile
 
 # Export shoreline positions as point shapefile
 export_shoreline_shapefile(
@@ -445,7 +445,7 @@ all_shorelines = pd.concat([
 ])
 
 # Calculate change rates
-from profile_analysis.tools.monitoring import calculate_shoreline_change_rates
+from profcalc.tools.monitoring import calculate_shoreline_change_rates
 
 change_rates = calculate_shoreline_change_rates(
     shoreline_data=all_shorelines,
@@ -472,7 +472,7 @@ R02     | 270.3    | 278.5    | 285.2    | +7.5 ft/yr  | Accretion | 0.95
 
 1. **Cross-Sectional Area Summary**
 ```python
-from profile_analysis.tools.monitoring import generate_area_summary_table
+from profcalc.tools.monitoring import generate_area_summary_table
 
 area_table = generate_area_summary_table(
     comparison_df=comparison_df,
@@ -506,7 +506,7 @@ totals_table.to_excel("output/tables/project_totals_2020.xlsx", index=False)
 
 **Actions:**
 ```python
-from profile_analysis.tools.monitoring import populate_excel_template
+from profcalc.tools.monitoring import populate_excel_template
 
 # Load existing formatted template
 template_wb = "templates/monitoring_report_template.xlsx"
@@ -530,7 +530,7 @@ populate_excel_template(
 
 **Actions:**
 ```python
-from profile_analysis.tools.monitoring import generate_summary_statistics
+from profcalc.tools.monitoring import generate_summary_statistics
 
 stats = generate_summary_statistics(
     comparison_df=comparison_df,

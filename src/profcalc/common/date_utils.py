@@ -22,6 +22,7 @@ from typing import Optional, Tuple
 # Core date parsing
 # ---------------------------------------------------------------------------
 
+
 def parse_date(date_str: str, tz: Optional[timezone] = None) -> datetime:
     """
     Parse a date string into a datetime object.
@@ -35,7 +36,7 @@ def parse_date(date_str: str, tz: Optional[timezone] = None) -> datetime:
     date_str = date_str.strip()
 
     # --- Relative date (e.g., "30d", "6m", "1y")
-    match = re.match(r'^(\d+)([dmy])$', date_str.lower())
+    match = re.match(r"^(\d+)([dmy])$", date_str.lower())
     if match:
         amount = int(match.group(1))
         unit = match.group(2)
@@ -49,7 +50,7 @@ def parse_date(date_str: str, tz: Optional[timezone] = None) -> datetime:
         pass
 
     # --- Absolute date formats
-    for fmt in ['%Y-%m-%d', '%Y-%m', '%Y']:
+    for fmt in ["%Y-%m-%d", "%Y-%m", "%Y"]:
         try:
             dt = datetime.strptime(date_str, fmt)
             return dt.replace(tzinfo=tz) if tz else dt
@@ -66,19 +67,20 @@ def parse_date(date_str: str, tz: Optional[timezone] = None) -> datetime:
 # Relative date handling
 # ---------------------------------------------------------------------------
 
+
 def calculate_relative_date(base_date: datetime, offset: str) -> datetime:
     """Calculate a date relative to a base date (e.g., '30d', '2m', '1y')."""
     offset = offset.strip().lower()
-    match = re.match(r'^(\d+)([dmy])$', offset)
+    match = re.match(r"^(\d+)([dmy])$", offset)
     if not match:
         raise ValueError(f"Invalid offset format: '{offset}' (use Nd/Nm/Ny)")
 
     amount, unit = int(match[1]), match[2]
-    if unit == 'd':
+    if unit == "d":
         return base_date - timedelta(days=amount)
-    elif unit == 'm':
+    elif unit == "m":
         return base_date - timedelta(days=amount * 30)
-    elif unit == 'y':
+    elif unit == "y":
         return base_date - timedelta(days=amount * 365)
     else:
         raise ValueError(f"Unsupported unit: {unit}")
@@ -88,7 +90,10 @@ def calculate_relative_date(base_date: datetime, offset: str) -> datetime:
 # Validation and range utilities
 # ---------------------------------------------------------------------------
 
-def validate_date_range(start_date: Optional[datetime], end_date: Optional[datetime]) -> bool:
+
+def validate_date_range(
+    start_date: Optional[datetime], end_date: Optional[datetime]
+) -> bool:
     """Validate that a date range is logical (start <= end)."""
     if start_date is None or end_date is None:
         return True
@@ -110,6 +115,7 @@ def is_within_range(dt: datetime, start: datetime, end: datetime) -> bool:
 # ---------------------------------------------------------------------------
 # Conversion helpers
 # ---------------------------------------------------------------------------
+
 
 def ensure_naive(dt: datetime) -> datetime:
     """Return a naive (timezone-free) datetime."""
@@ -142,7 +148,10 @@ def now_local() -> datetime:
 # Quick, safe converters
 # ---------------------------------------------------------------------------
 
-def to_datetime_safe(date_str: str, tz: Optional[timezone] = None) -> datetime | None:
+
+def to_datetime_safe(
+    date_str: str, tz: Optional[timezone] = None
+) -> datetime | None:
     """Safely convert a date string to a datetime, returning None on failure."""
     try:
         return parse_date(date_str, tz=tz)
@@ -154,7 +163,7 @@ def parse_date_range(
     start_str: str | None,
     end_str: str | None,
     tz: Optional[timezone] = None,
-    allow_none: bool = True
+    allow_none: bool = True,
 ) -> Tuple[Optional[datetime], Optional[datetime]]:
     """
     Parse and validate a date range (start, end) from string inputs.
@@ -170,4 +179,3 @@ def parse_date_range(
         validate_date_range(start_dt, end_dt)
 
     return start_dt, end_dt
-

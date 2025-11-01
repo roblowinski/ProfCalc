@@ -1,4 +1,5 @@
 """Test extra field preservation in conversions."""
+
 import sys
 from pathlib import Path
 
@@ -58,4 +59,3 @@ convert_format(
 )
 
 print("\n✅ All tests complete!")
-

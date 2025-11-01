@@ -74,7 +74,9 @@ def compute_equilibrium(
         raise ValueError("Either A or grain_size must be provided.")
 
     if A is None:
-        assert grain_size is not None  # This should be guaranteed by the check above
+        assert (
+            grain_size is not None
+        )  # This should be guaranteed by the check above
         A = compute_A_from_grain_size(grain_size)
 
     x = np.arange(xon, xoff + dx, dx)
@@ -91,4 +93,3 @@ def compute_equilibrium(
     }
 
     return profile_df
-

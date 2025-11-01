@@ -34,4 +34,3 @@ for filepath, description in test_files:
 print("\n" + "=" * 70)
 print("✅ Format detection is now CONTENT-BASED, not extension-based!")
 print("=" * 70)
-

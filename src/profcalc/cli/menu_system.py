@@ -1,5 +1,36 @@
-def conversion_submenu():
-    """Display and handle the Conversion submenu under Quick Tools option 2."""
+﻿"""
+Interactive Menu System for ProfCalc.
+
+This module provides the command-line interface for ProfCalc, offering
+a hierarchical menu system for accessing various analysis tools and
+utilities. The menu system supports both database and file-based data
+sources, with placeholders for future database integration.
+
+The menu is organized into logical workflows:
+- Data Management: Source selection and data operations
+- Annual Monitoring: Shoreline analysis and reporting tools
+- Profile Analysis: Survey comparison and volumetric calculations
+- Quick Tools: Utility functions for common tasks
+"""
+
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    pass
+
+
+def conversion_submenu() -> None:
+    """Display and handle the Conversion submenu under Quick Tools option 2.
+
+    Provides options for converting between different file formats:
+    - BMAP Free Format to XYZ/9-Col
+    - BMAP Free Format to Shapefile
+    - XYZ/9-Col to BMAP Free Format
+    - XYZ/9-Col to Shapefile
+    - Point Shapefile conversions
+
+    Note: All conversion options are currently stub implementations.
+    """
     while True:
         print("\n--- File Conversion Options ---")
         print("1. BMAP Free Format to XYZ/9-Col")
@@ -27,8 +58,19 @@ def conversion_submenu():
             break
         else:
             print("Invalid selection. Please try again.")
-def shoreline_analysis_menu():
-    """Display and handle the Shoreline Analysis workflow submenu (workflow-centric, grouped steps)."""
+
+
+def shoreline_analysis_menu() -> None:
+    """Display and handle the Shoreline Analysis workflow submenu.
+
+    Provides a workflow-centric menu for shoreline analysis with steps:
+    - Extract & Prepare Shoreline Data
+    - Calculate Shoreline Metrics
+    - Summarize & Review Results
+    - Export Results
+
+    Note: All analysis steps are currently stub implementations.
+    """
     while True:
         print("\n--- Shoreline Analysis (Annual Monitoring) ---")
         print("1. Extract & Prepare Shoreline Data")
@@ -53,36 +95,97 @@ def shoreline_analysis_menu():
             print("Invalid selection. Please try again.")
 
 
-def cross_sectional_analysis(session):
+def cross_sectional_analysis(session: "SessionContext") -> None:
+    """Perform cross-sectional analysis.
+
+    Args:
+        session: Current session context with data source information.
+
+    Note: This function is currently a stub implementation.
+    """
     print("[STUB] Cross-sectional analysis not yet implemented.")
 
 
-def volumetric_change(session):
+def volumetric_change(session: "SessionContext") -> None:
+    """Analyze volumetric changes between surveys.
+
+    Args:
+        session: Current session context with data source information.
+
+    Note: This function is currently a stub implementation.
+    """
     print("[STUB] Volumetric change analysis not yet implemented.")
 
 
-def shoreline_change(session):
+def shoreline_change(session: "SessionContext") -> None:
+    """Analyze shoreline position changes over time.
+
+    Args:
+        session: Current session context with data source information.
+
+    Note: This function is currently a stub implementation.
+    """
     print("[STUB] Shoreline change analysis not yet implemented.")
 
 
-def temporal_trends(session):
+def temporal_trends(session: "SessionContext") -> None:
+    """Analyze temporal trends in profile data.
+
+    Args:
+        session: Current session context with data source information.
+
+    Note: This function is currently a stub implementation.
+    """
     print("[STUB] Temporal trends analysis not yet implemented.")
 
 
-def outlier_detection(session):
+def outlier_detection(session: "SessionContext") -> None:
+    """Detect outliers in profile datasets.
+
+    Args:
+        session: Current session context with data source information.
+
+    Note: This function is currently a stub implementation.
+    """
     print("[STUB] Outlier detection not yet implemented.")
 
 
-def statistics_summaries(session):
+def statistics_summaries(session: "SessionContext") -> None:
+    """Generate statistical summaries of profile data.
+
+    Args:
+        session: Current session context with data source information.
+
+    Note: This function is currently a stub implementation.
+    """
     print("[STUB] Statistics & summaries not yet implemented.")
 
 
-def export_results(session):
+def export_results(session: "SessionContext") -> None:
+    """Export analysis results to various formats.
+
+    Args:
+        session: Current session context with data source information.
+
+    Note: This function is currently a stub implementation.
+    """
     print("[STUB] Export results not yet implemented.")
 
 
-def main_menu():
-    """Display and handle the main menu."""
+def main_menu() -> None:
+    """Display and handle the main ProfCalc menu.
+
+    Provides access to all major ProfCalc functionality through a numbered menu:
+    - Data Management
+    - Annual Monitoring Report Analyses
+    - File Conversion Tools
+    - Profile Analysis Tools
+    - Batch Processing
+    - Configuration & Settings
+    - Quick Tools
+    - Help & Documentation
+    - Exit
+    """
     while True:
         print("\n=== ProfCalc Main Menu ===")
         print("1. Data Management")
@@ -103,7 +206,7 @@ def main_menu():
         elif choice == "3":
             print("File Conversion Tools - Coming Soon!")
         elif choice == "4":
-            profile_analysis_menu()
+            profcalc_profcalc_menu()
         elif choice == "5":
             print("Batch Processing - Coming Soon!")
         elif choice == "6":
@@ -119,8 +222,17 @@ def main_menu():
             print("Invalid selection. Please try again.")
 
 
-def annual_monitoring_menu():
-    """Display and handle the Annual Monitoring Report Analyses menu."""
+def annual_monitoring_menu() -> None:
+    """Display and handle the Annual Monitoring Report Analyses menu.
+
+    Provides access to shoreline monitoring and analysis tools:
+    - Import Survey Data
+    - Profile Analysis
+    - Shoreline Analysis
+    - Condition Evaluation
+    - Reporting & Export
+    - Run XOn/XOff Volume Tool
+    """
     while True:
         print("\n--- Annual Monitoring Report Analyses ---")
         print("1. Import Survey Data")
@@ -146,17 +258,11 @@ def annual_monitoring_menu():
             print("Invalid selection. Please try again.")
 
 
-"""
-Interactive menu system for Profile Calculator.
-Includes data source selection and session context for dual-mode (DB/file) operation.
-"""
-
-
 # Simple session context for storing user choices
 class SessionContext:
     def __init__(self):
-        self.data_source = None  # 'database' or 'file'
-        self.data_source_details = (
+        self.data_source: Optional[str] = None  # 'database' or 'file'
+        self.data_source_details: Optional[str] = (
             None  # e.g., DB connection string or file path(s)
         )
 
@@ -164,8 +270,14 @@ class SessionContext:
 session = SessionContext()
 
 
-def select_data_source():
-    """Prompt user to select data source (database or file)."""
+def select_data_source() -> None:
+    """Prompt user to select data source for analysis.
+
+    Allows selection between:
+    - Database connection (placeholder for future implementation)
+    - File-based data import (placeholder for future implementation)
+    - Exit the application
+    """
     while True:
         print("\n=== Select Data Source ===")
         print("1. Connect to Profile Database")
@@ -195,8 +307,14 @@ def select_data_source():
             print("Invalid selection. Please try again.")
 
 
-def data_management_menu():
-    """Display and handle the Data Management menu."""
+def data_management_menu() -> None:
+    """Display and handle the Data Management menu.
+
+    Provides data management operations:
+    - Change Data Source
+    - Import/Export Data (stub)
+    - View Data Summary (stub)
+    """
     while True:
         print("\n--- Data Management ---")
         print(
@@ -220,38 +338,13 @@ def data_management_menu():
             print("Invalid selection. Please try again.")
 
 
-def profile_analysis_menu():
-def survey_vs_design_menu():
-    while True:
-        print("\n--- Survey vs. Design Template Analysis ---")
-        print("1. Prepare & Load Data (survey, template, azimuth)")
-        print("2. Pair & Align Profiles")
-        print("3. Compute Volumes (interpolate, distance, area, wedge)")
-        print("4. Review & Export Results")
-        print("5. Run Full Workflow")
-        print("6. Back to Profile Analysis Menu")
-        choice = input("Select an option: ").strip()
-        if choice == "6":
-            break
-        else:
-            print(f"[STUB] Option {choice} not yet implemented.")
+def profcalc_profcalc_menu() -> None:
+    """Display and handle the Profile Analysis Tools menu.
 
-def survey_vs_survey_menu():
-    while True:
-        print("\n--- Survey vs. Survey (Multi-Year) Analysis ---")
-        print("1. Prepare & Load Data (multiple surveys, azimuth)")
-        print("2. Select Comparison Mode (adjacent, custom, all-vs-all)")
-        print("3. Pair & Align Profiles")
-        print("4. Compute Volumes for Selected Comparisons")
-        print("5. Review & Export Results")
-        print("6. Run Full Workflow")
-        print("7. Back to Profile Analysis Menu")
-        choice = input("Select an option: ").strip()
-        if choice == "7":
-            break
-        else:
-            print(f"[STUB] Option {choice} not yet implemented.")
-    """Display and handle the Profile Analysis Tools menu."""
+    Provides access to profile analysis workflows:
+    - Survey vs. Design Template Analysis
+    - Survey vs. Survey (Multi-Year) Analysis
+    """
     while True:
         print("\n--- Profile Analysis ---")
         print(f"[Current Data Source: {session.data_source or 'Not Set'}]")
@@ -269,12 +362,71 @@ def survey_vs_survey_menu():
             print("Invalid selection. Please try again.")
 
 
+def survey_vs_design_menu() -> None:
+    """Display and handle the Survey vs. Design Template Analysis menu.
+
+    Provides workflow steps for comparing survey data against design templates:
+    - Prepare & Load Data
+    - Pair & Align Profiles
+    - Compute Volumes
+    - Review & Export Results
+    - Run Full Workflow
+
+    Note: All options are currently stub implementations.
+    """
+    while True:
+        print("\n--- Survey vs. Design Template Analysis ---")
+        print("1. Prepare & Load Data (survey, template, azimuth)")
+        print("2. Pair & Align Profiles")
+        print("3. Compute Volumes (interpolate, distance, area, wedge)")
+        print("4. Review & Export Results")
+        print("5. Run Full Workflow")
+        print("6. Back to Profile Analysis Menu")
+        choice = input("Select an option: ").strip()
+        if choice == "6":
+            break
+        else:
+            print(f"[STUB] Option {choice} not yet implemented.")
 
 
+def survey_vs_survey_menu() -> None:
+    """Display and handle the Survey vs. Survey (Multi-Year) Analysis menu.
+
+    Provides workflow steps for comparing multiple survey datasets:
+    - Prepare & Load Data
+    - Select Comparison Mode
+    - Pair & Align Profiles
+    - Compute Volumes for Selected Comparisons
+    - Review & Export Results
+    - Run Full Workflow
+
+    Note: All options are currently stub implementations.
+    """
+    while True:
+        print("\n--- Survey vs. Survey (Multi-Year) Analysis ---")
+        print("1. Prepare & Load Data (multiple surveys, azimuth)")
+        print("2. Select Comparison Mode (adjacent, custom, all-vs-all)")
+        print("3. Pair & Align Profiles")
+        print("4. Compute Volumes for Selected Comparisons")
+        print("5. Review & Export Results")
+        print("6. Run Full Workflow")
+        print("7. Back to Profile Analysis Menu")
+        choice = input("Select an option: ").strip()
+        if choice == "7":
+            break
+        else:
+            print(f"[STUB] Option {choice} not yet implemented.")
 
 
-def quick_tools_menu():
-    """Display and handle the Quick Tools submenu."""
+def quick_tools_menu() -> None:
+    """Display and handle the Quick Tools submenu.
+
+    Provides access to utility functions for common tasks:
+    - Find Common X Bounds Within a Group of Profiles
+    - Convert File Format & Create Shapefiles
+    - Get an Inventory of Profiles from a BMap File
+    - Assign Profile Names to XYZ/CSV Files Missing Profile IDs
+    """
     while True:
         print("\n--- Quick Tools ---")
         print(

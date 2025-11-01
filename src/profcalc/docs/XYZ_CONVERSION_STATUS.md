@@ -1,4 +1,4 @@
-# XYZ File Conversion Implementation Status
+﻿# XYZ File Conversion Implementation Status
 
 ## Overview
 This document outlines the current status of XYZ file conversion functionality in the ProfCalc coastal profile analysis system.
@@ -145,4 +145,5 @@ def execute_xyz_to_bmap() -> None:
 
 **Last Updated**: October 27, 2025
 **Status**: Ready for implementation of XYZ enhancements</content>
-<parameter name="filePath">c:\__PROJECTS\Scripts\Python\Coastal\Profile_Analysis\XYZ_CONVERSION_STATUS.md
+<parameter name="filePath">c:\__PROJECTS\Scripts\Python\Coastal\profcalc\XYZ_CONVERSION_STATUS.md
+
