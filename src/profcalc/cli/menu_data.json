@@ -1,0 +1,163 @@
+﻿{
+  "menu": [
+    {
+      "id": "data_management",
+      "title": "Data Management",
+      "handler": null,
+      "children": [
+        { "id": "data_management.import", "title": "Import Data", "handler": "data.import_data" },
+        {
+          "id": "data_management.view",
+          "title": "View Data",
+          "handler": null,
+          "children": [
+            { "id": "data_management.view.browse", "title": "Browse Table/Profiles", "handler": "data.browse" },
+            { "id": "data_management.view.plot", "title": "Plot Data", "handler": "data.plot" },
+            { "id": "data_management.view.summary", "title": "View Summary Stats", "handler": "data.summary" },
+            { "id": "data_management.view.back", "title": "Back to Data Management", "handler": null }
+          ]
+        },
+        {
+          "id": "data_management.qaqc",
+          "title": "QA/QC Tasks",
+          "handler": null,
+          "children": [
+            { "id": "data_management.qaqc.integrity", "title": "Data Integrity Check", "handler": "data.integrity_check" },
+            { "id": "data_management.qaqc.outliers", "title": "Outlier Detection", "handler": "data.outlier_detection" },
+            { "id": "data_management.qaqc.spec", "title": "Spec/Requirements Check", "handler": "data.spec_check" },
+            { "id": "data_management.qaqc.validation", "title": "Validation", "handler": "data.validation" },
+            { "id": "data_management.qaqc.back", "title": "Back to Data Management Menu", "handler": null }
+          ]
+        },
+        {
+          "id": "data_management.modify",
+          "title": "Modify Data",
+          "handler": null,
+          "children": [
+            { "id": "data_management.modify.edit", "title": "Edit/Update Data", "handler": "data.edit" },
+            { "id": "data_management.modify.merge", "title": "Merge/Append Data", "handler": "data.merge" },
+            { "id": "data_management.modify.delete", "title": "Delete Data", "handler": "data.delete" },
+            { "id": "data_management.modify.back", "title": "Back to Data Management", "handler": null }
+          ]
+        },
+        { "id": "data_management.export", "title": "Save/Export Data", "handler": "data.export" },
+        { "id": "data_management.back", "title": "Back to Main Menu", "handler": null }
+      ]
+    },
+    {
+      "id": "annual_monitoring",
+      "title": "Annual Monitoring Report Analyses",
+      "handler": null,
+      "children": [
+        { "id": "annual.import", "title": "Import Survey Data", "handler": "annual.import_survey" },
+  { "id": "annual.profile", "title": "Profile Analysis", "handler": "annual.profcalc_profcalc" },
+        { "id": "annual.shoreline", "title": "Shoreline Analysis", "handler": "annual.shoreline_analysis" },
+        { "id": "annual.condition", "title": "Condition Evaluation", "handler": "annual.condition_evaluation" },
+        { "id": "annual.reporting", "title": "Reporting & Export", "handler": "annual.reporting" },
+        { "id": "annual.back", "title": "Back to Main Menu", "handler": null }
+      ]
+    },
+    {
+      "id": "pre_construction",
+      "title": "Pre-Construction Template Design",
+      "handler": null,
+      "children": [
+        { "id": "pre.select", "title": "Select Profiles", "handler": "pre.select_profiles" },
+        { "id": "pre.cross_section", "title": "Cross-Sectional Analysis", "handler": "pre.cross_section" },
+        { "id": "pre.volume", "title": "Volume Calculations", "handler": "pre.volume" },
+        { "id": "pre.template", "title": "Template Profile Generation", "handler": "pre.template_generation" },
+        { "id": "pre.stats", "title": "Statistics & Summaries", "handler": "pre.statistics" },
+        { "id": "pre.export", "title": "Export All Results", "handler": "pre.export_all" },
+        { "id": "pre.back", "title": "Back to Main Menu", "handler": null }
+      ]
+    },
+    {
+      "id": "construction_submittal",
+      "title": "Construction Submittal Analyses",
+      "handler": null,
+      "children": [
+        { "id": "cs.select", "title": "Select Profiles", "handler": "cs.select_profiles" },
+        { "id": "cs.cross_section", "title": "Cross-Sectional Analysis", "handler": "cs.cross_section" },
+        { "id": "cs.volume", "title": "Volume Calculations", "handler": "cs.volume" },
+        { "id": "cs.compliance", "title": "Compliance Checking", "handler": "cs.compliance" },
+        { "id": "cs.export", "title": "Export All Results", "handler": "cs.export_all" },
+        { "id": "cs.back", "title": "Back to Main Menu", "handler": null }
+      ]
+    },
+    {
+      "id": "project_storm",
+      "title": "Project Storm Analyses",
+      "handler": null,
+      "children": [
+        { "id": "ps.select", "title": "Select Profiles", "handler": "ps.select_profiles" },
+        { "id": "ps.cross_section", "title": "Cross-Sectional Analysis", "handler": "ps.cross_section" },
+        { "id": "ps.volume", "title": "Volume Calculations", "handler": "ps.volume" },
+        { "id": "ps.shoreline", "title": "Shoreline Change", "handler": "ps.shoreline_change" },
+        { "id": "ps.stats", "title": "Statistics & Summaries", "handler": "ps.statistics" },
+        { "id": "ps.export", "title": "Export All Results", "handler": "ps.export_all" },
+        { "id": "ps.back", "title": "Back to Main Menu", "handler": null }
+      ]
+    },
+    {
+      "id": "general_purpose",
+      "title": "General Purpose Analyses",
+      "handler": null,
+      "children": [
+        { "id": "gp.select", "title": "Select Profiles", "handler": "gp.select_profiles" },
+        { "id": "gp.cross_section", "title": "Cross-Sectional Analysis", "handler": "gp.cross_section" },
+        { "id": "gp.volume", "title": "Volume Calculations", "handler": "gp.volume" },
+        { "id": "gp.shoreline", "title": "Shoreline Change", "handler": "gp.shoreline_change" },
+        { "id": "gp.statistics", "title": "Statistics & Summaries", "handler": "gp.statistics" },
+        { "id": "gp.export", "title": "Export All Results", "handler": "gp.export_all" },
+        { "id": "gp.back", "title": "Back to Main Menu", "handler": null }
+      ]
+    },
+    {
+      "id": "batch_processing",
+      "title": "Batch Processing",
+      "handler": null,
+      "children": [
+        { "id": "batch.select", "title": "Select Batch Type", "handler": "batch.select_type" },
+        { "id": "batch.configure", "title": "Configure Batch Parameters", "handler": "batch.configure" },
+        { "id": "batch.run", "title": "Run Batch Job", "handler": "batch.run" },
+        { "id": "batch.view_logs", "title": "View Batch Logs/Reports", "handler": "batch.view_logs" },
+        { "id": "batch.back", "title": "Back to Main Menu", "handler": null }
+      ]
+    },
+    {
+      "id": "configuration",
+      "title": "Configuration & Settings",
+      "handler": null,
+      "children": [
+        { "id": "config.paths", "title": "Set Data Paths", "handler": "config.set_paths" },
+        { "id": "config.toggle", "title": "Toggle Features/Options", "handler": "config.toggle_options" },
+        { "id": "config.save", "title": "Save/Load Configuration", "handler": "config.save_load" },
+        { "id": "config.back", "title": "Back to Main Menu", "handler": null }
+      ]
+    },
+    {
+      "id": "quick_tools",
+      "title": "Quick Tools",
+      "handler": null,
+      "children": [
+        { "id": "quick.file_convert", "title": "File Conversion Utility", "handler": "quick.file_conversion" },
+        { "id": "quick.coord_transform", "title": "Coordinate Transform Utility", "handler": "quick.coord_transform" },
+        { "id": "quick.inspect", "title": "Data Inspection Utility", "handler": "quick.data_inspect" },
+        { "id": "quick.back", "title": "Back to Main Menu", "handler": null }
+      ]
+    },
+    {
+      "id": "help",
+      "title": "Help & Documentation",
+      "handler": null,
+      "children": [
+        { "id": "help.user_guide", "title": "User Guide", "handler": "help.user_guide" },
+        { "id": "help.workflow_help", "title": "Workflow Help", "handler": "help.workflow_help" },
+        { "id": "help.about", "title": "About/Version Info", "handler": "help.about" },
+        { "id": "help.back", "title": "Back to Main Menu", "handler": null }
+      ]
+    },
+    { "id": "exit", "title": "Exit", "handler": "system.exit" }
+  ]
+}
+
