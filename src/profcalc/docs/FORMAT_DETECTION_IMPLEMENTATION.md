@@ -27,6 +27,7 @@ Centralized format detection with detailed analysis.
 - `get_format_description(format_type)` - Human-readable format descriptions
 
 **FormatDetectionResult Class:**
+
 ```python
 FormatDetectionResult(
     format_type: str,          # 'bmap', 'csv_standard', 'csv_9col', 'unknown'
@@ -94,6 +95,7 @@ Unified parsing for all supported formats.
 ## User Confirmation Workflow
 
 ### High Confidence Detection
+
 ```
 ==================================================================
 FILE FORMAT DETECTION
@@ -112,6 +114,7 @@ Proceed with this format? [Y/n]:
 ```
 
 ### Medium/Low Confidence Detection
+
 ```
 ==================================================================
 FILE FORMAT DETECTION
@@ -184,6 +187,7 @@ Proceed with this format? [y/N]:
 ## Integration with Existing Code
 
 ### To Use in Any Tool
+
 ```python
 from profcalc.common.file_parser import parse_file
 
@@ -201,6 +205,7 @@ for profile in parsed.profiles:
 ```
 
 ### ParsedFile Structure
+
 ```python
 ParsedFile(
     format_type='csv_9col',

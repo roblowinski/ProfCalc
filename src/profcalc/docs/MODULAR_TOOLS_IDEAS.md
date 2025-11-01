@@ -29,6 +29,7 @@ This document defines the generic, reusable calculation tools needed for coastal
 **Purpose:** Calculate area between two elevation bounds using trapezoidal integration
 
 **Function Signature:**
+
 ```python
 def calculate_cross_sectional_area(
     profile: Profile,
@@ -58,6 +59,7 @@ def calculate_cross_sectional_area(
 - Handle irregular spacing and missing data
 
 **Usage Example:**
+
 ```python
 # Area above MHW
 area_mhw = calculate_cross_sectional_area(
@@ -81,6 +83,7 @@ area_closure = calculate_cross_sectional_area(
 **Purpose:** Compare cross-sectional areas between two profiles (surveyed vs. template, or temporal)
 
 **Function Signature:**
+
 ```python
 def compare_profile_areas(
     profile1: Profile,
@@ -110,6 +113,7 @@ def compare_profile_areas(
 ```
 
 **Usage Example:**
+
 ```python
 comparison = compare_profile_areas(
     profile1=surveyed_2020,
@@ -128,6 +132,7 @@ print(f"% of Template: {(comparison['area1_above_mhw'] / comparison['area2_above
 **Purpose:** Extract key morphological parameters from beach profile
 
 **Function Signature:**
+
 ```python
 def extract_profile_morphology(
     profile: Profile,
@@ -159,6 +164,7 @@ def extract_profile_morphology(
 **Purpose:** Calculate volume between two adjacent profile lines using average-end-area method
 
 **Function Signature:**
+
 ```python
 def calculate_volume_between_profiles(
     profile1: Profile,
@@ -190,6 +196,7 @@ def calculate_volume_between_profiles(
 ```
 
 **Usage Example:**
+
 ```python
 volume = calculate_volume_between_profiles(
     profile1=profiles[0],
@@ -209,6 +216,7 @@ print(f"         {volume['volume_above_mhw'] / 27:.0f} cu yd")
 **Purpose:** Calculate total volumes across entire project extent
 
 **Function Signature:**
+
 ```python
 def calculate_project_volumes(
     profiles: List[Profile],
@@ -240,6 +248,7 @@ def calculate_project_volumes(
 **Purpose:** Calculate total volume needed to meet design template
 
 **Function Signature:**
+
 ```python
 def calculate_template_deficit_volume(
     surveyed_profiles: List[Profile],
@@ -275,6 +284,7 @@ def calculate_template_deficit_volume(
 **Purpose:** Find cross-shore distance where profile crosses target elevation
 
 **Function Signature:**
+
 ```python
 def extract_shoreline_position(
     profile: Profile,
@@ -301,6 +311,7 @@ def extract_shoreline_position(
 ```
 
 **Usage Example:**
+
 ```python
 shoreline_pos = extract_shoreline_position(
     profile=surveyed_profile,
@@ -321,6 +332,7 @@ else:
 **Purpose:** Extract shoreline positions for all profiles and compare to templates
 
 **Function Signature:**
+
 ```python
 def calculate_shoreline_metrics(
     surveyed_profiles: List[Profile],
@@ -353,6 +365,7 @@ def calculate_shoreline_metrics(
 **Purpose:** Calculate annual shoreline movement rates from multi-year data
 
 **Function Signature:**
+
 ```python
 def calculate_shoreline_change_rates(
     shoreline_data: pd.DataFrame,
@@ -388,6 +401,7 @@ def calculate_shoreline_change_rates(
 **Purpose:** Calculate cross-sectional area changes between survey dates
 
 **Function Signature:**
+
 ```python
 def calculate_temporal_area_changes(
     current_profiles: List[Profile],
@@ -421,6 +435,7 @@ def calculate_temporal_area_changes(
 **Purpose:** Calculate volumetric changes between survey dates
 
 **Function Signature:**
+
 ```python
 def calculate_temporal_volume_changes(
     current_profiles: List[Profile],
@@ -454,6 +469,7 @@ def calculate_temporal_volume_changes(
 **Purpose:** Calculate annual erosion/accretion rates from multi-year data
 
 **Function Signature:**
+
 ```python
 def calculate_annualized_rates(
     surveys: Dict[str, List[Profile]],
@@ -488,6 +504,7 @@ def calculate_annualized_rates(
 **Purpose:** Calculate summary statistics for reporting
 
 **Function Signature:**
+
 ```python
 def generate_summary_statistics(
     comparison_results: pd.DataFrame,
@@ -521,6 +538,7 @@ def generate_summary_statistics(
 **Purpose:** Identify erosion or accretion hotspots
 
 **Function Signature:**
+
 ```python
 def identify_hotspots(
     temporal_changes: pd.DataFrame,
@@ -552,6 +570,7 @@ def identify_hotspots(
 **Purpose:** Export spatial data to ESRI shapefile format for ArcGIS
 
 **Function Signature:**
+
 ```python
 def export_shapefile(
     data: pd.DataFrame,
@@ -576,6 +595,7 @@ def export_shapefile(
 ```
 
 **Usage Example:**
+
 ```python
 export_shapefile(
     data=shoreline_df,
@@ -598,6 +618,7 @@ export_shapefile(
 **Purpose:** Export results to formatted Excel workbook
 
 **Function Signature:**
+
 ```python
 def export_to_excel(
     data_dict: Dict[str, pd.DataFrame],
@@ -623,6 +644,7 @@ def export_to_excel(
 **Purpose:** Populate pre-formatted Excel template with calculated results
 
 **Function Signature:**
+
 ```python
 def populate_excel_template(
     template_path: str,
@@ -649,6 +671,7 @@ def populate_excel_template(
 ## Tool Composition Examples
 
 ### Example 1: Complete Profile Analysis
+
 ```python
 # Load data
 profile = read_csv_profiles("data/R01_2020.csv")[0]
@@ -673,6 +696,7 @@ results = {
 ```
 
 ### Example 2: Multi-Year Temporal Analysis
+
 ```python
 # Load multiple years
 surveys = {
@@ -698,6 +722,7 @@ hotspots = identify_hotspots(area_changes, threshold_percentile=90)
 ```
 
 ### Example 3: Complete Workflow with Export
+
 ```python
 # Analysis
 template_deficit = calculate_template_deficit_volume(

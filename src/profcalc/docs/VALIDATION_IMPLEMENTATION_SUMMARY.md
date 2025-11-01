@@ -26,6 +26,7 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 - Handles formats like: `"OC 117"`, `"Test Profile 2"`, `"Site-A Transect 5"`
 
 **Test Results:**
+
 ```
 ✅ Profile names with spaces preserved in XYZ→BMAP conversion
 ✅ Profile names with spaces preserved in XYZ→BMAP→XYZ roundtrip
@@ -50,6 +51,7 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 - Warns if individual lines have varying column counts
 
 **Error Message Example:**
+
 ```
 ❌ Column count validation failed
    File: data/temp/test_2col.xyz
@@ -64,6 +66,7 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 ```
 
 **Test Results:**
+
 ```
 ✅ Validation correctly rejected insufficient columns
 ✅ File with sufficient columns converted successfully
@@ -89,6 +92,7 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 - Shows which column was selected
 
 **Warning Example:**
+
 ```
 ⚠️  WARNING: Multiple columns match 'z' coordinate:
    Matched columns: z, elevation, height
@@ -97,6 +101,7 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 ```
 
 **Test Results:**
+
 ```
 ✅ Duplicate Z columns detected (z, elevation)
 ✅ Duplicate X/Y columns detected (easting/utm_x, northing/utm_y)
@@ -160,6 +165,7 @@ All validation errors now include:
 ## Code Quality
 
 ### Linting & Type Checking
+
 ```
 ✅ Ruff linting: CLEAN (no errors)
 ✅ MyPy type checking: CLEAN (no errors)
@@ -183,6 +189,7 @@ All validation errors now include:
 ## User-Facing Improvements
 
 ### Before
+
 ```bash
 $ profcalc -c data.xyz -o output.csv --columns "Y X Z"
 Traceback (most recent call last):
@@ -191,6 +198,7 @@ IndexError: list index out of range
 ```
 
 ### After
+
 ```bash
 $ profcalc -c data.xyz -o output.csv --columns "Y X Z"
 ❌ Column count validation failed
@@ -203,12 +211,14 @@ $ profcalc -c data.xyz -o output.csv --columns "Y X Z"
 ```
 
 ### Before (Silent Ambiguity)
+
 ```bash
 $ profcalc -c data.csv -o output.xyz
 [Silently uses 'z' column, ignores 'elevation']
 ```
 
 ### After (Clear Warning)
+
 ```bash
 $ profcalc -c data.csv -o output.xyz
 ⚠️  WARNING: Multiple columns match 'z' coordinate:

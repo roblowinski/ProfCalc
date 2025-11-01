@@ -68,6 +68,7 @@ This document outlines the current status of XYZ file conversion functionality i
 ## Implementation Requirements
 
 ### XYZ to BMAP Conversion Function
+
 ```python
 def execute_xyz_to_bmap() -> None:
     """

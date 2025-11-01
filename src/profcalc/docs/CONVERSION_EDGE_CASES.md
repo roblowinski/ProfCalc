@@ -27,6 +27,7 @@ This document catalogs fringe cases, rare scenarios, and edge conditions that ca
 Profile names containing spaces are corrupted during BMAP round-trip conversion.
 
 **Example:**
+
 ```
 Input XYZ:
 # Profile: OC 117
@@ -68,6 +69,7 @@ Profile name parsed as "OC" (space-delimited split truncates)
 When user specifies column order requiring more columns than file provides, causes `IndexError` crash.
 
 **Example:**
+
 ```bash
 profcalc -c data.xyz -o output.csv --columns "Y X Z"
 
@@ -77,6 +79,7 @@ data.xyz contains:
 ```
 
 **Current Behavior:**
+
 ```python
 column_order = {'x': 1, 'y': 0, 'z': 2}
 z_val = float(parts[column_order['z']])  # parts[2] → IndexError!
@@ -108,6 +111,7 @@ z_val = float(parts[column_order['z']])  # parts[2] → IndexError!
 When CSV has multiple columns matching same coordinate pattern, first match is used without warning.
 
 **Example:**
+
 ```csv
 profile_id,x,y,z,distance,elevation
 OC117,604523.45,4312567.89,5.67,100.0,5.67
@@ -148,6 +152,7 @@ OC117,604523.45,4312567.89,5.67,100.0,5.67
 Files containing data in multiple coordinate systems (e.g., State Plane + Lat/Lon) process without error but produce invalid output.
 
 **Example:**
+
 ```csv
 profile_id,easting,northing,elevation
 OC117,604523.45,4312567.89,5.67    ← State Plane (feet)
@@ -184,6 +189,7 @@ OC118,-82.5432,28.3456,6.12        ← Lat/Lon (degrees)
 Very large coordinate values exceed fixed-width format specification in BMAP output.
 
 **Example:**
+
 ```python
 # BMAP writer uses fixed width:
 f.write(f"{x_val:10.2f} {z_val:10.2f}\n")
@@ -219,6 +225,7 @@ f.write(f"{x_val:10.2f} {z_val:10.2f}\n")
 When converting with `--baselines`, profiles missing from origin azimuth file get Y=0 by default.
 
 **Example:**
+
 ```bash
 profcalc -c profiles.bmap --to xyz --baselines origins.csv -o output.xyz
 
@@ -255,6 +262,7 @@ OC118: X,0,Z coordinates (Y=0 placeholder)
 XYZ files with only X and Z coordinates (no Y) are silently ignored.
 
 **Example:**
+
 ```
 # Profile: OC117
 100.0 5.67
@@ -262,6 +270,7 @@ XYZ files with only X and Z coordinates (no Y) are silently ignored.
 ```
 
 **Current Behavior:**
+
 ```python
 parts = line.split()
 if len(parts) >= 3:  # ❌ Requires 3 columns
@@ -294,6 +303,7 @@ if len(parts) >= 3:  # ❌ Requires 3 columns
 Scientific notation in various formats may not be properly tested.
 
 **Example:**
+
 ```
 # Formats to test:
 1.0e3 2.0e3 5.67      # Standard
@@ -303,6 +313,7 @@ Scientific notation in various formats may not be properly tested.
 ```
 
 **Current Behavior:**
+
 ```python
 x_val = float(parts[0])  # Python float() should handle all formats
 ```
@@ -330,6 +341,7 @@ x_val = float(parts[0])  # Python float() should handle all formats
 Profile names with non-ASCII characters may cause encoding errors when writing files.
 
 **Example:**
+
 ```csv
 profile_id,x,z
 OC117–A,100.0,5.67      ← En-dash (U+2013)
@@ -338,6 +350,7 @@ Plage №5,200.0,3.12     ← Numero sign (U+2116)
 ```
 
 **Current Behavior:**
+
 ```python
 # May fail if file encoding not UTF-8
 f.write(f"{profile.profile_id}\n")  # UnicodeEncodeError?
@@ -368,6 +381,7 @@ f.write(f"{profile.profile_id}\n")  # UnicodeEncodeError?
 Each conversion may introduce rounding errors that accumulate over multiple conversions.
 
 **Example:**
+
 ```bash
 # Chain of conversions:
 profcalc -c original.csv -o temp1.xyz
@@ -377,6 +391,7 @@ profcalc -c temp3.xyz -o final.csv
 ```
 
 **Current Behavior:**
+
 ```python
 # BMAP/XYZ output uses limited precision:
 f.write(f"{x_val:10.2f} {z_val:10.2f}\n")  # 2 decimals only
@@ -411,13 +426,16 @@ f.write(f"{x_val:10.2f} {z_val:10.2f}\n")  # 2 decimals only
 Commas in string fields without proper quoting break CSV parsing.
 
 **Example:**
+
 ```csv
 profile_id,description,x,z
 OC117,Pre-storm, baseline survey,100.0,5.67
 ```
+
 (Missing quotes around description with comma)
 
 **Current Behavior:**
+
 ```python
 df = pd.read_csv(filepath)
 # Pandas sees 5 columns instead of 4
@@ -452,15 +470,18 @@ df = pd.read_csv(filepath)
 Lines containing only whitespace might be mishandled.
 
 **Example:**
+
 ```
 # Profile: OC117
 100.0 2000.0 5.67
 
 150.0 2050.0 4.89
 ```
+
 (Line 3 has spaces/tabs only)
 
 **Current Behavior:**
+
 ```python
 line = line.strip()  # Whitespace removed
 if not line:         # Empty check
@@ -494,6 +515,7 @@ Files created on different OS may have different line endings.
 - Mac Classic: `\r` (CR)
 
 **Current Behavior:**
+
 ```python
 with filepath.open('r') as f:
     for line in f:
@@ -522,6 +544,7 @@ with filepath.open('r') as f:
 Extra columns may have missing values for some rows.
 
 **Example:**
+
 ```csv
 profile_id,x,z,slope,notes
 OC117,100.0,5.67,0.05,
@@ -530,6 +553,7 @@ OC117,200.0,3.12,,gravel
 ```
 
 **Current Behavior:**
+
 ```python
 # Pandas fills missing values with NaN
 # Extra columns stored in metadata
@@ -561,6 +585,7 @@ BMAP files with invalid point counts may not be detected correctly.
 **Examples:**
 
 **Negative count:**
+
 ```
 OC117
 -5
@@ -568,6 +593,7 @@ OC117
 ```
 
 **Mismatched count:**
+
 ```
 OC117
 5
@@ -578,6 +604,7 @@ OC117
 300.0 1.89
 350.0 0.99
 ```
+
 (Actual: 6 points, Declared: 5)
 
 **Current Behavior:**

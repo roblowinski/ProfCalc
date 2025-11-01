@@ -45,6 +45,7 @@ profcalc -c profiles.csv --to shp-points -o points.shp --crs EPSG:6347
 ### BMAP Format
 
 **Structure:**
+
 ```
 <Profile Name> [Date] [Description]
 <Number of Points>
@@ -54,6 +55,7 @@ profcalc -c profiles.csv --to shp-points -o points.shp --crs EPSG:6347
 ```
 
 **Example:**
+
 ```
 OC 117 15AUG2020
 5
@@ -79,12 +81,14 @@ OC 117 15AUG2020
 ### CSV Format
 
 **Structure:**
+
 ```csv
 profile_id,x,y,z,survey_date,[optional_columns]
 <name>,<distance>,<northing>,<elevation>,<date>,...
 ```
 
 **Example:**
+
 ```csv
 profile_id,x,y,z,survey_date,slope,sediment
 OC117,0.0,2000.0,5.67,2024-10-26,0.05,sand
@@ -107,6 +111,7 @@ OC117,50.0,2000.0,5.12,2024-10-26,0.04,sand
 ### XYZ Format
 
 **Structure:**
+
 ```
 # Profile: <name>
 # Date: <date>
@@ -117,6 +122,7 @@ OC117,50.0,2000.0,5.12,2024-10-26,0.04,sand
 ```
 
 **Example:**
+
 ```
 # Profile: OC 117
 # Date: 2024-10-26
@@ -158,6 +164,7 @@ See [SHAPEFILE_EXPORT.md](SHAPEFILE_EXPORT.md) for complete documentation.
 - Requires origin azimuth file
 
 **Requirements:**
+
 ```bash
 pip install profile-analysis[gis]
 ```
@@ -189,6 +196,7 @@ profcalc -c survey_2024-10-26.txt \
 ```
 
 **Origin Azimuth File Format:**
+
 ```csv
 Profile,Origin_X,Origin_Y,Azimuth
 OC117,622294.69,461620.86,104.38
@@ -268,6 +276,7 @@ All errors include:
 - Suggested fixes
 
 **Example:**
+
 ```
 ❌ Error in file survey.xyz, line 15:
    Insufficient columns. Expected at least 3 columns (X Y Z), got 2.
@@ -326,6 +335,7 @@ Dates automatically extracted from:
 ### Coordinate Transformations
 
 When using baselines, real-world coordinates calculated as:
+
 ```
 real_x = origin_x + cross_shore_distance * cos(azimuth_radians)
 real_y = origin_y + cross_shore_distance * sin(azimuth_radians)
