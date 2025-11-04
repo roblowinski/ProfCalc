@@ -13,13 +13,12 @@ Behavior:
 - Report format matches BMAP's Cut & Fill report
 
 Example:
-    python tool_cut_fill.py \
-      --input1 ../../data/input_examples/OCNJ_FreeFormat_Test.txt \
-      --sel1 "OC118 21SEP2021 (AME)" \
-      --input2 ../../data/input_examples/OCNJ_FreeFormat_Test.txt \
-      --sel2 "OC118 16SEP2022 (AME)" \
-      --output ../../data/output_examples/OCNJ_CutFill_Detailed.txt \
-      --title "Untitled"
+        python tool_cut_fill.py \
+            --input1 src/profcalc/data/input_examples/OCNJ_FreeFormat_Test.txt \
+            --sel1 "OC118 21SEP2021 (AME)" \
+            --input2 src/profcalc/data/input_examples/OCNJ_FreeFormat_Test.txt \
+            --output src/profcalc/data/output_examples/OCNJ_CutFill_Detailed.txt \
+            --title "Untitled"
 """
 
 from __future__ import annotations

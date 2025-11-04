@@ -13,8 +13,8 @@ print("TEST 1: CSV→XYZ Conversion with Extra Columns")
 print("=" * 60)
 
 convert_format(
-    input_file="data/temp/test_extra_columns.csv",
-    output_file="data/temp/test_extra_output.xyz",
+    input_file="src/profcalc/data/temp/test_extra_columns.csv",
+    output_file="src/profcalc/data/temp/test_extra_output.xyz",
     from_format="csv",
     to_format="xyz",
 )
@@ -22,7 +22,9 @@ convert_format(
 # Read and display the output
 print("\n📄 Output XYZ file content:")
 print("-" * 60)
-with open("data/temp/test_extra_output.xyz") as f:
+with open(
+    "src/profcalc/data/temp/test_extra_output.xyz", encoding="utf-8"
+) as f:
     lines = f.readlines()
     for line in lines[:15]:  # Show first 15 lines
         print(line.rstrip())
@@ -33,15 +35,15 @@ print("TEST 2: XYZ→CSV Conversion (Round-trip)")
 print("=" * 60)
 
 convert_format(
-    input_file="data/temp/test_extra_output.xyz",
-    output_file="data/temp/test_roundtrip.csv",
+    input_file="src/profcalc/data/temp/test_extra_output.xyz",
+    output_file="src/profcalc/data/temp/test_roundtrip.csv",
     from_format="xyz",
     to_format="csv",
 )
 
 print("\n📄 Round-trip CSV file content:")
 print("-" * 60)
-with open("data/temp/test_roundtrip.csv") as f:
+with open("src/profcalc/data/temp/test_roundtrip.csv", encoding="utf-8") as f:
     lines = f.readlines()
     for line in lines[:10]:  # Show first 10 lines
         print(line.rstrip())
@@ -52,8 +54,8 @@ print("TEST 3: CSV→BMAP Conversion (Data Loss Warning)")
 print("=" * 60)
 
 convert_format(
-    input_file="data/temp/test_extra_columns.csv",
-    output_file="data/temp/test_bmap_warning.txt",
+    input_file="src/profcalc/data/temp/test_extra_columns.csv",
+    output_file="src/profcalc/data/temp/test_bmap_warning.txt",
     from_format="csv",
     to_format="bmap",
 )

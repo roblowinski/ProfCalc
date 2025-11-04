@@ -54,7 +54,7 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 
 ```
 ❌ Column count validation failed
-   File: data/temp/test_2col.xyz
+   File: src/profcalc/data/temp/test_2col.xyz
    Line 2: Only 2 column(s) found, but column order requires 3
    Column order: X=column 1, Y=column 0, Z=column 2
    Line content: 100.0 5.67

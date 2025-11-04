@@ -75,8 +75,9 @@ def test_point_shapefile_from_csv():
         for col in required_cols:
             assert col in gdf.columns, f"Missing column: {col}"
 
-        # Check CRS
-        assert gdf.crs.to_string() == "EPSG:6347", "Incorrect CRS"
+        # Check CRS (CRS may be None; convert safely)
+        crs_str = gdf.crs.to_string() if gdf.crs is not None else ""
+        assert crs_str == "EPSG:6347", "Incorrect CRS"
 
         print(f"✓ Point shapefile created with {len(gdf)} points")
         print(f"  Columns: {list(gdf.columns)}")
@@ -163,8 +164,9 @@ def test_line_shapefile_from_csv():
         for col in required_cols:
             assert col in gdf.columns, f"Missing column: {col}"
 
-        # Check CRS
-        assert gdf.crs.to_string() == "EPSG:6347", "Incorrect CRS"
+        # Check CRS (CRS may be None; convert safely)
+        crs_str = gdf.crs.to_string() if gdf.crs is not None else ""
+        assert crs_str == "EPSG:6347", "Incorrect CRS"
 
         # Check 3D geometry (LineStringZ should have Z coordinates)
         first_line = gdf.geometry.iloc[0]
@@ -348,7 +350,8 @@ def test_crs_parameter():
             write_survey_points_shapefile(profiles, output_path, crs=crs)
 
             gdf = gpd.read_file(output_path)
-            assert gdf.crs.to_string() == crs, f"CRS mismatch for {crs}"
+            crs_str = gdf.crs.to_string() if gdf.crs is not None else ""
+            assert crs_str == crs, f"CRS mismatch for {crs}"
 
             print(f"✓ CRS {crs} works correctly")
 

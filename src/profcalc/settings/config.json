@@ -7,7 +7,7 @@
       "vertical": "feet"
     },
     "paths": {
-      "data": "./data/",
+      "data": "src/profcalc/data/required_inputs/",
       "output": "./output/"
     },
     "_comment": "Application configuration - project metadata and paths. Not currently used by production code."

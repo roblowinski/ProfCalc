@@ -66,9 +66,9 @@ from profcalc.common import (
 )
 
 # Load survey data for multiple years
-survey_2020 = read_csv_profiles("data/surveys/2020_beach_profiles.csv")
-survey_2019 = read_csv_profiles("data/surveys/2019_beach_profiles.csv")
-survey_2018 = read_csv_profiles("data/surveys/2018_beach_profiles.csv")
+survey_2020 = read_csv_profiles("src/profcalc/data/surveys/2020_beach_profiles.csv")
+survey_2019 = read_csv_profiles("src/profcalc/data/surveys/2019_beach_profiles.csv")
+survey_2018 = read_csv_profiles("src/profcalc/data/surveys/2018_beach_profiles.csv")
 ```
 
 **Validation:**
@@ -88,7 +88,7 @@ survey_2018 = read_csv_profiles("data/surveys/2018_beach_profiles.csv")
 
 ```python
 # Load pre-defined design templates
-templates = read_csv_profiles("data/templates/design_profiles.csv")
+templates = read_csv_profiles("src/profcalc/data/templates/design_profiles.csv")
 
 # Create lookup dictionary
 template_dict = {profile.name: profile for profile in templates}
@@ -133,8 +133,8 @@ bounds = load_analysis_bounds("config/analysis_bounds.json")
 
 **Input Files:**
 
-- `data/profile_spacings.csv` - Alongshore distances between profiles
-- `data/ProfileOriginAzimuths.csv` - Profile baseline coordinates and orientations
+-- `src/profcalc/data/profile_spacings.csv` - Alongshore distances between profiles
+-- `src/profcalc/data/required_inputs/ProfileOriginAzimuths.csv` - Profile baseline coordinates and orientations
 
 **Profile Spacings Format:**
 
@@ -151,7 +151,7 @@ R03,R04,150.0
 import pandas as pd
 
 # Load profile spacing data
-spacings_df = pd.read_csv("data/profile_spacings.csv")
+spacings_df = pd.read_csv("src/profcalc/data/profile_spacings.csv")
 spacings = spacings_df['alongshore_distance_ft'].values
 ```
 
@@ -625,8 +625,8 @@ print(f"Erosion hot spot: {stats['max_erosion_profile']} ({stats['max_erosion_ra
 
 ```python
 # Step 1: Load data
-survey = read_csv_profiles("data/2020_profiles.csv")
-templates = read_csv_profiles("data/templates.csv")
+survey = read_csv_profiles("src/profcalc/data/2020_profiles.csv")
+templates = read_csv_profiles("src/profcalc/data/templates.csv")
 bounds = load_analysis_bounds("config/bounds.json")
 
 # Step 2: Cross-sectional analysis
@@ -647,9 +647,9 @@ export_results(comparison_df, volumes_df, shoreline_df, output_dir="output/2020"
 ```python
 # Load multiple years
 surveys = {
-    '2020': read_csv_profiles("data/2020_profiles.csv"),
-    '2019': read_csv_profiles("data/2019_profiles.csv"),
-    '2018': read_csv_profiles("data/2018_profiles.csv")
+    '2020': read_csv_profiles("src/profcalc/data/2020_profiles.csv"),
+    '2019': read_csv_profiles("src/profcalc/data/2019_profiles.csv"),
+    '2018': read_csv_profiles("src/profcalc/data/2018_profiles.csv")
 }
 
 # Temporal comparison

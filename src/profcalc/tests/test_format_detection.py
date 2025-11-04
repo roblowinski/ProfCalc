@@ -13,12 +13,15 @@ print("CONTENT-BASED FORMAT DETECTION TEST")
 print("=" * 70)
 
 test_files = [
-    ("data/temp/test_xyz.txt", "XYZ content in .txt file"),
-    ("data/temp/test_bmap.txt", "BMAP content in .txt file"),
-    ("data/temp/test_csv.txt", "CSV content in .txt file"),
-    ("data/temp/mystery_file.data", "XYZ content in .data file"),
-    ("data/input_examples/BMAP_free-format_OC.dat", "BMAP in .dat file"),
-    ("data/temp/survey_2024-10-26.xyz", "XYZ in .xyz file"),
+    ("src/profcalc/data/temp/test_xyz.txt", "XYZ content in .txt file"),
+    ("src/profcalc/data/temp/test_bmap.txt", "BMAP content in .txt file"),
+    ("src/profcalc/data/temp/test_csv.txt", "CSV content in .txt file"),
+    ("src/profcalc/data/temp/mystery_file.data", "XYZ content in .data file"),
+    (
+        "src/profcalc/data/required_inputs/BMAP_free-format_OC.dat",
+        "BMAP in .dat file",
+    ),
+    ("src/profcalc/data/temp/survey_2024-10-26.xyz", "XYZ in .xyz file"),
 ]
 
 print("\nTest Results:")

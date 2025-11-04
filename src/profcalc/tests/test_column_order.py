@@ -1,11 +1,8 @@
 """Test column order and alternative naming."""
 
-import sys
 from pathlib import Path
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent / "src"))
-
 from profcalc.cli.quick_tools.convert import convert_format
 
 print("=" * 80)
@@ -19,17 +16,21 @@ OC117,604589.12,4312633.56,4.89
 OC117,604655.78,4312700.23,4.12
 """
 
-Path("data/temp/test_easting_northing.csv").write_text(csv_content)
+Path("src/profcalc/data/temp/test_easting_northing.csv").write_text(
+    csv_content, encoding="utf-8"
+)
 
 convert_format(
-    input_file="data/temp/test_easting_northing.csv",
-    output_file="data/temp/test_easting_output.xyz",
+    input_file="src/profcalc/data/temp/test_easting_northing.csv",
+    output_file="src/profcalc/data/temp/test_easting_output.xyz",
     from_format="csv",
     to_format="xyz",
 )
 
 print("\n✅ CSV with easting/northing → XYZ")
-with open("data/temp/test_easting_output.xyz") as f:
+with open(
+    "src/profcalc/data/temp/test_easting_output.xyz", encoding="utf-8"
+) as f:
     print(f.read())
 
 print("\n" + "=" * 80)
@@ -43,19 +44,21 @@ xyz_content = """# Profile: OC117
 4312700.23 604655.78 4.12
 """
 
-Path("data/temp/test_yxz_order.xyz").write_text(xyz_content)
+Path("src/profcalc/data/temp/test_yxz_order.xyz").write_text(
+    xyz_content, encoding="utf-8"
+)
 
 # Convert with column order override
 convert_format(
-    input_file="data/temp/test_yxz_order.xyz",
-    output_file="data/temp/test_yxz_output.csv",
+    input_file="src/profcalc/data/temp/test_yxz_order.xyz",
+    output_file="src/profcalc/data/temp/test_yxz_output.csv",
     from_format="xyz",
     to_format="csv",
     column_order={"x": 1, "y": 0, "z": 2},  # Y X Z order
 )
 
 print("\n✅ XYZ with Y X Z order → CSV")
-with open("data/temp/test_yxz_output.csv") as f:
+with open("src/profcalc/data/temp/test_yxz_output.csv", encoding="utf-8") as f:
     lines = f.readlines()
     for line in lines[:6]:
         print(line.rstrip())
@@ -69,17 +72,19 @@ TEST001,604523.45,4312567.89,5.67
 TEST001,604589.12,4312633.56,4.89
 """
 
-Path("data/temp/test_utm_names.csv").write_text(csv_utm)
+Path("src/profcalc/data/temp/test_utm_names.csv").write_text(
+    csv_utm, encoding="utf-8"
+)
 
 convert_format(
-    input_file="data/temp/test_utm_names.csv",
-    output_file="data/temp/test_utm_output.xyz",
+    input_file="src/profcalc/data/temp/test_utm_names.csv",
+    output_file="src/profcalc/data/temp/test_utm_output.xyz",
     from_format="csv",
     to_format="xyz",
 )
 
 print("\n✅ CSV with utm_x/utm_y → XYZ")
-with open("data/temp/test_utm_output.xyz") as f:
+with open("src/profcalc/data/temp/test_utm_output.xyz", encoding="utf-8") as f:
     print(f.read())
 
 print("\n" + "=" * 80)
@@ -88,15 +93,17 @@ print("=" * 80)
 
 # Same Y X Z order file
 convert_format(
-    input_file="data/temp/test_yxz_order.xyz",
-    output_file="data/temp/test_numeric_indices.csv",
+    input_file="src/profcalc/data/temp/test_yxz_order.xyz",
+    output_file="src/profcalc/data/temp/test_numeric_indices.csv",
     from_format="xyz",
     to_format="csv",
     column_order={"x": 1, "y": 0, "z": 2},  # Equivalent to "1 0 2"
 )
 
 print("\n✅ XYZ with column order {x:1, y:0, z:2} → CSV")
-with open("data/temp/test_numeric_indices.csv") as f:
+with open(
+    "src/profcalc/data/temp/test_numeric_indices.csv", encoding="utf-8"
+) as f:
     lines = f.readlines()
     for line in lines[:6]:
         print(line.rstrip())

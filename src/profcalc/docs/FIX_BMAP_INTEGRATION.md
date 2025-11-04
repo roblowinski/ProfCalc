@@ -83,7 +83,7 @@ October 27, 2025
 ```
 FIX BMAP POINT COUNTS
 ==================================================================
-Enter input BMAP file path: data/input_files/survey.txt
+Enter input BMAP file path: src/profcalc/data/input_files/survey.txt
 
 ==================================================================
 FILE FORMAT DETECTION
@@ -100,23 +100,23 @@ Format Details:
 ==================================================================
 Proceed with this format? [Y/n]: y
 
-Enter output file path: data/temp/survey_fixed.txt
+Enter output file path: src/profcalc/data/temp/survey_fixed.txt
 Show detailed corrections? (y/n) [n]: y
 Save report to file? (y/n) [n]: y
-Enter report file path: data/temp/report.txt
+Enter report file path: src/profcalc/data/temp/report.txt
 
 🔄 Analyzing file and fixing point counts...
   ✏️  MA091: 128 → 130 (+2)
   ✏️  MA092: 145 → 143 (-2)
 
-✅ Corrected file written to: data/temp/survey_fixed.txt
-📄 Report saved to: data/temp/report.txt
+✅ Corrected file written to: src/profcalc/data/temp/survey_fixed.txt
+📄 Report saved to: src/profcalc/data/temp/report.txt
 ```
 
 ### CLI Batch Mode
 
 ```bash
-python -m profcalc -f "data/input_files/*.ASC" -o data/temp --report data/temp/report.txt -v
+python -m profcalc -f "src/profcalc/data/input_files/*.ASC" -o src/profcalc/data/temp --report src/profcalc/data/temp/report.txt -v
 ```
 
 Output:
@@ -127,7 +127,7 @@ Output:
 🔍 Analyzing file2.ASC -> file2_fix.ASC ...
   ✏️  MA064: 150 → 148 (-2)
 
-📄 Report saved to: data/temp/report.txt
+📄 Report saved to: src/profcalc/data/temp/report.txt
 ```
 
 ## Benefits of Integration
@@ -180,7 +180,7 @@ Test with sample files:
 python dev_scripts/test_fix_bmap_integration.py
 
 # Or test individual file
-python -m profcalc -f "data/input_files/Bmap_FreeFormat.txt" -o data/temp
+  python -m profcalc -f "src/profcalc/data/input_files/Bmap_FreeFormat.txt" -o src/profcalc/data/temp
 ```
 
 ## Code Quality
@@ -246,7 +246,7 @@ python -m profcalc -f "data/input_files/Bmap_FreeFormat.txt" -o data/temp
 ### Test Files
 
 - `dev_scripts/test_fix_bmap_integration.py` - Integration test
-- `data/input_files/*` - Sample files for testing
+- `src/profcalc/data/input_files/*` - Sample files for testing
 
 ## Performance Notes
 

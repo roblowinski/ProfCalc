@@ -19,7 +19,9 @@ profiles_with_date = [
     )
 ]
 
-write_bmap_profiles(profiles_with_date, "data/temp/test_profile_with_date.dat")
+write_bmap_profiles(
+    profiles_with_date, "src/profcalc/data/temp/test_profile_with_date.dat"
+)
 print(
     "✅ Created test_profile_with_date.dat - should show: OC117 15AUG2020 Pre-storm survey"
 )
@@ -37,7 +39,7 @@ profiles_no_date = [
 
 write_bmap_profiles(
     profiles_no_date,
-    "data/temp/test_no_date.dat",
+    "src/profcalc/data/temp/test_no_date.dat",
     source_filename="survey_2024-10-26.xyz",
 )
 print(
@@ -57,7 +59,7 @@ profiles_filename_only = [
 
 write_bmap_profiles(
     profiles_filename_only,
-    "data/temp/test_filename_only.dat",
+    "src/profcalc/data/temp/test_filename_only.dat",
     source_filename="coastal_data.xyz",
 )
 print(
@@ -70,7 +72,7 @@ for fname in [
     "test_no_date.dat",
     "test_filename_only.dat",
 ]:
-    path = Path(f"data/temp/{fname}")
+    path = Path(f"src/profcalc/data/temp/{fname}")
     if path.exists():
         first_line = path.read_text().split("\n")[0]
         print(f"  {fname}: {first_line}")

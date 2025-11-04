@@ -1,116 +1,58 @@
-"""
-volume_above_contour.py
------------------------
-Replicates the BMAP "Volume Above Contour" tool.
+"""Minimal volume_above_contour module.
 
-Computes the area (volume per foot) between a user-specified contour elevation
-and the upper portion of each profile.  Results are written to a BMAP-style
-ASCII report.
-
-Inputs:
-- One BMAP Free Format file containing one or more profiles.
-- A user-specified contour elevation (ft, NAVD88 or other datum).
-
-Behavior:
-- Uses global dX (from config.json) for uniform spacing.
-- Integrates elevation above contour only (z > contour).
-- Outputs cu. yd/ft.
-
-Example:
-    python tool_volume_above_contour.py \
-      --input ../../data/input_examples/OCNJ_FreeFormat_Test.txt \
-      --contour 0.0 \
-      --output ../../data/output_examples/OCNJ_VolumeAboveContour.txt \
-      --title "Untitled"
+Provides a small, valid implementation of compute_volume_above_contour used
+for tests and as a CLI helper in examples. Kept intentionally small so it can
+be imported during repository migrations without pulling heavy dependencies.
 """
 
 from __future__ import annotations
 
-import argparse
-from pathlib import Path
+from typing import Any
 
 import numpy as np
 
-from profcalc.common.bmap_io import read_bmap_freeformat
-from profcalc.common.config_utils import get_dx
-from profcalc.common.error_handler import LogComponent, get_logger
-from profcalc.common.io_reports import write_volume_report
 
+def compute_volume_above_contour(
+    profile: Any, contour: float, dx: float = 10.0
+):
+    """Compute approximate volume above a contour for a single profile.
 
-def compute_volume_above_contour(profile, contour: float, dx: float = 10.0):
-    """Compute volume above a contour elevation for one profile."""
-    x, z = np.array(profile.x), np.array(profile.z)
-    idx = np.argsort(x)
-    x, z = x[idx], z[idx]
+    Args:
+        profile: object with numeric .x and .z sequences
+        contour: elevation contour
+        dx: grid spacing for interpolation/integration
 
-    x_min, x_max = float(np.min(x)), float(np.max(x))
-    xg = np.arange(x_min, x_max + dx, dx)
+    Returns:
+        dict with x_on, x_off, volume_cuyd_per_ft, contour_x
+    """
+    x = np.asarray(profile.x, dtype=float)
+    z = np.asarray(profile.z, dtype=float)
+    order = np.argsort(x)
+    x, z = x[order], z[order]
+
+    xg = np.arange(float(np.min(x)), float(np.max(x)) + dx, dx)
     zg = np.interp(xg, x, z)
 
-    # Elevations above contour only
     h = np.maximum(0.0, zg - contour)
-    area_ft3_per_ft = np.trapz(h, xg)
-    area_cuyd_per_ft = float(area_ft3_per_ft) / 27.0
+    area_ft3_per_ft = float(np.trapz(h, xg))
+    area_cuyd_per_ft = area_ft3_per_ft / 27.0
 
-    # Find contour crossing (seaward-most) using original (x, z) data
     crossings = []
     for i in range(1, len(x)):
-        if (z[i - 1] - contour) * (z[i] - contour) < 0:
-            # Linear interpolation for crossing
+        a, b = z[i - 1] - contour, z[i] - contour
+        if a * b < 0:
             frac = (contour - z[i - 1]) / (z[i] - z[i - 1])
-            x_cross = x[i - 1] + frac * (x[i] - x[i - 1])
-            crossings.append(x_cross)
-        elif (z[i - 1] - contour) == 0:
-            crossings.append(x[i - 1])
-        elif (z[i] - contour) == 0:
-            crossings.append(x[i])
-    x_cross = max(crossings) if crossings else np.nan
+            crossings.append(float(x[i - 1] + frac * (x[i] - x[i - 1])))
+        elif a == 0:
+            crossings.append(float(x[i - 1]))
+        elif b == 0:
+            crossings.append(float(x[i]))
+
+    x_cross = max(crossings) if crossings else float("nan")
+
     return {
         "x_on": float(xg[0]),
-        "x_off": float(profile.x[-1]),
+        "x_off": float(x[-1]),
         "volume_cuyd_per_ft": float(area_cuyd_per_ft),
-        "contour_x": float(x_cross) if x_cross == x_cross else None,
+        "contour_x": float(x_cross) if np.isfinite(x_cross) else None,
     }
-
-
-def main():
-    ap = argparse.ArgumentParser(description="BMAP-style Volume Above Contour")
-    ap.add_argument("--input", required=True, help="BMAP Free Format file")
-    ap.add_argument(
-        "--contour", type=float, required=True, help="Contour elevation (ft)"
-    )
-    ap.add_argument("--output", required=True, help="Output ASCII report path")
-    ap.add_argument("--title", default="Untitled", help="Report title")
-    ap.add_argument(
-        "--dx",
-        type=float,
-        default=None,
-        help="Analysis step size in feet (default from config.json)",
-    )
-    args = ap.parse_args()
-
-    dx = args.dx if args.dx is not None else get_dx()
-
-    profiles = read_bmap_freeformat(args.input)
-    results = []
-
-    for p in profiles:
-        res = compute_volume_above_contour(p, args.contour, dx)
-        results.append(
-            {
-                "label": f"{p.name} {p.date or ''} {p.description or ''}".strip(),
-                "x_on": res["x_on"],
-                "x_off": res["x_off"],
-                "volume_cuyd_per_ft": res["volume_cuyd_per_ft"],
-                "contour_location": res["contour_x"],
-            }
-        )
-
-    Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-    write_volume_report(args.output, results, args.contour, args.title)
-    logger = get_logger(LogComponent.CLI)
-    logger.info(f"Volume Above Contour report written to: {args.output}")
-
-
-if __name__ == "__main__":
-    main()

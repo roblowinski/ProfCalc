@@ -246,7 +246,7 @@ ParsedFile(
 ## Testing
 
 ### Test Files Available
-Located in `data/input_files/`:
+Located in `src/profcalc/data/input_files/`:
 - `Bmap_FreeFormat.txt` - BMAP with .txt extension
 - `Bmap_FreeFormat_JustID.txt` - BMAP variant
 - `3Col_NoHeader__NoID.csv` - CSV without header

@@ -14,7 +14,7 @@ The project is organized for clarity, maintainability, and ease of use:
 - `notebooks/` — Jupyter notebooks for exploratory analysis
 - `ref_scripts/` — Reference implementations and legacy code
 - `dev_scripts/` — Prototypes and experimental scripts (not for production)
-- `data/` — Input, output, and required data files
+- `src/profcalc/data/` — Input, output, and required data files (moved inside the package)
 - `docs/` — Project documentation and workflow guides
 
 

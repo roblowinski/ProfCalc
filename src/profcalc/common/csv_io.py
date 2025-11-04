@@ -789,7 +789,8 @@ def _format_csv_output(
 
 def read_xyz_profiles(
     file_path: str | Path,
-    origin_azimuth_file: str | Path = "data/ProfileOriginAzimuths.csv",
+    origin_azimuth_file: str
+    | Path = "src/profcalc/data/required_inputs/ProfileOriginAzimuths.csv",
     tolerance_ft: float = 25.0,
 ) -> List[Profile]:
     """Read XYZ coordinate data and assign points to profiles based on perpendicular distance.

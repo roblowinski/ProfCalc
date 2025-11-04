@@ -121,9 +121,9 @@ def execute_xyz_to_bmap() -> None:
 5. Malformed XYZ files → Graceful error handling
 
 ### Sample Data
-- `data/temp/test_no_profiles.xyz` - XYZ without profile headers
-- Various test files in `data/input_examples/`
-- Origin azimuth files in `data/required/`
+-- `src/profcalc/data/temp/test_no_profiles.xyz` - XYZ without profile headers
+-- Various test files in `src/profcalc/data/input_examples/`
+-- Origin azimuth files in `src/profcalc/data/required/`
 
 ## Next Steps
 

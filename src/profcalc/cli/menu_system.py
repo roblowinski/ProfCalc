@@ -18,6 +18,9 @@ from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     pass
 
+# Use the package-level data tools to keep dataset registration centralized
+from profcalc.cli.tools import data as data_tools
+
 
 def conversion_submenu() -> None:
     """Display and handle the Conversion submenu under Quick Tools option 2.
@@ -95,7 +98,7 @@ def shoreline_analysis_menu() -> None:
             print("Invalid selection. Please try again.")
 
 
-def cross_sectional_analysis(session: "SessionContext") -> None:
+def cross_sectional_analysis(state: "AppState") -> None:
     """Perform cross-sectional analysis.
 
     Args:
@@ -106,7 +109,7 @@ def cross_sectional_analysis(session: "SessionContext") -> None:
     print("[STUB] Cross-sectional analysis not yet implemented.")
 
 
-def volumetric_change(session: "SessionContext") -> None:
+def volumetric_change(state: "AppState") -> None:
     """Analyze volumetric changes between surveys.
 
     Args:
@@ -117,7 +120,7 @@ def volumetric_change(session: "SessionContext") -> None:
     print("[STUB] Volumetric change analysis not yet implemented.")
 
 
-def shoreline_change(session: "SessionContext") -> None:
+def shoreline_change(state: "AppState") -> None:
     """Analyze shoreline position changes over time.
 
     Args:
@@ -128,7 +131,7 @@ def shoreline_change(session: "SessionContext") -> None:
     print("[STUB] Shoreline change analysis not yet implemented.")
 
 
-def temporal_trends(session: "SessionContext") -> None:
+def temporal_trends(state: "AppState") -> None:
     """Analyze temporal trends in profile data.
 
     Args:
@@ -139,7 +142,7 @@ def temporal_trends(session: "SessionContext") -> None:
     print("[STUB] Temporal trends analysis not yet implemented.")
 
 
-def outlier_detection(session: "SessionContext") -> None:
+def outlier_detection(state: "AppState") -> None:
     """Detect outliers in profile datasets.
 
     Args:
@@ -150,7 +153,7 @@ def outlier_detection(session: "SessionContext") -> None:
     print("[STUB] Outlier detection not yet implemented.")
 
 
-def statistics_summaries(session: "SessionContext") -> None:
+def statistics_summaries(state: "AppState") -> None:
     """Generate statistical summaries of profile data.
 
     Args:
@@ -161,7 +164,7 @@ def statistics_summaries(session: "SessionContext") -> None:
     print("[STUB] Statistics & summaries not yet implemented.")
 
 
-def export_results(session: "SessionContext") -> None:
+def export_results(state: "AppState") -> None:
     """Export analysis results to various formats.
 
     Args:
@@ -236,16 +239,37 @@ def annual_monitoring_menu() -> None:
     while True:
         print("\n--- Annual Monitoring Report Analyses ---")
         print("1. Import Survey Data")
-        print("2. Profile Analysis")
-        print("3. Shoreline Analysis")
-        print("4. Condition Evaluation")
-        print("5. Reporting & Export")
-        print("6. Back to Main Menu")
+        print("2. Compute Annual Erosion Rate (AER)")
+        print("3. Profile Analysis")
+        print("4. Shoreline Analysis")
+        print("5. Condition Evaluation")
+        print("6. Reporting & Export")
+        print("7. Back to Main Menu")
         choice = input("Select an option: ").strip()
         if choice == "1":
-            print("[STUB] Import Survey Data - Not yet implemented.")
+            # Prompt for a survey file and import using the shared data tools
+            path = input(
+                "Enter path to survey CSV to import (or blank to cancel): "
+            ).strip()
+            if not path:
+                print("Import cancelled.")
+                continue
+            try:
+                res = data_tools.import_data(path)
+                imported = (
+                    res.get("imported") if isinstance(res, dict) else "?"
+                )
+                print(f"Imported {imported} rows from {path}.")
+            except Exception as exc:  # pragma: no cover - interactive
+                print(f"Import failed: {exc}")
         elif choice == "2":
-            print("[STUB] Profile Analysis - Not yet implemented.")
+            # Compute AER via the Annual tools handler
+            try:
+                from profcalc.cli.tools import annual as annual_tools
+
+                annual_tools.compute_aer()
+            except Exception as exc:  # pragma: no cover - interactive
+                print(f"Failed to run AER handler: {exc}")
         elif choice == "3":
             shoreline_analysis_menu()
         elif choice == "4":
@@ -254,20 +278,28 @@ def annual_monitoring_menu() -> None:
             print("[STUB] Reporting & Export - Not yet implemented.")
         elif choice == "6":
             break
+        elif choice == "7":
+            break
         else:
             print("Invalid selection. Please try again.")
 
 
 # Simple session context for storing user choices
-class SessionContext:
-    def __init__(self):
-        self.data_source: Optional[str] = None  # 'database' or 'file'
-        self.data_source_details: Optional[str] = (
-            None  # e.g., DB connection string or file path(s)
-        )
+class AppState:
+    """Lightweight application state for the interactive menu.
+
+    We keep only a minimal set of attributes here (data_source selection and
+    optional details). Dataset registration and active dataset are handled by
+    `profcalc.cli.tools.data.session` so the menu delegates to that module for
+    data operations.
+    """
+
+    def __init__(self) -> None:
+        self.data_source: Optional[str] = None
+        self.data_source_details: Optional[str] = None
 
 
-session = SessionContext()
+app_state = AppState()
 
 
 def select_data_source() -> None:
@@ -285,20 +317,31 @@ def select_data_source() -> None:
         print("3. Exit")
         choice = input("Choose data source: ").strip()
         if choice == "1":
-            session.data_source = "database"
-            session.data_source_details = (
-                None  # Placeholder for DB connection details
-            )
+            app_state.data_source = "database"
+            app_state.data_source_details = None
             print(
                 "\n[INFO] Database mode selected. (DB connection not yet implemented)"
             )
             break
         elif choice == "2":
-            session.data_source = "file"
-            session.data_source_details = None  # Placeholder for file path(s)
-            print(
-                "\n[INFO] File mode selected. (File import not yet implemented)"
-            )
+            # Prompt for a file path and attempt import using data_tools
+            app_state.data_source = "file"
+            path = input(
+                "Enter path to 9-column CSV file to import (or blank to cancel): "
+            ).strip()
+            if not path:
+                print("Import cancelled.")
+                break
+            try:
+                result = data_tools.import_data(path)
+                imported = (
+                    result.get("imported") if isinstance(result, dict) else "?"
+                )
+                print(f"Imported {imported} rows from {path}.")
+            except (
+                Exception
+            ) as exc:  # pragma: no cover - interactive error path
+                print(f"Import failed: {exc}")
             break
         elif choice == "3":
             print("Goodbye!")
@@ -318,21 +361,47 @@ def data_management_menu() -> None:
     while True:
         print("\n--- Data Management ---")
         print(
-            "1. Change Data Source (Current: {})".format(
-                session.data_source or "Not Set"
-            )
+            f"1. Change Data Source (Current: {app_state.data_source or 'Not Set'})"
         )
-        print("2. Import/Export Data")
-        print("3. View Data Summary")
-        print("4. Back to Main Menu")
+        print("2. Import Data (9-col CSV)")
+        print("3. List Registered Datasets")
+        print("4. Select Active Dataset")
+        print("5. View Data Summary")
+        print("6. Back to Main Menu")
         choice = input("Select an option: ").strip()
         if choice == "1":
             select_data_source()
         elif choice == "2":
-            print("[STUB] Import/Export Data - Not yet implemented.")
+            path = input(
+                "Enter path to 9-column CSV file to import (or blank to cancel): "
+            ).strip()
+            if not path:
+                print("Import cancelled.")
+                continue
+            try:
+                result = data_tools.import_data(path)
+                imported = (
+                    result.get("imported") if isinstance(result, dict) else "?"
+                )
+                print(f"Imported {imported} rows from {path}.")
+            except Exception as exc:  # pragma: no cover - interactive
+                print(f"Import failed: {exc}")
         elif choice == "3":
-            print("[STUB] View Data Summary - Not yet implemented.")
+            data_tools.list_datasets()
         elif choice == "4":
+            dsid = input(
+                "Enter dataset ID to set active (or blank to cancel): "
+            ).strip()
+            if not dsid:
+                print("Selection cancelled.")
+                continue
+            try:
+                data_tools.select_dataset(dsid)
+            except Exception as exc:  # pragma: no cover - interactive
+                print(f"Failed to select dataset: {exc}")
+        elif choice == "5":
+            data_tools.summary()
+        elif choice == "6":
             break
         else:
             print("Invalid selection. Please try again.")
@@ -347,7 +416,7 @@ def profcalc_profcalc_menu() -> None:
     """
     while True:
         print("\n--- Profile Analysis ---")
-        print(f"[Current Data Source: {session.data_source or 'Not Set'}]")
+        print(f"[Current Data Source: {app_state.data_source or 'Not Set'}]")
         print("1. Survey vs. Design Template Analysis")
         print("2. Survey vs. Survey (Multi-Year) Analysis")
         print("3. Back to Main Menu")
@@ -457,3 +526,19 @@ def launch_menu() -> None:
     select_data_source()
     main_menu()
 
+
+def about() -> None:
+    """Print a concise about/version message."""
+    try:
+        from profcalc import __version__  # type: ignore
+
+        ver = __version__
+    except Exception:
+        ver = "(version unknown)"
+    print(
+        f"ProfCalc {ver} - interactive menu system\nFor help see README.md in the project root."
+    )
+
+
+if __name__ == "__main__":
+    launch_menu()

@@ -1,6 +1,8 @@
 # =============================================================================  # noqa: D100
-# Beach Profile Database - Centralized Logging and Error Handling Utilities
+# Unified Error Handling and Logging Utilities
 # =============================================================================
+# This module combines structured logging and custom exception handling to provide
+# a comprehensive error management system for the application.
 #
 # PURPOSE:
 # This module provides a comprehensive logging and error handling system that ensures
@@ -49,8 +51,9 @@ import time
 from datetime import UTC, datetime, timezone
 from enum import Enum
 from pathlib import Path
-from types import TracebackType
-from typing import Any
+from typing import Any, Union
+
+# Structured Logging Utilities
 
 
 class LogLevel(Enum):
@@ -615,7 +618,7 @@ class PerformanceTimer:
         self,
         exc_type: type | None,
         exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
+        exc_tb: Path | None,
     ) -> None:
         """Exit the context manager and log performance metrics.
 
@@ -626,7 +629,7 @@ class PerformanceTimer:
         Parameters:
             exc_type (type | None): The exception type if an exception occurred.
             exc_val (BaseException | None): The exception value if an exception occurred.
-            exc_tb (TracebackType | None): The traceback if an exception occurred.
+            exc_tb (Path | None): The traceback if an exception occurred.
 
         Returns:
             None
@@ -1367,6 +1370,46 @@ class ErrorHandler:
             **(extra or {}),
         }
         self.log_info(f"Audit: {action}", extra={"audit": audit_data})
+
+
+# Custom Exceptions
+class DataProcessingError(Exception):
+    """Base exception for data processing operations."""
+
+    pass
+
+
+class FileOperationError(DataProcessingError):
+    """Raised when file operations fail."""
+
+    pass
+
+
+class ValidationError(DataProcessingError):
+    """Raised when data validation fails."""
+
+    pass
+
+
+class CoordinateError(DataProcessingError):
+    """Raised when coordinate operations fail."""
+
+    pass
+
+
+class FormatError(DataProcessingError):
+    """Raised when data format parsing fails."""
+
+    pass
+
+
+# Validation Helpers
+def validate_file_path(path: Union[str, Path]) -> Path:
+    """Ensure the given path exists and is a file."""
+    path = Path(path)
+    if not path.is_file():
+        raise FileOperationError(f"Invalid file path: {path}")
+    return path
 
 
 def handle_database_error(

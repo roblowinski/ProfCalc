@@ -15,7 +15,7 @@ from profcalc.cli.quick_tools.convert import convert_format
 
 def test_duplicate_z_columns():
     """Test CSV with both 'z' and 'elevation' columns (both match Z pattern)."""
-    test_file = Path("data/temp/test_duplicate_z.csv")
+    test_file = Path("src/profcalc/data/temp/test_duplicate_z.csv")
     test_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Create CSV with both 'z' and 'elevation' columns
@@ -24,7 +24,7 @@ def test_duplicate_z_columns():
         f.write("OC117,604523.45,4312567.89,5.67,100.0,5.67\n")
         f.write("OC117,604589.12,4312633.56,4.89,150.0,4.89\n")
 
-    output_file = Path("data/temp/test_duplicate_z_output.xyz")
+    output_file = Path("src/profcalc/data/temp/test_duplicate_z_output.xyz")
 
     print("Converting CSV with duplicate Z columns (z and elevation)...")
     try:
@@ -40,12 +40,12 @@ def test_duplicate_z_columns():
         assert output_file.exists(), "Output file should be created"
 
         # Read output to verify which column was used
-        with output_file.open("r") as f:
+        with output_file.open("r", encoding="utf-8") as f:
             content = f.read()
-            print(f"\nOutput XYZ content:\n{content}")
-            # Should contain the Z values (5.67, 4.89)
-            assert "5.67" in content
-            assert "4.89" in content
+        print(f"\nOutput XYZ content:\n{content}")
+        # Should contain the Z values (5.67, 4.89)
+        assert "5.67" in content
+        assert "4.89" in content
 
     except Exception as e:
         print(f"❌ Test failed with error: {e}")
@@ -54,7 +54,7 @@ def test_duplicate_z_columns():
 
 def test_duplicate_x_columns():
     """Test CSV with multiple X coordinate columns (easting and utm_x)."""
-    test_file = Path("data/temp/test_duplicate_x.csv")
+    test_file = Path("src/profcalc/data/temp/test_duplicate_x.csv")
     test_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Create CSV with both 'easting' and 'utm_x' columns
@@ -63,7 +63,7 @@ def test_duplicate_x_columns():
         f.write("OC117,604523.45,4312567.89,604500.00,4312500.00,5.67\n")
         f.write("OC117,604589.12,4312633.56,604550.00,4312550.00,4.89\n")
 
-    output_file = Path("data/temp/test_duplicate_x_output.xyz")
+    output_file = Path("src/profcalc/data/temp/test_duplicate_x_output.xyz")
 
     print("\nConverting CSV with duplicate X columns (easting and utm_x)...")
     try:
@@ -76,12 +76,12 @@ def test_duplicate_x_columns():
         print("✅ Conversion succeeded (should have warned about ambiguity)")
 
         # Read output to verify first match was used (easting)
-        with output_file.open("r") as f:
+        with output_file.open("r", encoding="utf-8") as f:
             content = f.read()
-            print(f"\nOutput XYZ content:\n{content}")
-            # Should use 'easting' column (604523.45), not 'utm_x' (604500.00)
-            assert "604523.45" in content
-            assert "604589.12" in content
+        print(f"\nOutput XYZ content:\n{content}")
+        # Should use 'easting' column (604523.45), not 'utm_x' (604500.00)
+        assert "604523.45" in content
+        assert "604589.12" in content
 
     except Exception as e:
         print(f"❌ Test failed with error: {e}")
@@ -90,7 +90,7 @@ def test_duplicate_x_columns():
 
 def test_no_duplicate_columns():
     """Test CSV with no duplicate columns (should not warn)."""
-    test_file = Path("data/temp/test_no_duplicates.csv")
+    test_file = Path("src/profcalc/data/temp/test_no_duplicates.csv")
     test_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Create CSV with unique, unambiguous columns
@@ -99,7 +99,7 @@ def test_no_duplicate_columns():
         f.write("OC117,604523.45,4312567.89,5.67\n")
         f.write("OC117,604589.12,4312633.56,4.89\n")
 
-    output_file = Path("data/temp/test_no_dup_output.xyz")
+    output_file = Path("src/profcalc/data/temp/test_no_dup_output.xyz")
 
     print("\nConverting CSV with no duplicate columns...")
     try:
@@ -118,7 +118,7 @@ def test_no_duplicate_columns():
 
 def test_three_way_duplicate():
     """Test CSV with THREE columns all matching same pattern."""
-    test_file = Path("data/temp/test_three_way_dup.csv")
+    test_file = Path("src/profcalc/data/temp/test_three_way_dup.csv")
     test_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Create CSV with z, elevation, AND height (all match Z pattern)
@@ -127,7 +127,7 @@ def test_three_way_duplicate():
         f.write("OC117,100.0,2000.0,5.0,5.5,6.0\n")
         f.write("OC117,150.0,2050.0,4.0,4.5,5.0\n")
 
-    output_file = Path("data/temp/test_three_dup_output.xyz")
+    output_file = Path("src/profcalc/data/temp/test_three_dup_output.xyz")
 
     print("\nConverting CSV with THREE duplicate Z columns...")
     try:
@@ -140,20 +140,20 @@ def test_three_way_duplicate():
         print("✅ Conversion succeeded (should warn about 3-way ambiguity)")
 
         # Verify first match was used (z = 5.0, not elevation=5.5 or height=6.0)
-        with output_file.open("r") as f:
+        with output_file.open("r", encoding="utf-8") as f:
             content = f.read()
-            lines = content.strip().split("\n")
-            # Find first data line
-            for line in lines:
-                if not line.startswith(">") and not line.startswith("#"):
-                    parts = line.split()
-                    if len(parts) >= 3:
-                        z_value = float(parts[2])
-                        print(f"First Z value in output: {z_value}")
-                        assert z_value == 5.0, (
-                            f"Should use 'z' column (5.0), got {z_value}"
-                        )
-                        break
+        lines = content.strip().split("\n")
+        # Find first data line
+        for line in lines:
+            if not line.startswith(">") and not line.startswith("#"):
+                parts = line.split()
+                if len(parts) >= 3:
+                    z_value = float(parts[2])
+                    print(f"First Z value in output: {z_value}")
+                    assert z_value == 5.0, (
+                        f"Should use 'z' column (5.0), got {z_value}"
+                    )
+                    break
 
     except Exception as e:
         print(f"❌ Test failed with error: {e}")

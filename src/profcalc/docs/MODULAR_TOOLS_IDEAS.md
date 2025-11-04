@@ -13,16 +13,22 @@ This document defines the generic, reusable calculation tools needed for coastal
 ---
 
 ## Tool Categories
+
 ### 1. Cross-Sectional Analysis Tools
+
 ### 2. Volumetric Calculation Tools
+
 ### 3. Shoreline Analysis Tools
+
 ### 4. Temporal Comparison Tools
+
 ### 5. Statistical Analysis Tools
+
 ### 6. Export and Reporting Tools
 
 ---
 
-## 1. Cross-Sectional Analysis Tools
+## 1. Cross-Sectional Analysis Tools (Overview)
 
 ### Tool 1.1: `calculate_cross_sectional_area()`
 
@@ -54,7 +60,9 @@ def calculate_cross_sectional_area(
 ```
 
 **Algorithm:**
+
 - Clip profile data to elevation bounds
+
 - Apply trapezoidal rule: `A = Σ[(z[i] + z[i+1])/2 * (x[i+1] - x[i])]`
 - Handle irregular spacing and missing data
 
@@ -157,7 +165,7 @@ def extract_profile_morphology(
 
 ---
 
-## 2. Volumetric Calculation Tools
+## 2. Volumetric Calculation Tools (Updated)
 
 ### Tool 2.1: `calculate_volume_between_profiles()`
 
@@ -277,7 +285,7 @@ def calculate_template_deficit_volume(
 
 ---
 
-## 3. Shoreline Analysis Tools
+## 3. Shoreline Analysis and Extraction Tools
 
 ### Tool 3.1: `extract_shoreline_position()`
 
@@ -394,7 +402,7 @@ def calculate_shoreline_change_rates(
 
 ---
 
-## 4. Temporal Comparison Tools
+## 4. Temporal Analysis Tools
 
 ### Tool 4.1: `calculate_temporal_area_changes()`
 
@@ -497,7 +505,7 @@ def calculate_annualized_rates(
 
 ---
 
-## 5. Statistical Analysis Tools
+## 5. Statistical Analysis and Reporting Tools
 
 ### Tool 5.1: `generate_summary_statistics()`
 
@@ -563,7 +571,7 @@ def identify_hotspots(
 
 ---
 
-## 6. Export and Reporting Tools
+## 6. Data Export and Reporting Tools
 
 ### Tool 6.1: `export_shapefile()`
 
@@ -674,8 +682,8 @@ def populate_excel_template(
 
 ```python
 # Load data
-profile = read_csv_profiles("data/R01_2020.csv")[0]
-template = read_csv_profiles("data/R01_template.csv")[0]
+profile = read_csv_profiles("src/profcalc/data/R01_2020.csv")[0]
+template = read_csv_profiles("src/profcalc/data/R01_template.csv")[0]
 bounds = {'mhw_elevation': 1.58, 'closure_depth': -15.0}
 
 # Cross-sectional analysis
@@ -700,9 +708,9 @@ results = {
 ```python
 # Load multiple years
 surveys = {
-    '2020': read_csv_profiles("data/2020_profiles.csv"),
-    '2019': read_csv_profiles("data/2019_profiles.csv"),
-    '2018': read_csv_profiles("data/2018_profiles.csv")
+    '2020': read_csv_profiles("src/profcalc/data/2020_profiles.csv"),
+    '2019': read_csv_profiles("src/profcalc/data/2019_profiles.csv"),
+    '2018': read_csv_profiles("src/profcalc/data/2018_profiles.csv")
 }
 
 # Calculate temporal changes
@@ -761,6 +769,7 @@ export_to_excel(
 ## Implementation Notes
 
 ### Code Organization
+
 - Place all tools in `src/profcalc/tools/monitoring/`
 - Group related functions into modules:
   - `cross_sectional.py` - Area calculations
@@ -771,6 +780,7 @@ export_to_excel(
   - `export.py` - Data export utilities
 
 ### Dependencies
+
 - **NumPy**: Numerical calculations and array operations
 - **Pandas**: Tabular data manipulation
 - **SciPy**: Statistical functions (linear regression)
@@ -778,22 +788,28 @@ export_to_excel(
 - **OpenPyXL**: Excel file manipulation
 
 ### Error Handling
+
 - All functions use `BeachProfileError` with appropriate categories
 - Validate inputs before processing
 - Log warnings for edge cases (e.g., shoreline not found)
 - Provide helpful error messages for debugging
 
 ### Performance
+
 - Use vectorized NumPy operations where possible
 - Consider parallel processing for profile-to-profile calculations
 - Cache intermediate results for repeated analyses
 
 ### Testing
+
 - Unit tests for each tool with known inputs/outputs
 - Integration tests for composed workflows
 - Comparison tests against manual BMAP/Excel calculations
+
 1. Implement core cross-sectional tools first (foundation)
-3. Implement shoreline analysis (parallel development)
+
+2. Implement shoreline analysis (parallel development)
+
 See `src/profcalc/modules/` for existing tools.
 5. Develop export utilities
 6. Create validation framework (compare against manual methods)

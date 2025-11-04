@@ -25,8 +25,8 @@ print("TEST 1: Extra Field Preservation (CSV → XYZ → CSV Round-Trip)")
 print("-" * 80)
 
 convert_format(
-    input_file="data/temp/test_extra_columns.csv",
-    output_file="data/temp/comprehensive_test.xyz",
+    input_file="src/profcalc/data/temp/test_extra_columns.csv",
+    output_file="src/profcalc/data/temp/comprehensive_test.xyz",
     from_format="csv",
     to_format="xyz",
 )
@@ -35,19 +35,23 @@ convert_format(
 print(
     "\n✅ CSV → XYZ: Extra columns preserved (slope, roughness, sediment_type)"
 )
-with open("data/temp/comprehensive_test.xyz") as f:
+with open(
+    "src/profcalc/data/temp/comprehensive_test.xyz", encoding="utf-8"
+) as f:
     print("   First point:", f.readlines()[1].strip())
 
 # Convert back to CSV
 convert_format(
-    input_file="data/temp/comprehensive_test.xyz",
-    output_file="data/temp/comprehensive_roundtrip.csv",
+    input_file="src/profcalc/data/temp/comprehensive_test.xyz",
+    output_file="src/profcalc/data/temp/comprehensive_roundtrip.csv",
     from_format="xyz",
     to_format="csv",
 )
 
 print("✅ XYZ → CSV: Round-trip successful")
-with open("data/temp/comprehensive_roundtrip.csv") as f:
+with open(
+    "src/profcalc/data/temp/comprehensive_roundtrip.csv", encoding="utf-8"
+) as f:
     headers = f.readline().strip()
     print(f"   Headers: {headers}")
     print(f"   Data row: {f.readline().strip()}")
@@ -58,17 +62,19 @@ print("TEST 2: Origin Azimuth-Aware Coordinate Transformation (BMAP → XYZ)")
 print("-" * 80)
 
 convert_format(
-    input_file="data/temp/test_bmap_with_baseline.txt",
-    output_file="data/temp/comprehensive_bmap_to_xyz.xyz",
+    input_file="src/profcalc/data/temp/test_bmap_with_baseline.txt",
+    output_file="src/profcalc/data/temp/comprehensive_bmap_to_xyz.xyz",
     from_format="bmap",
     to_format="xyz",
-    baselines_file="data/temp/test_baselines.csv",
+    baselines_file="src/profcalc/data/temp/test_baselines.csv",
 )
 
 print(
     "\n✅ BMAP → XYZ with origin azimuths: Real-world coordinates calculated"
 )
-with open("data/temp/comprehensive_bmap_to_xyz.xyz") as f:
+with open(
+    "src/profcalc/data/temp/comprehensive_bmap_to_xyz.xyz", encoding="utf-8"
+) as f:
     lines = f.readlines()
     print(f"   Profile: {lines[0].strip()}")
     print(f"   Point 1: {lines[1].strip()} (origin + 0m)")
@@ -80,8 +86,8 @@ print("TEST 3: Data Loss Warning (CSV with extras → BMAP)")
 print("-" * 80)
 
 convert_format(
-    input_file="data/temp/test_extra_columns.csv",
-    output_file="data/temp/comprehensive_to_bmap.txt",
+    input_file="src/profcalc/data/temp/test_extra_columns.csv",
+    output_file="src/profcalc/data/temp/comprehensive_to_bmap.txt",
     from_format="csv",
     to_format="bmap",
 )

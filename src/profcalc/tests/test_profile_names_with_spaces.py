@@ -12,13 +12,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from profcalc.cli.quick_tools.convert import convert_format
+
 from profcalc.common.bmap_io import read_bmap_freeformat
 
 
 def test_profile_name_with_spaces_xyz_to_bmap():
     """Test XYZ with space in profile name converts to BMAP correctly."""
     # Create test XYZ file with space in profile name
-    test_file = Path("data/temp/test_space_in_name.xyz")
+    test_file = Path("src/profcalc/data/temp/test_space_in_name.xyz")
     test_file.parent.mkdir(parents=True, exist_ok=True)
 
     with test_file.open("w") as f:
@@ -30,7 +31,7 @@ def test_profile_name_with_spaces_xyz_to_bmap():
         f.write("300.0 3000.0 7.23\n")
         f.write("350.0 3050.0 6.45\n")
 
-    output_file = Path("data/temp/test_space_bmap_output.txt")
+    output_file = Path("src/profcalc/data/temp/test_space_bmap_output.txt")
 
     # Convert XYZ to BMAP
     convert_format(
@@ -67,7 +68,7 @@ def test_profile_name_with_spaces_xyz_to_bmap():
 def test_profile_name_with_spaces_roundtrip():
     """Test XYZ→BMAP→XYZ roundtrip preserves profile names with spaces."""
     # Create test XYZ file
-    test_file = Path("data/temp/test_roundtrip_spaces.xyz")
+    test_file = Path("src/profcalc/data/temp/test_roundtrip_spaces.xyz")
     test_file.parent.mkdir(parents=True, exist_ok=True)
 
     original_profiles = {
@@ -83,11 +84,11 @@ def test_profile_name_with_spaces_roundtrip():
                 f.write(f"{x} {y} {z}\n")
 
     # Convert XYZ → BMAP
-    bmap_file = Path("data/temp/test_roundtrip_spaces.txt")
+    bmap_file = Path("src/profcalc/data/temp/test_roundtrip_spaces.txt")
     convert_format(str(test_file), str(bmap_file), "xyz", "bmap")
 
     # Convert BMAP → XYZ
-    xyz_file = Path("data/temp/test_roundtrip_spaces_back.xyz")
+    xyz_file = Path("src/profcalc/data/temp/test_roundtrip_spaces_back.xyz")
     convert_format(str(bmap_file), str(xyz_file), "bmap", "xyz")
 
     # Read final XYZ by reading the file manually
@@ -131,7 +132,7 @@ def test_profile_name_with_spaces_roundtrip():
 
 def test_profile_name_with_date():
     """Test profile names that include dates with spaces."""
-    test_file = Path("data/temp/test_date_in_name.xyz")
+    test_file = Path("src/profcalc/data/temp/test_date_in_name.xyz")
     test_file.parent.mkdir(parents=True, exist_ok=True)
 
     with test_file.open("w") as f:
@@ -139,7 +140,7 @@ def test_profile_name_with_date():
         f.write("100.0 2000.0 5.67\n")
         f.write("150.0 2050.0 4.89\n")
 
-    output_file = Path("data/temp/test_date_bmap_output.txt")
+    output_file = Path("src/profcalc/data/temp/test_date_bmap_output.txt")
 
     # Convert to BMAP
     convert_format(str(test_file), str(output_file), "xyz", "bmap")
@@ -167,7 +168,7 @@ def test_profile_name_with_date():
 
 def test_bmap_with_spaces_in_header():
     """Test reading BMAP file that has spaces in profile header."""
-    test_file = Path("data/temp/test_bmap_space_header.txt")
+    test_file = Path("src/profcalc/data/temp/test_bmap_space_header.txt")
     test_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Create BMAP with spaces in profile name

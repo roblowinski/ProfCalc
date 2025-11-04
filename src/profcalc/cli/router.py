@@ -50,6 +50,16 @@ Examples:
         action="store_true",
         help="Enable verbose logging (INFO level)",
     )
+    # Menu integration options
+    parser.add_argument(
+        "--menu",
+        action="store_true",
+        help="Launch interactive menu (same as running with no args)",
+    )
+    parser.add_argument(
+        "--handler",
+        help="Run a menu handler by key (e.g. data.import_data) non-interactively",
+    )
 
     # Add mutually exclusive tool flags
     tool_group = parser.add_mutually_exclusive_group()
@@ -99,24 +109,55 @@ Examples:
 
     # Route to appropriate quick tool handler
     try:
+        # If menu flag provided explicitly, launch interactive menu
+        if getattr(args, "menu", False):
+            from .menu_system import launch_menu
+
+            launch_menu()
+            return
+
+        # If a menu handler key was provided, resolve and call it
+        if getattr(args, "handler", None):
+            from .menu import MenuEngine
+
+            engine = MenuEngine()
+            try:
+                handler_callable = engine.resolve_handler(args.handler)
+            except Exception as exc:
+                print(
+                    f"Failed to resolve handler '{args.handler}': {exc}",
+                    file=sys.stderr,
+                )
+                sys.exit(2)
+
+            if handler_callable is None:
+                print(f"Handler '{args.handler}' not found", file=sys.stderr)
+                sys.exit(2)
+
+            try:
+                handler_callable()
+            except TypeError:
+                handler_callable()
+            return
+
         if args.bounds:
-            from .quick_tools import bounds
+            from .tools import bounds
 
             bounds.execute_from_cli(remaining)
         elif args.convert:
-            from .quick_tools import convert
+            from .tools import convert
 
             convert.execute_from_cli(remaining)
         elif args.inventory:
-            from .quick_tools import inventory
+            from .tools import inventory
 
             inventory.execute_from_cli(remaining)
         elif args.assign:
-            from .quick_tools import assign
+            from .tools import assign
 
             assign.execute_from_cli(remaining)
         elif args.fix_bmap:
-            from .quick_tools import fix_bmap
+            from .tools import fix_bmap
 
             fix_bmap.execute_from_cli(remaining)
         else:

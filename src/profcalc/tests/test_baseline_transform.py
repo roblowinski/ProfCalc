@@ -13,16 +13,19 @@ print("TEST 1: BMAP→XYZ WITH Origin Azimuth File (Coordinate Transformation)")
 print("=" * 70)
 
 convert_format(
-    input_file="data/temp/test_bmap_with_baseline.txt",
-    output_file="data/temp/test_bmap_to_xyz_with_baseline.xyz",
+    input_file="src/profcalc/data/temp/test_bmap_with_baseline.txt",
+    output_file="src/profcalc/data/temp/test_bmap_to_xyz_with_baseline.xyz",
     from_format="bmap",
     to_format="xyz",
-    baselines_file="data/temp/test_baselines.csv",
+    baselines_file="src/profcalc/data/temp/test_baselines.csv",
 )
 
 print("\n📄 Output XYZ file with real-world coordinates:")
 print("-" * 70)
-with open("data/temp/test_bmap_to_xyz_with_baseline.xyz") as f:
+with open(
+    "src/profcalc/data/temp/test_bmap_to_xyz_with_baseline.xyz",
+    encoding="utf-8",
+) as f:
     lines = f.readlines()
     for line in lines:
         print(line.rstrip())
@@ -33,8 +36,8 @@ print("TEST 2: BMAP→CSV WITHOUT Origin Azimuth File (Warning Expected)")
 print("=" * 70)
 
 convert_format(
-    input_file="data/temp/test_bmap_with_baseline.txt",
-    output_file="data/temp/test_bmap_to_csv_no_baseline.csv",
+    input_file="src/profcalc/data/temp/test_bmap_with_baseline.txt",
+    output_file="src/profcalc/data/temp/test_bmap_to_csv_no_baseline.csv",
     from_format="bmap",
     to_format="csv",
     baselines_file=None,
@@ -42,7 +45,9 @@ convert_format(
 
 print("\n📄 Output CSV file (Y coordinates should be 0.0):")
 print("-" * 70)
-with open("data/temp/test_bmap_to_csv_no_baseline.csv") as f:
+with open(
+    "src/profcalc/data/temp/test_bmap_to_csv_no_baseline.csv", encoding="utf-8"
+) as f:
     lines = f.readlines()
     for line in lines[:10]:
         print(line.rstrip())

@@ -15,11 +15,11 @@ Behavior:
 - Outputs BMAP-style ASCII report
 
 Example:
-    python tool_volume_xon_xoff.py \
-      --input ../../data/input_examples/OCNJ_FreeFormat_Test.txt \
-      --xon -25 --xoff 3000 --zref 0.0 \
-      --output ../../data/output_examples/OCNJ_VolumeXonXoff.txt \
-      --title "Untitled"
+        python tool_volume_xon_xoff.py \
+            --input src/profcalc/data/input_examples/OCNJ_FreeFormat_Test.txt \
+            --xon -25 --xoff 3000 --zref 0.0 \
+            --output src/profcalc/data/output_examples/OCNJ_VolumeXonXoff.txt \
+            --title "Untitled"
 """
 
 from __future__ import annotations
