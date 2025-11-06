@@ -43,7 +43,8 @@ def _ensure_geopandas() -> None:
         return
     try:
         import geopandas as _gpd  # type: ignore
-        from shapely.geometry import LineString as _LineString, Point as _Point  # type: ignore
+        from shapely.geometry import LineString as _LineString  # type: ignore
+        from shapely.geometry import Point as _Point
     except Exception as e:  # keep broad catch here to propagate import issues
         GEOPANDAS_AVAILABLE = False
         raise ImportError(

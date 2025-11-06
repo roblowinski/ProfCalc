@@ -9,7 +9,6 @@ single menu without launching the full application.
 """
 
 import sys
-from typing import Callable
 
 from profcalc.cli import menu_system
 
@@ -22,7 +21,7 @@ def main() -> None:
 
     name = sys.argv[1]
     func = getattr(menu_system, name, None)
-    if func is None or not isinstance(func, Callable):
+    if func is None or not callable(func):
         print(f"Menu function '{name}' not found in profcalc.cli.menu_system")
         sys.exit(2)
 
