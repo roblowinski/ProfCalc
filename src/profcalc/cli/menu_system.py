@@ -360,6 +360,48 @@ def select_data_source() -> None:
             print("Invalid selection. Please try again.")
 
 
+    def ensure_data_source() -> None:
+        """Prompt the user to select a data source if one is not already set.
+
+        This is a lightweight convenience so entering Data Management will
+        immediately ask the user whether they want to load from file, connect
+        to a database, or use the in-memory session. It does not force an
+        immediate import unless the user chooses to do so.
+        """
+        if app_state.data_source:
+            return
+
+        print("\nNo data source configured. Select data source:")
+        print("1. Load from file")
+        print("2. Connect to database")
+        print("3. Use in-memory session (no external source)")
+        choice = input("Select a source [1/2/3]: ").strip()
+        if choice == "1":
+            app_state.data_source = "file"
+            path = input(
+                "Enter path to 9-column CSV to import now (or blank to skip): "
+            ).strip()
+            if path:
+                try:
+                    result = data_tools.import_data(path)
+                    imported = result.get("imported") if isinstance(result, dict) else "?"
+                    print(f"Imported {imported} rows from {path}.")
+                except (
+                    FileNotFoundError,
+                    ValueError,
+                    NotImplementedError,
+                    OSError,
+                ) as exc:  # pragma: no cover - interactive
+                    print(f"Import failed: {exc}")
+        elif choice == "2":
+            app_state.data_source = "database"
+            app_state.data_source_details = None
+            print("\n[INFO] Database mode selected. (DB connection not yet implemented)")
+        else:
+            app_state.data_source = "session"
+            print("\n[INFO] Using in-memory session (no external source configured).")
+
+
 def data_management_menu() -> None:
     """Display and handle the Data Management menu.
 
