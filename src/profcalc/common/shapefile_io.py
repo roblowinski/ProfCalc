@@ -21,23 +21,47 @@ import numpy as np
 
 from profcalc.common.bmap_io import Profile
 
-try:
-    import geopandas as gpd  # type: ignore
-    from shapely.geometry import LineString, Point  # type: ignore
+# Defer importing geopandas/shapely until runtime to avoid heavy optional
+# dependencies being required at package import time. Callers that need GIS
+# features should trigger the import by calling functions that use these
+# libraries; _ensure_geopandas will import them on first use and provide a
+# helpful ImportError message if they're missing.
+GEOPANDAS_AVAILABLE: bool = False
+gpd = None
+LineString = None
+Point = None
 
+
+def _ensure_geopandas() -> None:
+    """Import geopandas and shapely lazily and set module-level names.
+
+    Raises:
+        ImportError: if geopandas or shapely are not available.
+    """
+    global GEOPANDAS_AVAILABLE, gpd, LineString, Point
+    if GEOPANDAS_AVAILABLE:
+        return
+    try:
+        import geopandas as _gpd  # type: ignore
+        from shapely.geometry import LineString as _LineString, Point as _Point  # type: ignore
+    except Exception as e:  # keep broad catch here to propagate import issues
+        GEOPANDAS_AVAILABLE = False
+        raise ImportError(
+            "Shapefile export requires the 'geopandas' and 'shapely' libraries.\n"
+            "Install with: pip install profile-analysis[gis] or pip install geopandas shapely"
+        ) from e
+    gpd = _gpd
+    LineString = _LineString
+    Point = _Point
     GEOPANDAS_AVAILABLE = True
-except ImportError:
-    GEOPANDAS_AVAILABLE = False
 
 
 def _check_geopandas() -> None:
-    """Check if geopandas is available and raise helpful error if not."""
-    if not GEOPANDAS_AVAILABLE:
-        raise ImportError(
-            "Shapefile export requires the 'geopandas' library.\n"
-            "Install with: pip install profile-analysis[gis]\n"
-            "Or manually: pip install geopandas>=0.14.0"
-        )
+    """Ensure geopandas is importable; raise helpful ImportError if not."""
+    try:
+        _ensure_geopandas()
+    except ImportError:
+        raise
 
 
 def write_survey_points_shapefile(
