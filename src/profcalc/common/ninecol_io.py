@@ -104,7 +104,9 @@ class NineColumnParser:
         content = header_line + "\n" + "".join(lines[header_idx + 1 :])
         df = pd.read_csv(StringIO(content), header=0)
 
-        # Normalize column names by stripping surrounding whitespace.
+        # Some input files may have inconsistent spacing after commas in the header,
+        # resulting in column names with leading/trailing whitespace (e.g., ' DATE').
+        # Strip whitespace from column names to ensure robust matching with required columns.
         # Use Index.map to preserve the pandas Index type (avoids mypy complaint).
         df.columns = df.columns.map(
             lambda c: c.strip() if isinstance(c, str) else c

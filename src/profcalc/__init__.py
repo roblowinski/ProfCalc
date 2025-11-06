@@ -12,7 +12,7 @@ Primary namespaces:
 
 __version__ = "0.9.0"
 __author__ = "U.S. Army Corps of Engineers, Philadelphia District"
-__all__ = ["common", "tools", "docs"]
+__all__ = ["common"]
 
 # NOTE: avoid importing CLI entry points at package import time. Importing
 # `profcalc` should be cheap and not pull in CLI subpackages with

@@ -7,15 +7,17 @@ from profcalc.cli.tools.data import session as data_session
 
 def test_compute_aer_noninteractive_sample_files():
     data_dir = Path(__file__).resolve().parents[1].joinpath("data", "temp").resolve()
-    before = data_dir.joinpath("9Col_WithHeader.csv")
-    after = data_dir.joinpath("9Col_WithHeader.csv")
+    before = data_dir.joinpath("9Col_WithHeader_before.csv")
+    after = data_dir.joinpath("9Col_WithHeader_after.csv")
 
-    # Using same file for before/after is okay for smoke test; expect zero net
+    # Use two different files to ensure non-zero cut/fill for a meaningful test
     res = compute_aer_noninteractive(before, after, dx=0.5, use_bmap_core=False)
     assert "cut_cuyd_per_ft" in res
     assert "fill_cuyd_per_ft" in res
     assert "all_cuyd_per_ft" in res
     assert isinstance(res["cut_cuyd_per_ft"], float)
+    # Optionally, check that cut/fill are not both zero
+    assert abs(res["cut_cuyd_per_ft"]) > 0 or abs(res["fill_cuyd_per_ft"]) > 0
 
 
 def test_compute_aer_noninteractive_with_session_datasets():
