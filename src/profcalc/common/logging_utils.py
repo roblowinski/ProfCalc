@@ -142,7 +142,7 @@ class ProfileAnalysisLogger:
                 )
             else:
                 self.logger.info(f"{name}: type={type(data).__name__}")
-        except Exception as e:
+        except (TypeError, ValueError, AttributeError) as e:
             self.logger.warning(f"Could not log statistics for {name}: {e}")
 
     def log_error(
@@ -254,7 +254,7 @@ def log_operation(logger: ProfileAnalysisLogger, operation: str, **context):
             operation_id=operation_id,
             duration=f"{duration:.3f}s",
         )
-    except Exception as e:
+    except (TypeError, ValueError, RuntimeError, OSError, AttributeError) as e:
         duration = time.time() - start_time
         logger.log_error(
             e,
@@ -339,7 +339,13 @@ def benchmark_function(
                 )
 
                 return result
-            except Exception as e:
+            except (
+                TypeError,
+                ValueError,
+                RuntimeError,
+                OSError,
+                AttributeError,
+            ) as e:
                 execution_time = time.time() - start_time
                 logger.log_error(
                     e,

@@ -145,7 +145,14 @@ class CSVParser:
                 f"Failed to parse CSV file: {e}",
                 category=ErrorCategory.FILE_IO,
             ) from e
-        except Exception as e:
+        except (
+            OSError,
+            ValueError,
+            TypeError,
+            KeyError,
+            IndexError,
+            AttributeError,
+        ) as e:
             raise BeachProfileError(
                 f"Unexpected error parsing CSV file: {e}",
                 category=ErrorCategory.FILE_IO,
@@ -449,7 +456,13 @@ class CSVParser:
 
             return profile
 
-        except Exception as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            IndexError,
+            AttributeError,
+        ) as e:
             self.logger.error(f"Failed to parse profile {profile_id}: {e}")
             return None
 
@@ -678,7 +691,7 @@ def write_csv_profiles(
         # Write to CSV
         df.to_csv(file_path, index=False, encoding="utf-8")
 
-    except Exception as e:
+    except (OSError, ValueError, TypeError) as e:
         raise BeachProfileError(
             f"Failed to write CSV file: {e}", category=ErrorCategory.FILE_IO
         ) from e
@@ -907,7 +920,7 @@ def read_xyz_profiles(
         raise BeachProfileError(
             f"XYZ file is empty: {file_path}", category=ErrorCategory.FILE_IO
         )
-    except Exception as e:
+    except (OSError, ValueError, TypeError, KeyError, IndexError) as e:
         raise BeachProfileError(
             f"Failed to read XYZ file: {e}", category=ErrorCategory.FILE_IO
         ) from e
@@ -976,7 +989,7 @@ def _load_profile_origin_azimuths(
             f"Origin azimuth file is empty: {origin_azimuth_file}",
             category=ErrorCategory.FILE_IO,
         )
-    except Exception as e:
+    except (OSError, ValueError, TypeError, KeyError, IndexError) as e:
         raise BeachProfileError(
             f"Failed to load origin azimuth file: {e}",
             category=ErrorCategory.FILE_IO,

@@ -96,10 +96,19 @@ class NineColumnParser:
                 category=ErrorCategory.FILE_IO,
             )
 
-        # Use the header line to name columns
+        # Use the header line to name columns. Some inputs have spaces after
+        # commas which results in column names with leading/trailing
+        # whitespace (e.g. ' DATE'). Strip whitespace from column names so
+        # they match the expected required column names.
         header_line = lines[header_idx].strip()
         content = header_line + "\n" + "".join(lines[header_idx + 1 :])
         df = pd.read_csv(StringIO(content), header=0)
+
+        # Normalize column names by stripping surrounding whitespace.
+        # Use Index.map to preserve the pandas Index type (avoids mypy complaint).
+        df.columns = df.columns.map(
+            lambda c: c.strip() if isinstance(c, str) else c
+        )
 
         # Check for required columns
         missing_columns = set(self.required_columns) - set(df.columns)
@@ -140,7 +149,7 @@ class NineColumnParser:
 
             return profiles
 
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError, IndexError) as e:
             raise BeachProfileError(
                 f"Failed to parse 9-column file: {e}",
                 category=ErrorCategory.FILE_IO,
@@ -260,7 +269,13 @@ class NineColumnParser:
 
             return profile
 
-        except Exception as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            IndexError,
+            AttributeError,
+        ) as e:
             self.logger.error(
                 f"Failed to convert 9-column data to Profile object: {e}"
             )
@@ -363,7 +378,7 @@ def write_9col_profiles(
                     )
                     point_counter += 1
 
-    except Exception as e:
+    except (OSError, ValueError, TypeError) as e:
         raise BeachProfileError(
             f"Failed to write 9-column file {file_path}: {e}",
             category=ErrorCategory.FILE_IO,

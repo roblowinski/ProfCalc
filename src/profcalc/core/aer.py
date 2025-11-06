@@ -57,6 +57,13 @@ def interpolate_to_common_grid(
     xb = _to_numpy(x2)
     zb = _to_numpy(z2)
 
+    # Validate dx early to provide a clear error for invalid spacing
+    try:
+        if not math.isfinite(dx) or dx <= 0:
+            raise ValueError("dx must be a positive finite number")
+    except TypeError:
+        raise ValueError("dx must be a positive finite number")
+
     if xa.size < 2 or xb.size < 2:
         raise ValueError("Each profile must contain at least two points")
 

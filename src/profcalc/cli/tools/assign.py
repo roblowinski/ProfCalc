@@ -6,20 +6,22 @@ meaningful profile names. Useful for raw survey data without profile identificat
 """
 
 import argparse
+import importlib
 from pathlib import Path
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import numpy as np
 import pandas as pd
 
-# Optional sklearn imports
-try:
-    from sklearn.cluster import DBSCAN
-    from sklearn.preprocessing import StandardScaler
-
-    SKLEARN_AVAILABLE = True
-except ImportError:
-    SKLEARN_AVAILABLE = False
+# Import sklearn only for type checkers; do runtime import lazily to avoid
+# language-server warnings in developer environments that don't have
+# scikit-learn installed. Actual imports are performed inside
+# `assign_profiles_by_clustering` when the spatial method is used.
+if TYPE_CHECKING:
+    from sklearn.cluster import DBSCAN  # type: ignore  # noqa: F401
+    from sklearn.preprocessing import (
+        StandardScaler,  # type: ignore  # noqa: F401
+    )
 
 from profcalc.common.bmap_io import Profile
 
@@ -171,7 +173,7 @@ def execute_from_menu() -> None:
 
     except FileNotFoundError:
         print(f"\n❌ Error: Input file not found: {input_file}")
-    except Exception as e:
+    except (OSError, ValueError, TypeError, ImportError) as e:
         print(f"\n❌ Error: {e}")
 
     input("\nPress Enter to continue...")
@@ -254,11 +256,25 @@ def assign_profiles_by_clustering(
         List of Profile objects with assigned names
     """
     if method == "spatial":
-        if not SKLEARN_AVAILABLE:
+        # Import sklearn lazily to avoid top-level import errors in environments
+        # where scikit-learn is not installed. Provide a clear runtime error if
+        # the spatial method is requested but sklearn isn't available.
+        try:
+            # Use importlib to avoid static import checks in editors that don't
+            # have sklearn installed. We still provide TYPE_CHECKING imports
+            # above so static type checkers understand the types.
+            cluster_mod = importlib.import_module("sklearn.cluster")
+            preprocess_mod = importlib.import_module("sklearn.preprocessing")
+            DBSCAN = getattr(cluster_mod, "DBSCAN")
+            StandardScaler = getattr(preprocess_mod, "StandardScaler")
+        except ImportError as e:
+            # ImportError covers ModuleNotFoundError as well. If importing the
+            # module fails due to other runtime errors inside the package, let
+            # those propagate so the caller sees the real problem.
             print(
                 "❌ Error: sklearn required for spatial clustering. Install with: pip install scikit-learn"
             )
-            raise ImportError("sklearn not available")
+            raise ImportError("sklearn not available") from e
 
         # Use DBSCAN for spatial clustering
         coords = points_df[["x", "y"]].values

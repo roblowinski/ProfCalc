@@ -202,7 +202,7 @@ def write_survey_points_shapefile(
     # Write to shapefile
     try:
         gdf.to_file(output_path, driver="ESRI Shapefile")
-    except Exception as e:
+    except (OSError, ValueError, RuntimeError) as e:
         raise ValueError(f"Failed to write point shapefile: {e}") from e
 
     print(f"✅ Wrote {total_points:,} survey points to {output_path}")
@@ -334,7 +334,7 @@ def write_profile_lines_shapefile(
     # Write to shapefile
     try:
         gdf.to_file(output_path, driver="ESRI Shapefile")
-    except Exception as e:
+    except (OSError, ValueError, RuntimeError) as e:
         raise ValueError(f"Failed to write line shapefile: {e}") from e
 
     print(f"✅ Wrote {len(profiles)} profile lines (3D) to {output_path}")

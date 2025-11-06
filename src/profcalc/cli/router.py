@@ -123,7 +123,12 @@ Examples:
             engine = MenuEngine()
             try:
                 handler_callable = engine.resolve_handler(args.handler)
-            except Exception as exc:
+            except (
+                LookupError,
+                ValueError,
+                AttributeError,
+                ImportError,
+            ) as exc:
                 print(
                     f"Failed to resolve handler '{args.handler}': {exc}",
                     file=sys.stderr,
@@ -164,7 +169,7 @@ Examples:
             parser.print_help()
             sys.exit(1)
 
-    except Exception as e:
+    except (OSError, ValueError, TypeError, RuntimeError, ImportError) as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 

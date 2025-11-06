@@ -367,12 +367,12 @@ def validate_file_path(
         # Check if readable
         if check_readable and path.exists():
             try:
-                with open(path, "r") as f:
+                with open(path, "r", encoding="utf-8") as f:
                     f.read(1)  # Try to read one character
             except (PermissionError, OSError) as e:
                 errors.append(f"File is not readable: {e}")
 
-    except Exception as e:
+    except (TypeError, ValueError, OSError) as e:
         errors.append(f"Invalid file path: {e}")
 
     return errors
@@ -408,7 +408,13 @@ def run_validation_checks(
                 if logger:
                     for error in errors:
                         logger.warning(f"Validation error: {error}")
-        except Exception as e:
+        except (
+            TypeError,
+            ValueError,
+            OSError,
+            AttributeError,
+            RuntimeError,
+        ) as e:
             error_msg = f"Validation check failed: {e}"
             all_errors.append(error_msg)
             if logger:

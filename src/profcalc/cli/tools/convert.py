@@ -574,7 +574,15 @@ def _read_baseline_file(baselines_file: str) -> dict[str, dict[str, float]]:
 
         return baselines
 
-    except Exception as e:
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        RuntimeError,
+        KeyError,
+        IndexError,
+        ImportError,
+    ) as e:
         raise ValueError(f"Error reading origin azimuth file: {e}") from e
 
 
@@ -986,7 +994,14 @@ def execute_from_menu() -> None:
         print(f"\n❌ Error: {e}")
     except ValueError as e:
         print(f"\n❌ Error: {e}")
-    except Exception as e:
+    except (
+        OSError,
+        TypeError,
+        RuntimeError,
+        KeyError,
+        IndexError,
+        ImportError,
+    ) as e:
         print(f"\n❌ Unexpected error: {e}")
 
     input("\nPress Enter to continue...")
@@ -1287,16 +1302,40 @@ def execute_bmap_to_csv() -> None:
                     description=conversion_params["description"]
                 )
                 print(f"✅ 9-Column conversion completed. Output saved to '{output_file}'")
-            except Exception as e:
+            except (
+                OSError,
+                ValueError,
+                TypeError,
+                RuntimeError,
+                KeyError,
+                IndexError,
+                ImportError,
+            ) as e:
                 print(f"❌ 9-Column conversion failed: {e}")
         elif output_format == "xyz":
             # XYZ conversion with origin azimuth
             try:
                 convert_bmap_to_csv_3d(input_file, output_file, conversion_params["origin_azimuth_file"])
                 print(f"✅ XYZ conversion completed. Output saved to '{output_file}'")
-            except Exception as e:
+            except (
+                OSError,
+                ValueError,
+                TypeError,
+                RuntimeError,
+                KeyError,
+                IndexError,
+                ImportError,
+            ) as e:
                 print(f"❌ XYZ conversion failed: {e}")
-    except Exception as e:
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        RuntimeError,
+        KeyError,
+        IndexError,
+        ImportError,
+    ) as e:
         print(f"❌ Conversion failed: {e}")
 
     input("\nPress Enter to continue...")
@@ -1597,7 +1636,15 @@ def execute_bmap_to_shapefile() -> None:
         print("✅ Shapefile conversion completed successfully!")
         for file_type, file_path in output_files.items():
             print(f"   {file_type.capitalize()} Shapefile: {file_path}")
-    except Exception as e:
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        RuntimeError,
+        KeyError,
+        IndexError,
+        ImportError,
+    ) as e:
         print(f"❌ Conversion failed: {e}")
 
     input("\nPress Enter to continue...")
@@ -1712,7 +1759,7 @@ def execute_csv_to_bmap() -> None:
         print(
             f"✅ Conversion completed successfully. Output saved to '{output_file}'"
         )
-    except Exception as e:
+    except (OSError, ValueError, TypeError, RuntimeError) as e:
         print(f"❌ Conversion failed: {e}")
 
     input("\nPress Enter to continue...")
@@ -1743,7 +1790,15 @@ def convert_csv_to_bmap(input_file: str, output_file: str) -> None:
             print(f"✅ Detected 3D CSV format with {len(profiles)} profiles")
         else:
             raise ValueError("No profiles found in 3D CSV format")
-    except Exception as e:
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        RuntimeError,
+        KeyError,
+        IndexError,
+        ImportError,
+    ) as e:
         # If 3D reading fails, try 2D format
         try:
             profiles = read_csv_profiles_2d(input_file)
@@ -1753,7 +1808,15 @@ def convert_csv_to_bmap(input_file: str, output_file: str) -> None:
                 )
             else:
                 raise ValueError("No profiles found in 2D CSV format")
-        except Exception as e2:
+        except (
+            OSError,
+            ValueError,
+            TypeError,
+            RuntimeError,
+            KeyError,
+            IndexError,
+            ImportError,
+        ) as e2:
             raise ValueError(
                 f"Could not read CSV file as 2D or 3D format. 3D error: {e}, 2D error: {e2}"
             )
@@ -2114,7 +2177,15 @@ def execute_csv_to_shapefile() -> None:
             print(
                 f"   {output_type.capitalize()} Shapefile saved to: {output_file}"
             )
-    except Exception as e:
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        RuntimeError,
+        KeyError,
+        IndexError,
+        ImportError,
+    ) as e:
         print(f"❌ Conversion failed: {e}")
 
     input("\nPress Enter to continue...")
@@ -2325,7 +2396,15 @@ def execute_xyz_to_shapefile() -> None:
             print(
                 f"   {output_type.capitalize()} Shapefile saved to: {output_file}"
             )
-    except Exception as e:
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        RuntimeError,
+        KeyError,
+        IndexError,
+        ImportError,
+    ) as e:
         print(f"❌ Conversion failed: {e}")
 
     input("\nPress Enter to continue...")
@@ -2485,7 +2564,7 @@ def execute_shapefile_to_bmap() -> None:
         print(
             f"✅ Conversion completed successfully. Output saved to '{output_file}'"
         )
-    except Exception as e:
+    except (OSError, ValueError, TypeError, RuntimeError) as e:
         print(f"❌ Conversion failed: {e}")
 
     input("\nPress Enter to continue...")
@@ -2558,7 +2637,7 @@ def execute_shapefile_to_xyz() -> None:
         print(
             f"✅ Conversion completed successfully. Output saved to '{output_file}'"
         )
-    except Exception as e:
+    except (OSError, ValueError, TypeError, RuntimeError) as e:
         print(f"❌ Conversion failed: {e}")
 
     input("\nPress Enter to continue...")

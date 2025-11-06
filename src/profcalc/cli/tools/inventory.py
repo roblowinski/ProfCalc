@@ -47,7 +47,7 @@ def execute_from_cli(args: list[str]) -> None:
     )
 
     # Write output
-    Path(parsed_args.output).write_text(report)
+    Path(parsed_args.output).write_text(report, encoding="utf-8")
     print(f"✅ Inventory report written to: {parsed_args.output}")
 
 
@@ -292,7 +292,7 @@ def execute_from_menu() -> None:
 
         report = generate_inventory_report(input_file, verbose=verbose)
 
-        Path(output_file).write_text(report)
+        Path(output_file).write_text(report, encoding="utf-8")
 
         # Print summary
         print("\n" + report)
@@ -300,7 +300,7 @@ def execute_from_menu() -> None:
 
     except FileNotFoundError as e:
         print(f"\n❌ Error: {e}")
-    except Exception as e:
+    except (OSError, ValueError, TypeError, RuntimeError) as e:
         print(f"\n❌ Unexpected error: {e}")
 
     input("\nPress Enter to continue...")

@@ -105,7 +105,7 @@ def execute_from_cli(args: List[str]) -> None:
                 if profile_name not in all_profiles:
                     all_profiles[profile_name] = []
                 all_profiles[profile_name].extend(surveys)
-        except Exception as e:
+        except (OSError, ValueError, TypeError, RuntimeError) as e:
             print(f"⚠️  Warning: Error reading {file_path}: {e}")
             continue
 
@@ -130,7 +130,7 @@ def execute_from_cli(args: List[str]) -> None:
         )
 
     # Write output
-    Path(parsed_args.output).write_text(output)
+    Path(parsed_args.output).write_text(output, encoding="utf-8")
     print(f"✅ Results written to {parsed_args.output}")
     print(f"   Profiles analyzed: {len(common_ranges)}")
 
@@ -298,7 +298,7 @@ def execute_from_menu() -> None:
         # Execute
         execute_from_cli(args)
 
-    except Exception as e:
+    except (OSError, ValueError, TypeError) as e:
         print(f"\n❌ Error: {e}")
 
     input("\nPress Enter to continue...")

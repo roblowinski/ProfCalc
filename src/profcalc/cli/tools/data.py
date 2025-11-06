@@ -4,6 +4,7 @@ These functions are intentionally small wrappers so they can be tested easily
 and replaced later with full implementations.
 """
 
+import json
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -26,7 +27,8 @@ def _maybe_register_path(p: Path) -> Optional[str]:
         try:
             if info.get("path") == p.resolve():
                 return dsid
-        except Exception:
+        except (AttributeError, TypeError):
+            # Defensive: skip any malformed dataset entries
             continue
 
     dsid = session.load_dataset(str(p))
@@ -125,8 +127,6 @@ def import_data(
         # Resolve config.json which lives at src/profcalc/settings/config.json
         cfg_path = Path(__file__).resolve().parents[2].joinpath("settings", "config.json")
         if cfg_path.exists():
-            import json
-
             with cfg_path.open("r", encoding="utf-8") as fh:
                 cfg = json.load(fh)
             data_dir = cfg.get("paths", {}).get("data")
@@ -148,7 +148,7 @@ def import_data(
                 if prof_id:
                     print(f"Auto-registered profile line data: {profline_csv} (id={prof_id})")
 
-    except Exception:
+    except (OSError, json.JSONDecodeError):
         # Non-fatal: auto-load is best-effort and should not block import
         pass
 

@@ -1,5 +1,4 @@
-﻿"""
-Interactive Menu System for ProfCalc.
+"""Interactive Menu System for ProfCalc.
 
 This module provides the command-line interface for ProfCalc, offering
 a hierarchical menu system for accessing various analysis tools and
@@ -260,7 +259,12 @@ def annual_monitoring_menu() -> None:
                     res.get("imported") if isinstance(res, dict) else "?"
                 )
                 print(f"Imported {imported} rows from {path}.")
-            except Exception as exc:  # pragma: no cover - interactive
+            except (
+                FileNotFoundError,
+                ValueError,
+                NotImplementedError,
+                OSError,
+            ) as exc:  # pragma: no cover - interactive
                 print(f"Import failed: {exc}")
         elif choice == "2":
             # Compute AER via the Annual tools handler
@@ -268,7 +272,10 @@ def annual_monitoring_menu() -> None:
                 from profcalc.cli.tools import annual as annual_tools
 
                 annual_tools.compute_aer()
-            except Exception as exc:  # pragma: no cover - interactive
+            except (
+                ImportError,
+                AttributeError,
+            ) as exc:  # pragma: no cover - interactive
                 print(f"Failed to run AER handler: {exc}")
         elif choice == "3":
             shoreline_analysis_menu()
@@ -339,7 +346,10 @@ def select_data_source() -> None:
                 )
                 print(f"Imported {imported} rows from {path}.")
             except (
-                Exception
+                FileNotFoundError,
+                ValueError,
+                NotImplementedError,
+                OSError,
             ) as exc:  # pragma: no cover - interactive error path
                 print(f"Import failed: {exc}")
             break
@@ -384,7 +394,12 @@ def data_management_menu() -> None:
                     result.get("imported") if isinstance(result, dict) else "?"
                 )
                 print(f"Imported {imported} rows from {path}.")
-            except Exception as exc:  # pragma: no cover - interactive
+            except (
+                FileNotFoundError,
+                ValueError,
+                NotImplementedError,
+                OSError,
+            ) as exc:  # pragma: no cover - interactive
                 print(f"Import failed: {exc}")
         elif choice == "3":
             data_tools.list_datasets()
@@ -397,7 +412,11 @@ def data_management_menu() -> None:
                 continue
             try:
                 data_tools.select_dataset(dsid)
-            except Exception as exc:  # pragma: no cover - interactive
+            except (
+                KeyError,
+                ValueError,
+                OSError,
+            ) as exc:  # pragma: no cover - interactive
                 print(f"Failed to select dataset: {exc}")
         elif choice == "5":
             data_tools.summary()
@@ -533,7 +552,7 @@ def about() -> None:
         from profcalc import __version__  # type: ignore
 
         ver = __version__
-    except Exception:
+    except (ImportError, AttributeError):
         ver = "(version unknown)"
     print(
         f"ProfCalc {ver} - interactive menu system\nFor help see README.md in the project root."

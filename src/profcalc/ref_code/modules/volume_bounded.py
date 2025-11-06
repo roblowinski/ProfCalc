@@ -58,6 +58,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+from profcalc.common.error_handler import BeachProfileError, ErrorCategory
+
 # Field name aliases for handling different naming conventions in input files
 FIELD_ALIASES = {
     # Profile metadata fields
@@ -313,20 +315,23 @@ class BMAPParser:
         Returns:
             List of Profile objects
         """
-        try:
-            # Read profiles from BMAP file
-            profile_data_list = self.read_profiles(file_path)
+        # Read profiles from BMAP file
+        profile_data_list = self.read_profiles(file_path)
 
-            profiles = []
-            for profile_data in profile_data_list:
-                profile = self._convert_to_profile(profile_data)
-                if profile:
-                    profiles.append(profile)
+        if not profile_data_list:
+            # No profiles found — treat as a parse failure for malformed inputs
+            raise BeachProfileError(
+                f"No profiles parsed from BMAP file: {file_path}",
+                category=ErrorCategory.FILE_IO,
+            )
 
-            return profiles
+        profiles: List[Profile] = []
+        for profile_data in profile_data_list:
+            profile = self._convert_to_profile(profile_data)
+            if profile:
+                profiles.append(profile)
 
-        except Exception as e:
-            raise Exception(f"Failed to parse BMAP file: {e}") from e
+        return profiles
 
     def _convert_to_profile(
         self, profile_data: dict[str, Any]
@@ -397,7 +402,9 @@ class BMAPParser:
 
             return profile
 
-        except Exception:
+        except (ValueError, TypeError, KeyError):
+            # If conversion fails for predictable reasons (bad types or missing keys)
+            # return None so the parser can skip invalid profiles gracefully.
             return None
 
 
@@ -869,7 +876,15 @@ def menu():
             for name, df in files.items():
                 print(f"{name}: {len(df)} rows")
             print(f"BMAP Profiles Parsed: {len(bmap_profiles)} profiles")
-        except Exception as e:
+        except (
+            ValueError,
+            TypeError,
+            OSError,
+            KeyError,
+            IndexError,
+            AttributeError,
+            ImportError,
+        ) as e:
             print(f"Error loading data: {e}")
 
     def compute_volume_above_contour():
@@ -880,7 +895,7 @@ def menu():
             z = np.array([5, 15, 10, 20, 25])  # Example z-coordinates
             volume = bmap_style_volume_above_contour(x, z, contour)
             print(f"Volume above contour {contour}: {volume:.2f} cubic yards per foot")
-        except Exception as e:
+        except (ValueError, TypeError, OSError) as e:
             print(f"Error computing volume: {e}")
 
     def compute_bounded_volume_menu():
@@ -894,7 +909,7 @@ def menu():
             print(f"Volume within bounds {x_bounds} and {z_bounds}:")
             print(f"  Volume Above: {result['volume_above']:.2f}")
             print(f"  Volume Below: {result['volume_below']:.2f}")
-        except Exception as e:
+        except (ValueError, TypeError, OSError) as e:
             print(f"Error computing bounded volume: {e}")
 
     while True:

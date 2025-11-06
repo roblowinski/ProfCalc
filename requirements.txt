@@ -1,5 +1,17 @@
+﻿# Core dependencies
 numpy
 pandas
 scipy
+
+# Optional / geo / ML dependencies used by some tools/tests
+scikit-learn
+geopandas
+shapely
+fiona
+pyproj
+rtree
+
+# Testing / developer tools
+pytest
 ruff
 mypy

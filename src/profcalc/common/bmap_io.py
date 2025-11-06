@@ -363,7 +363,7 @@ class BMAPParser:
 
             return profiles
 
-        except Exception as e:
+        except (OSError, ValueError, TypeError, KeyError, IndexError) as e:
             raise BeachProfileError(
                 f"Failed to parse BMAP file: {e}",
                 category=ErrorCategory.FILE_IO,
@@ -455,7 +455,13 @@ class BMAPParser:
 
             return profile
 
-        except Exception as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            IndexError,
+            AttributeError,
+        ) as e:
             self.logger.error(
                 f"Failed to convert profile data to Profile object: {e}"
             )
@@ -729,7 +735,7 @@ def write_bmap_profiles(
                 # Add blank line between profiles
                 f.write("\n")
 
-    except Exception as e:
+    except (OSError, ValueError, TypeError) as e:
         raise BeachProfileError(
             f"Failed to write BMAP file {file_path}: {e}",
             category=ErrorCategory.FILE_IO,

@@ -12,6 +12,8 @@ from typing import Optional
 import profcalc.cli.menu_system as menu_system
 from profcalc.cli.tools.data import import_data
 from profcalc.cli.tools.data import session as data_session
+from profcalc.common.bmap_io import BMAPImportError
+from profcalc.common.error_handler import BeachProfileError
 from profcalc.common.ninecol_io import read_9col_profiles
 from profcalc.core import aer as aer_mod
 
@@ -95,7 +97,7 @@ def compute_aer() -> Optional[dict]:
                 try:
                     idx = max(0, min(len(ids) - 1, int(choice) - 1))
                     return Path(datasets[ids[idx]].get("path"))
-                except Exception:
+                except (ValueError, TypeError):
                     print("Invalid selection; falling back to file import.")
 
         # Fall back to prompting for a file path
@@ -109,7 +111,7 @@ def compute_aer() -> Optional[dict]:
         # Attempt to import/register the file so future tools see it
         try:
             import_data(str(p))
-        except Exception:
+        except (FileNotFoundError, ValueError, NotImplementedError, OSError):
             # Non-fatal; still attempt to read the file directly
             pass
         return p
@@ -126,7 +128,12 @@ def compute_aer() -> Optional[dict]:
     try:
         before_profiles = read_9col_profiles(str(pb))
         after_profiles = read_9col_profiles(str(pa))
-    except Exception as exc:  # pragma: no cover - interactive
+    except (
+        BeachProfileError,
+        ValueError,
+    ) as exc:  # pragma: no cover - interactive
+        # read_9col_profiles may raise BeachProfileError or ValueError for
+        # malformed inputs; surface a friendly message and abort.
         print(f"Failed to read 9-col profiles: {exc}")
         return None
 
@@ -145,7 +152,7 @@ def compute_aer() -> Optional[dict]:
         else:
             try:
                 idx = max(0, min(len(profiles) - 1, int(sel) - 1))
-            except Exception:
+            except (ValueError, TypeError):
                 idx = 0
         return profiles[idx]
 
@@ -162,10 +169,10 @@ def compute_aer() -> Optional[dict]:
             return None
         try:
             return _dt.date.fromisoformat(ds)
-        except Exception:
+        except (ValueError, TypeError):
             try:
                 return _dt.datetime.strptime(ds, "%Y%m%d").date()
-            except Exception:
+            except (ValueError, TypeError):
                 return None
 
     date_before = _parse_date(prof_before.date)
@@ -174,7 +181,7 @@ def compute_aer() -> Optional[dict]:
     dx_in = input("Grid spacing dx (feet, default 0.1): ").strip()
     try:
         dx = float(dx_in) if dx_in else 0.1
-    except Exception:
+    except (ValueError, TypeError):
         dx = 0.1
 
     use_bmap = input("Use BMAP core splitting logic? (Y/n) [Y]: ").strip().lower()
@@ -192,7 +199,12 @@ def compute_aer() -> Optional[dict]:
             dx=dx,
             use_bmap_core=use_bmap_core,
         )
-    except Exception as exc:  # pragma: no cover - interactive
+    except (
+        ValueError,
+        ArithmeticError,
+    ) as exc:  # pragma: no cover - interactive
+        # calculate_aer can raise ValueError or other numeric errors; in
+        # interactive mode present a message and abort.
         print(f"AER computation failed: {exc}")
         return None
 
@@ -239,7 +251,7 @@ def compute_aer() -> Optional[dict]:
                     ]
                 )
             print(f"Summary written to {save}")
-        except Exception as exc:  # pragma: no cover - interactive
+        except (OSError, IOError) as exc:  # pragma: no cover - interactive
             print(f"Failed to save summary: {exc}")
 
     return res
@@ -254,78 +266,11 @@ def _parse_date_str(ds: Optional[str]) -> Optional[_dt.date]:
         return None
     try:
         return _dt.date.fromisoformat(ds)
-    except Exception:
+    except (ValueError, TypeError):
         try:
             return _dt.datetime.strptime(ds, "%Y%m%d").date()
-        except Exception:
+        except (ValueError, TypeError):
             return None
-
-
-def compute_aer_noninteractive(
-    before: Path | str,
-    after: Path | str,
-    *,
-    profile_before: Optional[str] = None,
-    profile_after: Optional[str] = None,
-    dx: float = 0.1,
-    use_bmap_core: bool = True,
-) -> dict:
-    """Non-interactive AER computation for scripts and tests.
-
-    Args:
-        before, after: Paths to 9-column survey files (or dataset ids/paths)
-        profile_before, profile_after: optional profile names to select when
-            multiple profiles exist in a file. If omitted the first profile
-            is used.
-        dx: grid spacing
-        use_bmap_core: whether to use the BMAP split_trap_area logic
-
-    Returns:
-        result dict from `profcalc.core.aer.calculate_aer`.
-
-    Raises:
-        FileNotFoundError: if input files are missing
-        ValueError: if profiles cannot be found or parsed
-    """
-    pb = Path(before)
-    pa = Path(after)
-    if not pb.exists():
-        raise FileNotFoundError(f"Input file not found: {pb}")
-    if not pa.exists():
-        raise FileNotFoundError(f"Input file not found: {pa}")
-
-    before_profiles = read_9col_profiles(str(pb))
-    after_profiles = read_9col_profiles(str(pa))
-
-    if not before_profiles:
-        raise ValueError(f"No profiles found in {pb}")
-    if not after_profiles:
-        raise ValueError(f"No profiles found in {pa}")
-
-    def _select(profiles, name: Optional[str]):
-        if name:
-            for p in profiles:
-                if p.name == name:
-                    return p
-            raise ValueError(f"Profile '{name}' not found")
-        return profiles[0]
-
-    prof_before = _select(before_profiles, profile_before)
-    prof_after = _select(after_profiles, profile_after)
-
-    date_before = _parse_date_str(prof_before.date)
-    date_after = _parse_date_str(prof_after.date)
-
-    return aer_mod.calculate_aer(
-        prof_before.x,
-        prof_before.z,
-        prof_after.x,
-        prof_after.z,
-        date_before,
-        date_after,
-        dx=dx,
-        use_bmap_core=use_bmap_core,
-    )
 
 
 def _get_profiles_for_path(path: Path):
@@ -336,14 +281,14 @@ def _get_profiles_for_path(path: Path):
     """
     try:
         return read_9col_profiles(str(path))
-    except Exception:
+    except (BeachProfileError, ValueError):
         # Try BMAP parser fallback
         try:
             from profcalc.common.bmap_io import BMAPParser
 
             parser = BMAPParser()
             return parser.parse_file(str(path))
-        except Exception:
+        except (BeachProfileError, BMAPImportError, ValueError, OSError):
             return []
 
 
@@ -369,8 +314,25 @@ def compute_aer_noninteractive(
     Returns:
         dict: same structure as profcalc.core.aer.calculate_aer result
     """
-    p_before = Path(before)
-    p_after = Path(after)
+
+    # Resolve inputs: accept either filesystem paths or dataset IDs registered
+    # in the shared session (data_session). If a dataset id is provided, use
+    # the dataset's registered path.
+    def _resolve_input(inp: str | Path) -> Path:
+        # If already a Path, return it
+        p = Path(inp) if not isinstance(inp, Path) else inp
+        # If this looks like a registered dataset id, prefer the session path
+        datasets = data_session.list_datasets()
+        if isinstance(inp, str) and inp in datasets:
+            ds_info = datasets[inp]
+            ds_path = ds_info.get("path")
+            if ds_path:
+                return Path(ds_path)
+        # Otherwise return the path as given
+        return p
+
+    p_before = _resolve_input(before)
+    p_after = _resolve_input(after)
 
     if not p_before.exists() or not p_after.exists():
         raise FileNotFoundError("Before/after file not found")
@@ -397,7 +359,7 @@ def compute_aer_noninteractive(
                         d = p.date.date()
                     elif isinstance(p.date, _dt.date):
                         d = p.date
-                except Exception:
+                except (ValueError, TypeError):
                     d = None
                 if d and (best_date is None or d > best_date):
                     best_date = d

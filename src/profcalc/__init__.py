@@ -12,7 +12,9 @@ Primary namespaces:
 
 __version__ = "0.9.0"
 __author__ = "U.S. Army Corps of Engineers, Philadelphia District"
-__all__ = ["common", "tools", "docs", "main"]
+__all__ = ["common", "tools", "docs"]
 
-# Import main CLI entry point
-from .cli import main
+# NOTE: avoid importing CLI entry points at package import time. Importing
+# `profcalc` should be cheap and not pull in CLI subpackages with
+# interactive/demo side-effects. Callers can import `profcalc.cli` or
+# use console entry points instead.

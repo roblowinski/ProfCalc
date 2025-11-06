@@ -11,6 +11,7 @@ Supports multiple input formats:
 """
 
 import argparse
+import glob
 import sys
 from pathlib import Path
 from typing import Dict, Tuple
@@ -41,7 +42,7 @@ def fix_bmap_point_counts(
     # Parse file using centralized parser with format detection
     try:
         parsed = parse_file(input_path, skip_confirmation=skip_confirmation)
-    except Exception as e:
+    except (OSError, ValueError, TypeError, ImportError) as e:
         if verbose:
             print(f"\n❌ Error parsing file: {e}")
         raise
@@ -243,8 +244,6 @@ def execute_from_cli(args: list[str]) -> None:
 
     # Backup output file if it exists
 
-    import glob
-
     input_files = [
         Path(f) for f in sorted(glob.glob(parsed_args.input_pattern))
     ]
@@ -386,7 +385,7 @@ def execute_from_menu() -> None:
         )
 
         if report_file:
-            Path(report_file).write_text(report)
+            Path(report_file).write_text(report, encoding="utf-8")
             print(f"\n📄 Report saved to: {report_file}")
 
         print("\n" + report)
@@ -394,12 +393,10 @@ def execute_from_menu() -> None:
 
     except FileNotFoundError as e:
         print(f"\n❌ Error: {e}")
-    except Exception as e:
+    except (OSError, ValueError, TypeError, RuntimeError) as e:
         print(f"\n❌ Unexpected error: {e}")
 
 
 # Add CLI entrypoint
 if __name__ == "__main__":
-    import sys
-
     execute_from_cli(sys.argv[1:])

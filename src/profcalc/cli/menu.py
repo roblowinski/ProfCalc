@@ -150,7 +150,8 @@ class MenuEngine:
             if handler_key:
                 try:
                     handler = self.resolve_handler(handler_key)
-                except Exception as e:
+                except (ImportError, ValueError, AttributeError) as e:
+                    # Failed to find/resolve the handler; present a friendly message
                     print(f"Failed to resolve handler '{handler_key}': {e}")
                     continue
 
@@ -164,7 +165,16 @@ class MenuEngine:
                 except TypeError:
                     # Some prototype handlers expect arguments; call without args
                     handler()
-                except Exception as e:
+                except (
+                    RuntimeError,
+                    OSError,
+                    ValueError,
+                    ZeroDivisionError,
+                    KeyError,
+                ) as e:  # pragma: no cover - interactive
+                    # Top-level interactive loop: surface common handler errors
+                    # without crashing the menu. We avoid catching BaseException
+                    # so KeyboardInterrupt/SystemExit still propagate.
                     print(f"Handler raised an exception: {e}")
             else:
                 print("No action assigned to this menu item.")
@@ -206,7 +216,7 @@ class MenuEngine:
             mod = importlib.import_module(pkg_module)
             func = getattr(mod, func_name)
             return func
-        except Exception:
+        except (ImportError, AttributeError) as import_err:
             # Fallback to the dev_scripts prototype by loading the file dynamically
             repo_root = Path(__file__).resolve().parents[4]
             proto_path = repo_root.joinpath(self.PROTOTYPE_PATH_NAME)
@@ -227,7 +237,7 @@ class MenuEngine:
             # Last resort: try to import a handlers module that might be nearby
             raise ImportError(
                 f"Could not resolve handler for key: {handler_key}"
-            )
+            ) from import_err
 
 
 def main() -> None:

@@ -356,7 +356,13 @@ def transform_profiles_with_baselines(
                 profile, baseline["x0"], baseline["y0"], baseline["azimuth"]
             )
             transformed_profiles.append(transformed)
-        except Exception as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            IndexError,
+            RuntimeError,
+        ) as e:
             logger = get_logger(LogComponent.SPATIAL)
             logger.error(f"Failed to transform profile {profile.name}: {e}")
 
