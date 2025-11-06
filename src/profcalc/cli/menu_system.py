@@ -12,13 +12,27 @@ The menu is organized into logical workflows:
 - Quick Tools: Utility functions for common tasks
 """
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Callable, Tuple
+from dataclasses import dataclass
+import builtins
 
 if TYPE_CHECKING:
     pass
 
 # Use the package-level data tools to keep dataset registration centralized
 from profcalc.cli.tools import data as data_tools
+
+
+@dataclass
+class AppIO:
+    input_fn: Callable[[str], str] = builtins.input
+    print_fn: Callable[..., None] = builtins.print
+
+
+def _get_io(io: Optional[AppIO]) -> Tuple[Callable[[str], str], Callable[..., None]]:
+    if io is None:
+        return builtins.input, builtins.print
+    return io.input_fn, io.print_fn
 
 
 def conversion_submenu() -> None:
@@ -360,49 +374,50 @@ def select_data_source() -> None:
             print("Invalid selection. Please try again.")
 
 
-    def ensure_data_source() -> None:
-        """Prompt the user to select a data source if one is not already set.
+def ensure_data_source(io: Optional[AppIO] = None) -> None:
+    """Prompt the user to select a data source if one is not already set.
 
-        This is a lightweight convenience so entering Data Management will
-        immediately ask the user whether they want to load from file, connect
-        to a database, or use the in-memory session. It does not force an
-        immediate import unless the user chooses to do so.
-        """
-        if app_state.data_source:
-            return
+    This convenience prompts once when entering Data Management so users
+    choose File/Database/Session up-front. Import is optional when choosing
+    File.
+    """
+    if app_state.data_source:
+        return
 
-        print("\nNo data source configured. Select data source:")
-        print("1. Load from file")
-        print("2. Connect to database")
-        print("3. Use in-memory session (no external source)")
-        choice = input("Select a source [1/2/3]: ").strip()
-        if choice == "1":
-            app_state.data_source = "file"
-            path = input(
-                "Enter path to 9-column CSV to import now (or blank to skip): "
-            ).strip()
-            if path:
-                try:
-                    result = data_tools.import_data(path)
-                    imported = result.get("imported") if isinstance(result, dict) else "?"
-                    print(f"Imported {imported} rows from {path}.")
-                except (
-                    FileNotFoundError,
-                    ValueError,
-                    NotImplementedError,
-                    OSError,
-                ) as exc:  # pragma: no cover - interactive
-                    print(f"Import failed: {exc}")
-        elif choice == "2":
-            app_state.data_source = "database"
-            app_state.data_source_details = None
-            print("\n[INFO] Database mode selected. (DB connection not yet implemented)")
-        else:
-            app_state.data_source = "session"
-            print("\n[INFO] Using in-memory session (no external source configured).")
+    input_fn, print_fn = _get_io(io)
+
+    print_fn("\nNo data source configured. Select data source:")
+    print_fn("1. Load from file")
+    print_fn("2. Connect to database")
+    print_fn("3. Use in-memory session (no external source)")
+    choice = input_fn("Select a source [1/2/3]: ").strip()
+    if choice == "1":
+        app_state.data_source = "file"
+        path = input_fn(
+            "Enter path to 9-column CSV to import now (or blank to skip): "
+        ).strip()
+        if path:
+            try:
+                result = data_tools.import_data(path)
+                imported = result.get("imported") if isinstance(result, dict) else "?"
+                print_fn(f"Imported {imported} rows from {path}.")
+            except (
+                FileNotFoundError,
+                ValueError,
+                NotImplementedError,
+                OSError,
+            ) as exc:  # pragma: no cover - interactive
+                print_fn(f"Import failed: {exc}")
+    elif choice == "2":
+        app_state.data_source = "database"
+        app_state.data_source_details = None
+        print_fn("\n[INFO] Database mode selected. (DB connection not yet implemented)")
+    else:
+        app_state.data_source = "session"
+        print_fn("\n[INFO] Using in-memory session (no external source configured).")
 
 
-def data_management_menu() -> None:
+def data_management_menu(io: Optional[AppIO] = None) -> None:
     """Display and handle the Data Management menu.
 
     Provides data management operations:
@@ -410,47 +425,52 @@ def data_management_menu() -> None:
     - Import/Export Data (stub)
     - View Data Summary (stub)
     """
+    # Prompt for data source up-front if none selected
+    ensure_data_source(io)
+
+    input_fn, print_fn = _get_io(io)
+
     while True:
-        print("\n--- Data Management ---")
-        print(
-            f"1. Change Data Source (Current: {app_state.data_source or 'Not Set'})"
+        print_fn("\n--- Data Management ---")
+        print_fn(
+            f"1. Select Data Source (Current: {app_state.data_source or 'Not Set'})"
         )
         print("2. Import Data (9-col CSV)")
         print("3. List Registered Datasets")
         print("4. Select Active Dataset")
         print("5. View Data Summary")
         print("6. Back to Main Menu")
-        choice = input("Select an option: ").strip()
+        choice = input_fn("Select an option: ").strip()
         if choice == "1":
             select_data_source()
         elif choice == "2":
-            path = input(
+            path = input_fn(
                 "Enter path to 9-column CSV file to import (or blank to cancel): "
             ).strip()
             if not path:
-                print("Import cancelled.")
+                print_fn("Import cancelled.")
                 continue
             try:
                 result = data_tools.import_data(path)
                 imported = (
                     result.get("imported") if isinstance(result, dict) else "?"
                 )
-                print(f"Imported {imported} rows from {path}.")
+                print_fn(f"Imported {imported} rows from {path}.")
             except (
                 FileNotFoundError,
                 ValueError,
                 NotImplementedError,
                 OSError,
             ) as exc:  # pragma: no cover - interactive
-                print(f"Import failed: {exc}")
+                print_fn(f"Import failed: {exc}")
         elif choice == "3":
             data_tools.list_datasets()
         elif choice == "4":
-            dsid = input(
+            dsid = input_fn(
                 "Enter dataset ID to set active (or blank to cancel): "
             ).strip()
             if not dsid:
-                print("Selection cancelled.")
+                print_fn("Selection cancelled.")
                 continue
             try:
                 data_tools.select_dataset(dsid)
@@ -459,13 +479,13 @@ def data_management_menu() -> None:
                 ValueError,
                 OSError,
             ) as exc:  # pragma: no cover - interactive
-                print(f"Failed to select dataset: {exc}")
+                print_fn(f"Failed to select dataset: {exc}")
         elif choice == "5":
             data_tools.summary()
         elif choice == "6":
             break
         else:
-            print("Invalid selection. Please try again.")
+            print_fn("Invalid selection. Please try again.")
 
 
 def profcalc_profcalc_menu() -> None:

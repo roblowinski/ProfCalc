@@ -16,7 +16,8 @@ This document maps the interactive menu functions in `src/profcalc/cli/menu_syst
   8. Help & Documentation -> (stub)
   9. Exit
 
-## Menus and submenus (call graph)
+```text
+Menus and submenus (call graph)
 
 `select_data_source()`
 
@@ -24,7 +25,7 @@ This document maps the interactive menu functions in `src/profcalc/cli/menu_syst
 
 `data_management_menu()`
 
-1. Change Data Source -> `select_data_source()`
+1. Select Data Source -> `select_data_source()`
 1. Import Data -> calls `data_tools.import_data()`
 1. List Registered Datasets -> `data_tools.list_datasets()`
 1. Select Active Dataset -> `data_tools.select_dataset()`
