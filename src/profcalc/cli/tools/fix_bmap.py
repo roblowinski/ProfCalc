@@ -211,6 +211,29 @@ def _generate_multi_file_report(all_corrections, no_corrections):
     return "\n".join(lines)
 
 
+def scan_bmap_for_corrections(
+    input_file: str, skip_confirmation: bool = False
+):
+    """Scan a single file and return the parsed object and corrections dict.
+
+    This does not write any output files. Caller may inspect `parsed` and
+    use `_write_corrected_file` to write corrected output when ready.
+    """
+    input_path = Path(input_file)
+    # Parse file using centralized parser with format detection
+    parsed = parse_file(input_path, skip_confirmation=skip_confirmation)
+
+    corrections: Dict[str, Tuple[int, int]] = {}
+    for profile in parsed.profiles:
+        profile_id = profile["profile_id"]
+        declared_count = profile.get("point_count", 0)
+        actual_count = profile["actual_point_count"]
+        if declared_count != actual_count:
+            corrections[profile_id] = (declared_count, actual_count)
+
+    return parsed, corrections
+
+
 def execute_from_cli(args: list[str]) -> None:
     """
     Execute BMAP point count fixer from command line.
@@ -359,44 +382,178 @@ def execute_from_menu() -> None:
     print("FIX BMAP POINT COUNTS")
     print("=" * 60)
 
-    # Get user inputs
-    input_file = input("Enter input BMAP file path: ").strip()
-    output_file = input("Enter output file path: ").strip()
+    while True:
+        # Get input file and scan for corrections first
+        input_file = input(
+            "Enter input BMAP file path (or blank to return): "
+        ).strip()
+        if not input_file:
+            break
 
-    verbose_input = (
-        input("Show detailed corrections? (y/n) [n]: ").strip().lower()
-    )
-    verbose = verbose_input == "y"
+        try:
+            parsed, corrections = scan_bmap_for_corrections(
+                input_file, skip_confirmation=False
+            )
+        except FileNotFoundError as e:
+            print(f"\n❌ Error: {e}")
+            continue
+        except (OSError, ValueError, TypeError, ImportError) as e:
+            print(f"\n❌ Error parsing file: {e}")
+            continue
 
-    report_input = input("Save report to file? (y/n) [n]: ").strip().lower()
-    report_file = None
-    if report_input == "y":
-        report_file = input("Enter report file path: ").strip()
+        # Display corrections on screen
+        print("\n--- Correction Summary ---")
+        if corrections:
+            for pname, (declared, actual) in sorted(corrections.items()):
+                diff = actual - declared
+                sign = "+" if diff > 0 else ""
+                print(f"  ✏️  {pname}: {declared} → {actual} ({sign}{diff})")
+        else:
+            print("✅ No point-count corrections needed.")
 
-    try:
-        print("\n🔄 Analyzing file and fixing point counts...")
-
-        corrections = fix_bmap_point_counts(
-            input_file, output_file, verbose=verbose, skip_confirmation=False
+        # Ask for log file path (default to input_file + .fix.log)
+        default_log = str(
+            Path(input_file).with_suffix(Path(input_file).suffix + ".fix.log")
         )
+        log_choice = input(
+            f"Save correction log to file? [Y/{default_log}] (enter 'n' to skip): "
+        ).strip()
+        report_file = None
+        if not log_choice or log_choice.lower() in ("y", "yes"):
+            report_file = default_log
+        elif log_choice.lower() in ("n", "no"):
+            report_file = None
+        else:
+            report_file = log_choice
 
-        report = _generate_correction_report(
-            input_file, output_file, corrections
-        )
+        # Ask for output file path (allow overwrite)
+        out_prompt = "Enter output file path (leave blank to overwrite the input file): "
+        output_file = input(out_prompt).strip()
+        if not output_file:
+            output_file = input_file
 
-        if report_file:
-            Path(report_file).write_text(report, encoding="utf-8")
-            print(f"\n📄 Report saved to: {report_file}")
+        # Confirm overwrite if output exists and differs from input
+        out_path = Path(output_file)
+        if out_path.exists() and str(out_path) != str(Path(input_file)):
+            ok = (
+                input(
+                    f"Output file {output_file} exists. Overwrite? (y/n) [n]: "
+                )
+                .strip()
+                .lower()
+            )
+            if ok not in ("y", "yes"):
+                print("Cancelled write. No changes applied.")
+                # Ask whether to process another file
+                again = (
+                    input("Process another file? (y/n) [y]: ").strip().lower()
+                )
+                if again in ("n", "no"):
+                    break
+                else:
+                    continue
 
-        print("\n" + report)
-        print(f"\n✅ Corrected file written to: {output_file}")
+        try:
+            # Write corrected file (only writes corrected data if corrections exist)
+            if corrections:
+                _write_corrected_file(parsed, out_path)
+            else:
+                # No corrections - write a copy if user requested to write
+                write_copy = (
+                    input(
+                        "No corrections found. Write a copy of the file anyway? (y/n) [n]: "
+                    )
+                    .strip()
+                    .lower()
+                )
+                if write_copy in ("y", "yes"):
+                    _write_corrected_file(parsed, out_path)
 
-    except FileNotFoundError as e:
-        print(f"\n❌ Error: {e}")
-    except (OSError, ValueError, TypeError, RuntimeError) as e:
-        print(f"\n❌ Unexpected error: {e}")
+            # Generate and save report/log if requested
+            report_text = _generate_correction_report(
+                input_file, output_file, corrections
+            )
+            if report_file:
+                Path(report_file).write_text(report_text, encoding="utf-8")
+                print(f"\n📄 Report saved to: {report_file}")
+
+            # Print summary to screen
+            print("\n" + report_text)
+            if corrections:
+                print(f"\n✅ Corrected file written to: {output_file}")
+            else:
+                print("\n✅ No corrections were necessary.")
+
+        except (OSError, ValueError, TypeError, RuntimeError) as e:
+            print(f"\n❌ Unexpected error: {e}")
+
+        # Ask whether to process another file
+        again = input("Process another file? (y/n) [y]: ").strip().lower()
+        if again in ("n", "no"):
+            break
 
 
 # Add CLI entrypoint
 if __name__ == "__main__":
     execute_from_cli(sys.argv[1:])
+
+
+def execute_modify_headers_menu() -> None:
+    """Interactive tool to inspect and modify profile headers in a BMAP file.
+
+    Prompts the user for a file, lists profiles and their current headers,
+    allows editing the header text for selected profiles, and writes the
+    modified file to an output path chosen by the user.
+    """
+    print("\n" + "=" * 60)
+    print("MODIFY BMAP PROFILE HEADERS")
+    print("=" * 60)
+
+    input_file = input(
+        "Enter input BMAP file path (or blank to cancel): "
+    ).strip()
+    if not input_file:
+        print("Cancelled.")
+        return
+
+    try:
+        parsed = parse_file(Path(input_file), skip_confirmation=False)
+    except Exception as e:
+        print(f"\n❌ Error parsing file: {e}")
+        return
+
+    profiles = parsed.profiles
+    if not profiles:
+        print("No profiles found in file.")
+        return
+
+    print(f"Found {len(profiles)} profiles:")
+    for i, p in enumerate(profiles, 1):
+        raw_hdr = p.get("raw_header") or p.get("profile_id")
+        print(f"  {i}. {p.get('profile_id')}  -> header: {raw_hdr}")
+
+    # Allow editing headers one by one
+    for i, p in enumerate(profiles, 1):
+        cur = p.get("raw_header") or p.get("profile_id")
+        ans = (
+            input(f"Edit header for {p.get('profile_id')}? (y/n) [n]: ")
+            .strip()
+            .lower()
+        )
+        if ans not in ("y", "yes"):
+            continue
+        new_hdr = input(f"Enter new header text (current: {cur}): ").strip()
+        if new_hdr:
+            p["raw_header"] = new_hdr
+
+    out_path = input(
+        "Enter output file path (blank to overwrite input): "
+    ).strip()
+    if not out_path:
+        out_path = input_file
+
+    try:
+        _write_corrected_file(parsed, Path(out_path))
+        print(f"\n✅ Wrote modified file to: {out_path}")
+    except Exception as e:
+        print(f"\n❌ Failed to write modified file: {e}")

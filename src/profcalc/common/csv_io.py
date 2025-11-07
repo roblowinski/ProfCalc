@@ -955,27 +955,62 @@ def _load_profile_origin_azimuths(
             "origin_y": ["origin_y", "Origin_Y", "y0", "Y0", "originy"],
         }
 
+        # Try to find columns using a permissive set of header variants.
         for expected_col, possible_cols in possible_names.items():
+            found = None
             for actual_col in possible_cols:
                 if actual_col in df.columns:
-                    column_mapping[expected_col] = actual_col
+                    found = actual_col
                     break
-            else:
-                raise BeachProfileError(
-                    f"Could not find column for '{expected_col}'. Expected one of: {possible_cols}",
-                    category=ErrorCategory.VALIDATION,
-                )
+                # also try case-insensitive match
+                for c in df.columns:
+                    if c.strip().lower() == actual_col.strip().lower():
+                        found = c
+                        break
+                if found:
+                    break
 
-        # Rename columns to expected format
-        df = df.rename(columns={v: k for k, v in column_mapping.items()})
+            if found:
+                column_mapping[expected_col] = found
 
-        # Ensure we have the expected columns
-        expected_columns = ["profile_id", "azimuth", "origin_x", "origin_y"]
-        if not all(col in df.columns for col in expected_columns):
+        # At minimum we must have a profile id column
+        if "profile_id" not in column_mapping:
+            # try to infer a profile id-like column
+            for c in df.columns:
+                if c.strip().lower() in (
+                    "profile",
+                    "profile_name",
+                    "id",
+                    "profileid",
+                ):
+                    column_mapping["profile_id"] = c
+                    break
+
+        if "profile_id" not in column_mapping:
             raise BeachProfileError(
-                f"Origin azimuth file must contain columns: {', '.join(expected_columns)}",
+                "Could not find a profile identifier column in origin azimuth file",
                 category=ErrorCategory.VALIDATION,
             )
+
+        # Rename columns to expected keys where present
+        rename_map = {v: k for k, v in column_mapping.items()}
+        df = df.rename(columns=rename_map)
+
+        # Normalize numeric columns: strip commas/whitespace and coerce to numeric
+        for numcol in ("origin_x", "origin_y", "azimuth"):
+            if numcol in df.columns:
+                # convert to string, strip thousands separators and whitespace
+                df[numcol] = (
+                    df[numcol]
+                    .astype(str)
+                    .str.replace(",", "", regex=False)
+                    .str.strip()
+                    .replace({"nan": None})
+                )
+                df[numcol] = pd.to_numeric(df[numcol], errors="coerce")
+
+        # If azimuth is provided in degrees-minutes as text or with weird chars,
+        # pd.to_numeric will coerce to NaN; we leave NaN and let callers decide.
 
         return df
 
