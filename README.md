@@ -43,6 +43,10 @@ This package includes tools for beach profile analysis, beachfill construction m
 - **Logs and outputs**: `logs/`
 - **Prototypes/experimental**: `dev_scripts/` (not for production)
 
+## Data files and policy
+
+Generated data and large binary artifacts (CSV outputs, shapefiles, archives) are kept out of source-controlled package code. See `DATA.md` for the data placement and handling policy, how to regenerate outputs, and recommended Git workflows (Git LFS, bundles, backups).
+
 See `README_RUN_HELP.md` for details on running scripts and tests.
 
 ## Installation

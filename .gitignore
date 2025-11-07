@@ -207,3 +207,22 @@ build/
 temp/
 *.db
 *.sqlite3
+
+# Data / large generated outputs
+data/
+artifacts/
+outputs/
+
+# Project-specific generated files (exclude the bounds outputs)
+bounds_both_*
+
+# GIS / shapefile auxiliary files
+*.shp
+*.dbf
+*.shx
+*.prj
+*.cpg
+
+# Archives
+*.zip
+*.tar.gz
