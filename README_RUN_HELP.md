@@ -9,15 +9,12 @@ Activate virtual environment (PowerShell)
 ---------------------------------------
 If you use the project's venv in the repository root, activate it with PowerShell:
 
-```powershell
 . .\.venv\Scripts\Activate.ps1
-```
 
 Install dependencies
 
 Install the pinned requirements (if you haven't already):
 
-```powershell
 pip install -r requirements.txt
 ```
 
@@ -30,18 +27,49 @@ Examples:
 - Run the demo directly against two files (before and after):
 
 ```powershell
-python scripts\compute_aer_demo.py --before data\temp\9Col_WithHeader.csv --after data\temp\9Col_WithHeader.csv
+python scripts\compute_aer_demo.py --before src\profcalc\data\temp\9Col_WithHeader.csv --after src\profcalc\data\temp\9Col_WithHeader.csv
 ```
 
 - Register files with the in-memory session and then run against the registered dataset ids:
-
 1. Register files with the session (the demo supports --register):
 
 ```powershell
-python scripts\compute_aer_demo.py --register data\temp\9Col_WithHeader.csv --register data\temp\9Col_WithHeader.csv
+python scripts\compute_aer_demo.py --register src\profcalc\data\temp\9Col_WithHeader.csv --register src\profcalc\data\temp\9Col_WithHeader.csv
 ```
 
 1. Inspect registered datasets (open a Python REPL):
+Examples:
+
+- Run the demo directly against two files (before and after):
+
+  ```powershell
+  python scripts\compute_aer_demo.py --before src\profcalc\data\temp\9Col_WithHeader.csv --after src\profcalc\data\temp\9Col_WithHeader.csv
+  ```
+
+- Register files with the in-memory session and then run against the registered dataset ids:
+
+  1. Register files with the session (the demo supports --register):
+
+     ```powershell
+     python scripts\compute_aer_demo.py --register src\profcalc\data\temp\9Col_WithHeader.csv --register src\profcalc\data\temp\9Col_WithHeader.csv
+     ```
+
+  1. Inspect registered datasets (open a Python REPL):
+
+     ```powershell
+     python -c "from profcalc.cli.tools.data import session; print(session.list_datasets())"
+     ```
+
+  1. Use the dataset ids printed by the previous command with the demo's --before/--after arguments.
+
+Run tests (pytest)
+-------------------
+
+Run the entire test suite:
+
+```powershell
+python -m pytest tests/ -v
+```
 
 ```powershell
 python -c "from profcalc.cli.tools.data import session; print(session.list_datasets())"
@@ -90,7 +118,7 @@ Notes & troubleshooting
   available to other CLI tools during that Python process.
 - If you run into parsing errors for your own files, try opening them to
   confirm they match the expected 9-column format (headers or whitespace can
-  be tolerated by the parser). The sample data files are under `data/temp/`.
+  be tolerated by the parser). The sample data files are under `src/profcalc/data/temp/`.
 
 What the new numeric tests cover (plain language)
 -----------------------------------------------

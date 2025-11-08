@@ -45,7 +45,9 @@ def _ensure_geopandas() -> None:
         import geopandas as _gpd  # type: ignore
         from shapely.geometry import LineString as _LineString  # type: ignore
         from shapely.geometry import Point as _Point
-    except Exception as e:  # keep broad catch here to propagate import issues
+    except (
+        ImportError
+    ) as e:  # keep broad catch here to propagate import issues
         GEOPANDAS_AVAILABLE = False
         raise ImportError(
             "Shapefile export requires the 'geopandas' and 'shapely' libraries.\n"

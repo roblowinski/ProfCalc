@@ -9,6 +9,48 @@ import csv
 from pathlib import Path
 from typing import Dict, Optional, Sequence, Union
 
+# Prefer to reuse richer helpers from the full tools implementation when
+# available (tests expect helpers like `_parse_column_order` and
+# `_detect_format`). Fall back to local lightweight implementations.
+try:
+    from profcalc.cli.tools.convert import (
+        _detect_format,
+        _parse_column_order,
+    )
+except ImportError:  # pragma: no cover - fallback helpers
+
+    def _parse_column_order(
+        s: Optional[Union[str, Dict[str, int]]],
+    ) -> Dict[str, int]:
+        """Parse a simple column order spec (e.g. "x=0,y=1,z=2") into a mapping.
+
+        This minimal fallback supports the limited patterns used in tests.
+        """
+        if not s:
+            return {"x": 0, "y": 1, "z": 2}
+        if isinstance(s, dict):
+            return s
+        parts = str(s).split(",")
+        mapping: Dict[str, int] = {}
+        for p in parts:
+            if "=" in p:
+                k, v = p.split("=", 1)
+                mapping[k.strip()] = int(v.strip())
+        # Ensure defaults
+        mapping.setdefault("x", 0)
+        mapping.setdefault("y", 1)
+        mapping.setdefault("z", 2)
+        return mapping
+
+    def _detect_format(file_path: str) -> str:
+        """Minimal detection: choose 'csv' if file extension is .csv else 'xyz'."""
+        ext = Path(file_path).suffix.lower()
+        if ext == ".csv":
+            return "csv"
+        if ext in (".xyz", ".dat"):
+            return "xyz"
+        return "bmap"
+
 
 def _detect_xy_columns(
     headers: Optional[Union[Sequence[str], Dict[str, int]]],
@@ -79,15 +121,36 @@ def convert_format(
             x = r.get(mapping["x"], "")
             y = r.get(mapping["y"], "")
             z = r.get(mapping["z"], "")
-            lines.append(f"{x} {y} {z}\n")
+        try:
+            from profcalc.cli.tools.convert import (
+                execute_from_cli as impl_execute_from_cli,
+            )
+            from profcalc.cli.tools.convert import (
+                execute_from_menu as impl_execute_from_menu,
+            )
+        except ImportError:  # pragma: no cover - import fallback
 
-        outp.parent.mkdir(parents=True, exist_ok=True)
-        outp.write_text("".join(lines), encoding="utf-8")
-        return
+            def execute_from_menu() -> None:  # type: ignore
+                raise ImportError("convert tool is not available")
 
-    if from_format == "xyz" and to_format == "csv":
-        # Read xyz-like whitespace-separated columns
-        outp.parent.mkdir(parents=True, exist_ok=True)
+            def execute_from_cli(args: list[str]) -> None:  # type: ignore
+                raise ImportError("convert tool is not available")
+        else:
+            from profcalc.cli.quick_tools.quick_tool_logger import (
+                log_quick_tool_error,
+            )
+
+            def execute_from_menu() -> None:
+                try:
+                    if impl_execute_from_menu:
+                        return impl_execute_from_menu()
+                    return impl_execute_from_cli([])
+                except Exception as e:  # pragma: no cover - log and re-raise
+                    log_quick_tool_error(
+                        "convert",
+                        f"Unhandled exception in convert quick tool: {e}",
+                    )
+                    raise
         with inp.open("r", encoding="utf-8") as fh:
             lines = [
                 ln.strip()
@@ -122,3 +185,39 @@ def convert_format(
     raise NotImplementedError(
         f"Conversion from {from_format} to {to_format} is not supported"
     )
+
+
+# Expose menu/CLI wrappers consistent with other quick_tools modules
+try:
+    from profcalc.cli.tools.convert import (
+        execute_from_cli as impl_execute_from_cli,
+    )
+    from profcalc.cli.tools.convert import (
+        execute_from_menu as impl_execute_from_menu,
+    )
+except ImportError:  # pragma: no cover - import fallback
+
+    def execute_from_menu() -> None:  # type: ignore
+        raise ImportError("convert tool is not available")
+
+    def execute_from_cli(args: list[str]) -> None:  # type: ignore
+        raise ImportError("convert tool is not available")
+else:
+    from profcalc.cli.quick_tools.quick_tool_logger import (
+        log_quick_tool_error,
+    )
+
+    def execute_from_menu() -> None:
+        try:
+            if impl_execute_from_menu:
+                return impl_execute_from_menu()
+            return impl_execute_from_cli([])
+        except Exception as e:  # pragma: no cover - log and re-raise
+            log_quick_tool_error(
+                "convert",
+                f"Unhandled exception in convert quick tool: {e}",
+            )
+            raise
+
+
+__all__ = ["convert_format", "execute_from_menu", "execute_from_cli"]

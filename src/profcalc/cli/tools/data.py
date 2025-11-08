@@ -1,7 +1,13 @@
 """Data management handlers for the command-line menu.
 
-These functions are intentionally small wrappers so they can be tested easily
-and replaced later with full implementations.
+Small wrappers for dataset import, registration and session management used
+by the interactive menu and CLI handlers. These functions are lightweight so
+they can be tested or replaced with fuller implementations later.
+
+Usage examples:
+    - Programmatic: import :func:`import_data` and call it in scripts.
+    - Menu: use the Data Management entries in the interactive menu to import
+        and register datasets for further processing.
 """
 
 import json

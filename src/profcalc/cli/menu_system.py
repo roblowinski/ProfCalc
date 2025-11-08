@@ -170,7 +170,7 @@ def data_management_menu(io: Optional[AppIO] = None) -> None:
         print("6. Back to Main Menu")
         choice = input_fn("Select an option: ").strip()
         if choice == "1":
-            select_data_source()
+            ensure_data_source(io)
         elif choice == "2":
             path = input_fn(
                 "Enter path to 9-column CSV file to import (or blank to cancel): "
@@ -486,17 +486,20 @@ def quick_tools_menu() -> None:
     """
     while True:
         print("\n--- Quick Tools ---")
+        print("1. Correct BMAP Free Format Profile Point Count")
         print(
-            "1. Fix BMAP point counts (correct profile point counts in a BMAP free format file)"
+            "2. Find Common X Bounds Within a Group of Profiles in a BMap Free Format File"
         )
-        print("2. Return to Main Menu")
-        print("3. Get an Inventory of Profiles from a BMap Free Format File")
-        print("4. Assign Profile Names to XYZ/CSV Files Missing Profile IDs")
-        print("5. Convert File Format & Create Shapefiles (i.e., 3D to 2D)")
+        print("3. Get an Inventory of Profiles from Multi Profile File")
+        print("4. Assign Missing Profile Names in a XYZ/CSV File Based on X/Y")
+        print("5. Modify BMAP Free Format Profile Header")
+        print("6. Retrieve Survey Dates for Profile from 9-Col File")
+        print("7. Return to Main Menu")
         choice = input("Select a quick tool: ").strip()
+
         if choice == "1":
             try:
-                from profcalc.cli.tools import fix_bmap as fix_bmap_tool
+                from profcalc.cli.quick_tools import fix_bmap as fix_bmap_tool
 
                 fix_bmap_tool.execute_from_menu()
             except (
@@ -504,11 +507,23 @@ def quick_tools_menu() -> None:
                 AttributeError,
             ) as exc:  # pragma: no cover - interactive
                 print(f"Failed to run BMAP fixer tool: {exc}")
+
         elif choice == "2":
-            break
+            try:
+                from profcalc.cli.quick_tools import bounds as bounds_tool
+
+                bounds_tool.execute_from_menu()
+            except (
+                ImportError,
+                AttributeError,
+            ) as exc:  # pragma: no cover - interactive
+                print(f"Failed to run bounds tool: {exc}")
+
         elif choice == "3":
             try:
-                from profcalc.cli.tools import inventory as inventory_tool
+                from profcalc.cli.quick_tools import (
+                    inventory as inventory_tool,
+                )
 
                 inventory_tool.execute_from_menu()
             except (
@@ -516,9 +531,10 @@ def quick_tools_menu() -> None:
                 AttributeError,
             ) as exc:  # pragma: no cover - interactive
                 print(f"Failed to run inventory tool: {exc}")
+
         elif choice == "4":
             try:
-                from profcalc.cli.tools import assign as assign_tool
+                from profcalc.cli.quick_tools import assign as assign_tool
 
                 assign_tool.execute_from_menu()
             except (
@@ -526,8 +542,42 @@ def quick_tools_menu() -> None:
                 AttributeError,
             ) as exc:  # pragma: no cover - interactive
                 print(f"Failed to run assign tool: {exc}")
+
         elif choice == "5":
-            conversion_submenu()
+            try:
+                from profcalc.cli.quick_tools import fix_bmap as fix_bmap_tool
+
+                # fix_bmap module provides an interactive header modification helper
+                if hasattr(fix_bmap_tool, "execute_modify_headers_menu"):
+                    fix_bmap_tool.execute_modify_headers_menu()
+                else:
+                    print(
+                        "Header modification tool is not available in fix_bmap module."
+                    )
+            except (
+                ImportError,
+                AttributeError,
+            ) as exc:  # pragma: no cover - interactive
+                print(f"Failed to run header modification tool: {exc}")
+
+        elif choice == "6":
+            try:
+                from profcalc.cli.quick_tools import (
+                    get_profile_dates as get_profile_dates_tool,
+                )
+            except (ImportError, AttributeError) as exc:
+                print(f"Failed to import get_profile_dates tool: {exc}")
+                input("\nPress Enter to continue...")
+                continue
+            try:
+                get_profile_dates_tool.execute_from_menu()
+            except Exception as exc:
+                print(f"Failed to run get_profile_dates tool: {exc}")
+            input("\nPress Enter to continue...")
+
+        elif choice == "7":
+            break
+
         else:
             print("Invalid selection. Please try again.")
 
@@ -557,7 +607,7 @@ def conversion_submenu() -> None:
 
         if choice == "1":
             try:
-                from profcalc.cli.tools import convert as convert_tool
+                from profcalc.cli.quick_tools import convert as convert_tool
 
                 convert_tool.execute_from_menu()
             except (
@@ -567,7 +617,7 @@ def conversion_submenu() -> None:
                 print(f"Failed to run conversion tool: {exc}")
         elif choice == "2":
             try:
-                from profcalc.cli.tools import convert as convert_tool
+                from profcalc.cli.quick_tools import convert as convert_tool
 
                 convert_tool.execute_from_menu()
             except (
@@ -577,7 +627,7 @@ def conversion_submenu() -> None:
                 print(f"Failed to run conversion tool: {exc}")
         elif choice == "3":
             try:
-                from profcalc.cli.tools import convert as convert_tool
+                from profcalc.cli.quick_tools import convert as convert_tool
 
                 convert_tool.execute_from_menu()
             except (
@@ -587,7 +637,7 @@ def conversion_submenu() -> None:
                 print(f"Failed to run conversion tool: {exc}")
         elif choice == "4":
             try:
-                from profcalc.cli.tools import convert as convert_tool
+                from profcalc.cli.quick_tools import convert as convert_tool
 
                 convert_tool.execute_from_menu()
             except (
@@ -597,7 +647,7 @@ def conversion_submenu() -> None:
                 print(f"Failed to run conversion tool: {exc}")
         elif choice == "5":
             try:
-                from profcalc.cli.tools import convert as convert_tool
+                from profcalc.cli.quick_tools import convert as convert_tool
 
                 convert_tool.execute_from_menu()
             except (
@@ -607,7 +657,7 @@ def conversion_submenu() -> None:
                 print(f"Failed to run conversion tool: {exc}")
         elif choice == "6":
             try:
-                from profcalc.cli.tools import convert as convert_tool
+                from profcalc.cli.quick_tools import convert as convert_tool
 
                 convert_tool.execute_from_menu()
             except (
@@ -623,7 +673,7 @@ def conversion_submenu() -> None:
 
 def launch_menu() -> None:
     """Launch the interactive menu system."""
-    select_data_source()
+    ensure_data_source()
     main_menu()
 
 
@@ -631,7 +681,7 @@ def _retrieve_profile_date_range() -> None:
     """Prompt for a BMAP file and a profile name (or all) and print date range."""
     try:
         from profcalc.common.bmap_io import read_bmap_freeformat
-    except Exception as e:  # pragma: no cover - import-time issues
+    except ImportError as e:  # pragma: no cover - import-time issues
         print(f"Required bmap reader not available: {e}")
         return
 
@@ -642,7 +692,7 @@ def _retrieve_profile_date_range() -> None:
 
     try:
         profiles = read_bmap_freeformat(input_file)
-    except Exception as e:
+    except (OSError, ValueError, TypeError) as e:
         print(f"Failed to read BMAP file: {e}")
         return
 
@@ -678,7 +728,7 @@ def _retrieve_profile_date_range() -> None:
         # attempt to sort ISO-like strings; otherwise show min/max lexicographically
         sorted_dates = sorted(dates)
         print(f"Date range: {sorted_dates[0]} to {sorted_dates[-1]}")
-    except Exception:
+    except (TypeError, ValueError):
         print(f"Dates: {', '.join(sorted(set(dates)))}")
 
 

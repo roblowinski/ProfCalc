@@ -1,7 +1,5 @@
 # Profile Analysis Tools
 
-
-
 ## Project Structure
 
 The project is organized for clarity, maintainability, and ease of use:
@@ -17,13 +15,11 @@ The project is organized for clarity, maintainability, and ease of use:
 - `src/profcalc/data/` — Input, output, and required data files (moved inside the package)
 - `docs/` — Project documentation and workflow guides
 
-
 ## Overview
 
 The Profile Analysis Tools package is a Python-based framework designed for coastal engineers to analyze beach profile data. It replicates the functionality of the USACE Beach Morphology Analysis Package (BMAP) and extends it with modern features for integration, testing, and customization.
 
 This package includes tools for beach profile analysis, beachfill construction monitoring, and long-term coastal monitoring. It is designed to be modular and extendable to support a wide range of coastal engineering tasks.
-
 
 ## Features
 
@@ -32,7 +28,6 @@ This package includes tools for beach profile analysis, beachfill construction m
 - **Monitoring and construction tools**: Utilities for analyzing beach profile changes over time and during beachfill construction projects.
 - **Data integration**: Compatible with CSV, Excel, and other formats for easy import of profile data.
 - **Scalable architecture**: Easily extendable to include new tools or workflows as needed.
-
 
 ## Where to Find Things
 
@@ -50,7 +45,6 @@ Generated data and large binary artifacts (CSV outputs, shapefiles, archives) ar
 See `README_RUN_HELP.md` for details on running scripts and tests.
 
 ## Installation
-
 
 ### Clone the Repository
 
@@ -107,4 +101,3 @@ will fail the job if cycles are introduced.
 
 If you change package-level imports or refactor modules, run the scanner
 to ensure no cycles were introduced.
-

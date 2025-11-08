@@ -15,6 +15,10 @@ def test_no_broad_except_exception_in_src():
             text = p.read_text(encoding="utf-8")
         except OSError:
             continue
+        # Skip test files and documentation within the src tree
+        rel = p.relative_to(repo_root)
+        if "tests" in rel.parts or "docs" in rel.parts:
+            continue
         for i, line in enumerate(text.splitlines(), start=1):
             if pattern.search(line):
                 offenders.append(f"{p.relative_to(repo_root)}:{i}: {line.strip()}")

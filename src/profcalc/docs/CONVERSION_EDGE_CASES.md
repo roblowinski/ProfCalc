@@ -35,6 +35,37 @@ Input XYZ:
 150.0 2050.0 4.89
 
 Converts to BMAP:
+
+**Status Legend:**
+
+- ✅ **Fixed** - Issue resolved in current version
+- 🔴 **Critical** - Causes data corruption or crashes
+- 🟡 **High** - Causes incorrect results or data loss
+- 🟢 **Medium** - May cause issues in specific scenarios
+- ⚪ **Low** - Minor issues or already handled correctly
+
+---
+
+## ✅ Resolved Issues
+
+### 1. Profile Names with Spaces
+
+**Status:** ✅ FIXED (October 2025)
+**Affects:** BMAP format reading/writing
+
+**Problem:**
+
+Profile names containing spaces are corrupted during BMAP round-trip conversion.
+
+**Example:**
+
+```
+Input XYZ:
+# Profile: OC 117
+100.0 2000.0 5.67
+150.0 2050.0 4.89
+
+Converts to BMAP:
 OC 117
 2
 100.0 5.67
@@ -45,46 +76,21 @@ Profile name parsed as "OC" (space-delimited split truncates)
 ```
 
 **Impact:**
+
 - ~~Profile names truncated on round-trip~~ ✅ Fixed
 - ~~Data assigned to wrong profiles~~ ✅ Fixed
 - ~~Loss of profile identity~~ ✅ Fixed
 
 **Resolution:**
+
 - BMAP parser now correctly handles profile names with spaces
 - Uses regex-based parsing instead of simple string split
 - Validated with comprehensive test suite: 4 tests passing
 - See `test_profile_names_with_spaces.py`
 
 **Workaround (Historical):**
+
 - No longer needed - spaces now fully supported
-
----
-
-### 2. Column Order Override with Insufficient Columns
-
-**Status:** ✅ FIXED (October 2025)
-**Affects:** XYZ format with `--columns` flag
-
-**Problem:**
-When user specifies column order requiring more columns than file provides, causes `IndexError` crash.
-
-**Example:**
-
-```bash
-profcalc -c data.xyz -o output.csv --columns "Y X Z"
-
-data.xyz contains:
-100.0 5.67
-150.0 4.89
-```
-
-**Current Behavior:**
-
-```python
-column_order = {'x': 1, 'y': 0, 'z': 2}
-z_val = float(parts[column_order['z']])  # parts[2] → IndexError!
-```
-
 **Impact:**
 - ~~Immediate crash with unhelpful error message~~ ✅ Fixed
 - ~~No data validation before processing~~ ✅ Fixed

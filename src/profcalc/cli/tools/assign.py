@@ -1,8 +1,17 @@
-"""
-Assign Profile Names - Assign profile names to XYZ/CSV files missing profile IDs.
+"""Assign Profile Names
 
-Automatically groups points into profiles based on spatial clustering and assigns
-meaningful profile names. Useful for raw survey data without profile identification.
+Assign profile names to XYZ/CSV files that lack profile identifiers. The
+module groups points into profiles using clustering (DBSCAN or a simple
+distance heuristic) and writes outputs in CSV/XYZ/BMAP formats.
+
+Usage examples:
+    - CLI: call the module's CLI entry (executes :func:`execute_from_cli`),
+        for example::
+
+            python -m profcalc.cli.tools.assign input1.csv input2.csv -o output.csv
+
+    - Menu: from the interactive menu choose the Quick Tools → Assign tool or
+        call :func:`execute_from_menu` to run the interactive flow.
 """
 
 import argparse
@@ -23,25 +32,57 @@ if TYPE_CHECKING:
         StandardScaler,  # type: ignore  # noqa: F401
     )
 
+from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
+from profcalc.cli.quick_tools.quick_tool_utils import (
+    default_output_path,
+    timestamped_output_path,
+)
 from profcalc.common.bmap_io import Profile
 
 
 def execute_from_cli(args: list[str]) -> None:
-    """
-    Execute profile name assignment from command line.
+    # Tabulate summary output
+    from tabulate import tabulate
 
-    Args:
-        args: Command-line arguments (excluding the -a flag)
-    """
+    def make_profile_summary(profiles):
+        rows = []
+        for p in profiles:
+            x_min, x_max = float(np.min(p.x)), float(np.max(p.x))
+            y_vals = (
+                p.metadata.get("y", [0.0] * len(p.x))
+                if p.metadata
+                else [0.0] * len(p.x)
+            )
+            y_min, y_max = float(np.min(y_vals)), float(np.max(y_vals))
+            z_min, z_max = float(np.min(p.z)), float(np.max(p.z))
+            rows.append(
+                [
+                    p.name,
+                    len(p.x),
+                    f"{x_min:.2f} – {x_max:.2f}",
+                    f"{y_min:.2f} – {y_max:.2f}",
+                    f"{z_min:.2f} – {z_max:.2f}",
+                ]
+            )
+        headers = ["Profile Name", "Points", "X Range", "Y Range", "Z Range"]
+        return tabulate(rows, headers, tablefmt="github")
+
+    # Execute profile name assignment from command line.
+    # Args: args: Command-line arguments (excluding the -a flag)
     parser = argparse.ArgumentParser(
         prog="profcalc -a",
         description="Assign profile names to XYZ/CSV files missing profile IDs",
     )
     parser.add_argument(
-        "input_file", help="Input XYZ/CSV file without profile names"
+        "input_files",
+        nargs="+",
+        help="Input XYZ/CSV file(s) or wildcard pattern(s) without profile names",
     )
     parser.add_argument(
-        "-o", "--output", required=True, help="Output file path"
+        "-o",
+        "--output",
+        required=False,
+        help="Output file path (auto-named if omitted)",
     )
     parser.add_argument(
         "--method",
@@ -75,14 +116,41 @@ def execute_from_cli(args: list[str]) -> None:
 
     parsed_args = parser.parse_args(args)
 
-    print(f"🔍 Reading points from: {parsed_args.input_file}")
+    # Expand wildcards and aggregate all points
+    from glob import glob
+
+    input_paths = []
+    for pattern in parsed_args.input_files:
+        expanded = glob(pattern)
+        if not expanded:
+            print(f"❌ No files matched: {pattern}")
+        input_paths.extend(expanded)
+    if not input_paths:
+        msg = "❌ No input files found. Exiting."
+        print(msg)
+        log_quick_tool_error("assign", msg)
+        return
+
+    print(f"🔍 Reading points from {len(input_paths)} file(s):")
+    for p in input_paths:
+        print(f"   - {p}")
     print(f"📐 Clustering method: {parsed_args.method}")
     if parsed_args.method == "spatial":
         print(f"   DBSCAN eps: {parsed_args.eps} ft")
         print(f"   DBSCAN min_samples: {parsed_args.min_samples}")
 
-    # Read input file
-    points_df = read_points_file(parsed_args.input_file)
+    # Aggregate all points
+    all_dfs = []
+    for f in input_paths:
+        try:
+            df = read_points_file(f)
+            all_dfs.append(df)
+        except (OSError, IOError, ValueError) as e:
+            print(f"❌ Error reading {f}: {e}")
+    if not all_dfs:
+        print("❌ No valid data loaded. Exiting.")
+        return
+    points_df = pd.concat(all_dfs, ignore_index=True)
     print(f"   Found {len(points_df)} points")
 
     # Assign profiles using clustering
@@ -96,17 +164,71 @@ def execute_from_cli(args: list[str]) -> None:
     )
 
     print(f"\n📊 Created {len(profiles)} profiles")
+    print("\nProfile Assignment Summary:")
+    print(make_profile_summary(profiles))
+
+    # Determine output file name if not provided
+    if parsed_args.output:
+        output_path = parsed_args.output
+    else:
+        # Default to output_assign with appropriate extension
+        ext = (
+            ".csv"
+            if input_paths and input_paths[0].lower().endswith(".csv")
+            else ".xyz"
+        )
+        output_path = default_output_path(
+            "assign", input_paths[0] if input_paths else None, ext=ext
+        )
+        print(
+            f"💡 Output file not specified. Using default file: {output_path}"
+        )
+
+    # Write summary to a text file
+    base = Path(output_path).with_suffix("")
+    summary_path = str(base) + "_summary.txt"
+    with open(summary_path, "w", encoding="utf-8") as f:
+        f.write(make_profile_summary(profiles) + "\n")
+    print(f"\n📝 Profile summary saved to: {summary_path}")
 
     # Write output
-    print(f"💾 Writing output: {parsed_args.output}")
-    write_output_with_profiles(
-        profiles, parsed_args.output, parsed_args.input_file
-    )
-
-    print("✅ Profile assignment complete!")
+    print(f"💾 Writing output: {output_path}")
+    try:
+        write_output_with_profiles(
+            profiles, output_path, input_paths[0] if input_paths else None
+        )
+        print("✅ Profile assignment complete!")
+    except Exception as e:
+        log_quick_tool_error("assign", f"Failed to write assign output: {e}")
+        print(f"❌ Failed to write assign output: {e}")
 
 
 def execute_from_menu() -> None:
+    from tabulate import tabulate
+
+    def make_profile_summary(profiles):
+        rows = []
+        for p in profiles:
+            x_min, x_max = float(np.min(p.x)), float(np.max(p.x))
+            y_vals = (
+                p.metadata.get("y", [0.0] * len(p.x))
+                if p.metadata
+                else [0.0] * len(p.x)
+            )
+            y_min, y_max = float(np.min(y_vals)), float(np.max(y_vals))
+            z_min, z_max = float(np.min(p.z)), float(np.max(p.z))
+            rows.append(
+                [
+                    p.name,
+                    len(p.x),
+                    f"{x_min:.2f} – {x_max:.2f}",
+                    f"{y_min:.2f} – {y_max:.2f}",
+                    f"{z_min:.2f} – {z_max:.2f}",
+                ]
+            )
+        headers = ["Profile Name", "Points", "X Range", "Y Range", "Z Range"]
+        return tabulate(rows, headers, tablefmt="github")
+
     """Execute profile name assignment from interactive menu."""
     print("\n" + "=" * 60)
     print("PROFILE NAME ASSIGNMENT")
@@ -115,8 +237,17 @@ def execute_from_menu() -> None:
     print("Uses spatial clustering to group points into logical profiles.")
 
     # Get user inputs
-    input_file = input("Enter input file path (XYZ/CSV): ").strip()
-    output_file = input("Enter output file path: ").strip()
+
+    input_patterns = (
+        input(
+            "Enter input file path(s) or wildcard(s) (XYZ/CSV, space-separated): "
+        )
+        .strip()
+        .split()
+    )
+    output_file = input(
+        "Enter output file path (leave blank for auto-naming): "
+    ).strip()
 
     method_choice = (
         input("\nClustering method (spatial/distance) [spatial]: ")
@@ -145,11 +276,38 @@ def execute_from_menu() -> None:
         == "y"
     )
 
-    try:
-        print(f"\n🔍 Reading points from: {input_file}")
+    from glob import glob
 
-        # Read input file
-        points_df = read_points_file(input_file)
+    try:
+        # Expand wildcards and aggregate all points
+        input_paths = []
+        for pattern in input_patterns:
+            expanded = glob(pattern)
+            if not expanded:
+                print(f"❌ No files matched: {pattern}")
+            input_paths.extend(expanded)
+        if not input_paths:
+            msg = "❌ No input files found. Exiting."
+            print(msg)
+            log_quick_tool_error("assign", msg)
+            input("\nPress Enter to continue...")
+            return
+
+        print(f"\n🔍 Reading points from {len(input_paths)} file(s):")
+        for p in input_paths:
+            print(f"   - {p}")
+        all_dfs = []
+        for f in input_paths:
+            try:
+                df = read_points_file(f)
+                all_dfs.append(df)
+            except (OSError, IOError, ValueError) as e:
+                print(f"❌ Error reading {f}: {e}")
+        if not all_dfs:
+            print("❌ No valid data loaded. Exiting.")
+            input("\nPress Enter to continue...")
+            return
+        points_df = pd.concat(all_dfs, ignore_index=True)
         print(f"   Found {len(points_df)} points")
 
         # Assign profiles
@@ -163,16 +321,52 @@ def execute_from_menu() -> None:
         )
 
         print(f"\n📊 Created {len(profiles)} profiles")
+        print("\nProfile Assignment Summary:")
+        print(make_profile_summary(profiles))
+
+        # Determine output file name if not provided (menu: timestamped)
+        if output_file:
+            output_path = output_file
+        else:
+            ext = (
+                ".csv"
+                if input_paths and input_paths[0].lower().endswith(".csv")
+                else ".xyz"
+            )
+            output_path = timestamped_output_path("assign", ext=ext)
+            print(
+                f"💡 Output file not specified. Using timestamped file: {output_path}"
+            )
+
+        # Write summary to a text file
+        base = Path(output_path).with_suffix("")
+        summary_path = str(base) + "_summary.txt"
+        try:
+            with open(summary_path, "w", encoding="utf-8") as f:
+                f.write(make_profile_summary(profiles) + "\n")
+            print(f"\n📝 Profile summary saved to: {summary_path}")
+        except Exception as e:
+            log_quick_tool_error(
+                "assign", f"Failed to write summary file: {e}"
+            )
+            print(f"\n❌ Failed to write summary file: {e}")
 
         # Write output
-        print(f"💾 Writing output: {output_file}")
-        write_output_with_profiles(profiles, output_file, input_file)
-
-        print("\n✅ Profile assignment complete!")
-        print(f"   Output saved to: {output_file}")
+        print(f"💾 Writing output: {output_path}")
+        try:
+            write_output_with_profiles(
+                profiles, output_path, input_paths[0] if input_paths else None
+            )
+            print("\n✅ Profile assignment complete!")
+            print(f"   Output saved to: {output_path}")
+        except Exception as e:
+            log_quick_tool_error(
+                "assign", f"Failed to write assign output: {e}"
+            )
+            print(f"❌ Failed to write assign output: {e}")
 
     except FileNotFoundError:
-        print(f"\n❌ Error: Input file not found: {input_file}")
+        print("\n❌ Error: Input file not found.")
     except (OSError, ValueError, TypeError, ImportError) as e:
         print(f"\n❌ Error: {e}")
 

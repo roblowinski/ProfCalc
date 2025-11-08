@@ -15,7 +15,7 @@ from typing import Any, Iterable, Optional, Tuple
 
 try:
     from pyproj import CRS, Transformer
-except Exception:  # pragma: no cover - optional dependency
+except ImportError:  # pragma: no cover - optional dependency
     CRS = None  # type: ignore
     Transformer = None  # type: ignore
 
@@ -46,7 +46,7 @@ def infer_state_plane_crs_from_samples(
             xf = float(x)
             yf = float(y)
             pts.append((xf, yf))
-        except Exception:
+        except (ValueError, TypeError):
             continue
         if len(pts) >= 10:
             break
@@ -70,7 +70,7 @@ def infer_state_plane_crs_from_samples(
             if score > best_score:
                 best_score = score
                 best = (crs, label)
-        except Exception:
+        except (ImportError, RuntimeError, ValueError, TypeError):
             continue
 
     # require a majority of samples to fall inside the bbox to accept

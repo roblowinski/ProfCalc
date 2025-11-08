@@ -56,6 +56,7 @@ Summary by menu
 - Storm-Related Analyses ............................. ❌ (placeholder)
 
 ## Quick Tools (selected handlers)
+
 - Fix BMAP point counts (point-count correction) ...... ✅ (`profcalc.cli.tools.fix_bmap.execute_from_menu` implemented)
 - Format Conversion (BMAP/CSV/XYZ/Shapefile) ......... ✅ (`profcalc.cli.tools.convert` implemented)
 - Profile Inventory .................................. ✅ (`profcalc.cli.tools.inventory.execute_from_menu` implemented)

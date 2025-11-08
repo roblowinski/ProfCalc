@@ -6,13 +6,11 @@ This document summarizes and elaborates on the annual data analysis and reportin
 
 ## 1. Data Analysis Workflow (Post-Survey)
 
-
 ### 1.1. Data Import and Preparation
 
 - Import beach profile, shoreline, and borrow area survey data (CSV, XYZ, or other formats).
 - Validate and clean data (check for missing values, outliers, format consistency).
 - Organize data by survey date, location, and type.
-
 
 ### 1.2. Beach Profile Analysis
 
@@ -22,7 +20,6 @@ This document summarizes and elaborates on the annual data analysis and reportin
 - Summarize cumulative volume change for the project area and sub-areas (above MHW, below MHW, etc.).
 - Generate profile plots and tables for reporting.
 
-
 ### 1.3. Shoreline Analysis
 
 - Extract shoreline positions from survey data.
@@ -31,14 +28,12 @@ This document summarizes and elaborates on the annual data analysis and reportin
 - Summarize percent of project seaward of design template.
 - Generate shoreline plots and summary tables.
 
-
 ### 1.4. Borrow Area Analysis
 
 - Process bathymetric survey data for borrow areas.
 - Calculate available material above authorized dredging depth.
 - Track changes in borrow area volume over time.
 - Generate bathymetric maps and material availability tables.
-
 
 ### 1.5. Project Condition Evaluation
 
@@ -47,7 +42,6 @@ This document summarizes and elaborates on the annual data analysis and reportin
 - Identify areas of excess and deficit relative to design.
 - Estimate fill quantity required for next renourishment (if applicable).
 - Summarize findings in fact sheets and executive summaries.
-
 
 ### 1.6. Recommendations and Reporting
 

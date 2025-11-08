@@ -1,16 +1,17 @@
-"""
-Bounds Finder - Find common X/Y coordinate ranges across BMAP profiles.
+"""Bounds Finder
 
-This simplified bounds tool reads BMAP free-format profile files, computes
-common X and/or Y ranges across surveys (using the core calculation
-function), writes combined per-survey and per-profile CSV/text outputs, and
-optionally writes a point shapefile of Xon/Xoff positions. When a profile
-baseline (origin azimuth) CSV file is provided (or found in package data),
-the shapefile points are converted to real-world Easting/Northing coordinates
-and the attributes X and Y are added to the DBF.
+Find common X/Y coordinate ranges across profile surveys. Reads BMAP,
+CSV or XYZ input, computes per-survey and per-profile bounds, and writes
+CSV and pretty-text outputs. Optionally creates a shapefile of Xon/Xoff
+positions when baseline (origin azimuth) data are available.
 
-This module intentionally keeps the interactive menu behaviour self-
-contained for the quick-tool workflow.
+Usage examples:
+    - CLI: run the conversion/CLI entry that calls :func:`execute_from_cli` or
+        use the interactive menu entry::
+
+            python -m profcalc.cli.tools.bounds "*.dat"
+
+    - Menu: Quick Tools → Find Common Bounds (invokes :func:`execute_from_menu`).
 """
 
 import glob
@@ -21,6 +22,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 import numpy as np
 
+from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
 from profcalc.common.bmap_io import format_date_for_bmap, read_bmap_freeformat
 from profcalc.common.csv_io import CSVParser, read_xyz_profiles
 from profcalc.core.profile_stats import calculate_common_ranges
@@ -29,7 +31,7 @@ try:
     from tabulate import tabulate  # type: ignore
 
     _HAS_TABULATE = True
-except Exception:  # pragma: no cover - optional dependency
+except ImportError:  # pragma: no cover - optional dependency
     tabulate = None  # type: ignore
     _HAS_TABULATE = False
 
@@ -349,10 +351,10 @@ def execute_from_menu() -> None:
                                             for x in parts[:3]
                                         ]
                                         return "xyz"
-                                    except Exception:
+                                    except (ValueError, TypeError):
                                         pass
                                 break
-                    except Exception:
+                    except (OSError, ValueError, TypeError):
                         pass
                     return "bmap"
 
@@ -382,12 +384,12 @@ def execute_from_menu() -> None:
                 if raw_date:
                     try:
                         date_key = datetime.fromisoformat(str(raw_date))
-                    except Exception:
+                    except (ValueError, TypeError):
                         try:
                             date_key = datetime.strptime(
                                 str(raw_date).upper(), "%d%b%Y"
                             )
-                        except Exception:
+                        except (ValueError, TypeError):
                             for fmt in (
                                 "%m/%d/%Y",
                                 "%d/%m/%Y",
@@ -400,7 +402,7 @@ def execute_from_menu() -> None:
                                         str(raw_date), fmt
                                     )
                                     break
-                                except Exception:
+                                except (ValueError, TypeError):
                                     continue
 
                 # X axis
@@ -420,7 +422,7 @@ def execute_from_menu() -> None:
                     all_surveys_y.append(
                         (profile.name, date_norm or "", date_key, ymin, ymax)
                     )
-        except Exception as e:
+        except (OSError, ValueError, TypeError) as e:
             print(f"⚠️  Warning: could not read '{fp}': {e}")
 
     if dir_input in ("x", "both") and not all_profiles_x:
@@ -559,29 +561,41 @@ def execute_from_menu() -> None:
     base_dir = Path(matched_files[0]).parent if matched_files else Path.cwd()
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     axis_label = dir_input
-    base_name = f"bounds_{axis_label}_{ts}"
+    base_name = f"output_bounds_{axis_label}_{ts}"
     written_files: List[Path] = []
 
     if display_rows:
         survey_csv = base_dir / f"{base_name}_surveys.csv"
         survey_txt = base_dir / f"{base_name}_surveys.txt"
-        survey_csv.write_text(
-            _format_survey_csv_combined(display_rows), encoding="utf-8"
-        )
-        survey_txt.write_text(
-            _format_survey_table_combined(display_rows), encoding="utf-8"
-        )
+        try:
+            survey_csv.write_text(
+                _format_survey_csv_combined(display_rows), encoding="utf-8"
+            )
+            survey_txt.write_text(
+                _format_survey_table_combined(display_rows), encoding="utf-8"
+            )
+        except Exception as e:
+            log_quick_tool_error(
+                "bounds", f"Failed to write survey outputs: {e}"
+            )
+            print(f"❌ Failed to write survey outputs: {e}")
         written_files.extend([survey_csv, survey_txt])
 
     if summary_rows:
         summary_csv = base_dir / f"{base_name}_summary.csv"
         summary_txt = base_dir / f"{base_name}_summary.txt"
-        summary_csv.write_text(
-            _format_summary_csv_combined(summary_rows), encoding="utf-8"
-        )
-        summary_txt.write_text(
-            _format_summary_table_combined(summary_rows), encoding="utf-8"
-        )
+        try:
+            summary_csv.write_text(
+                _format_summary_csv_combined(summary_rows), encoding="utf-8"
+            )
+            summary_txt.write_text(
+                _format_summary_table_combined(summary_rows), encoding="utf-8"
+            )
+        except Exception as e:
+            log_quick_tool_error(
+                "bounds", f"Failed to write summary outputs: {e}"
+            )
+            print(f"❌ Failed to write summary outputs: {e}")
         written_files.extend([summary_csv, summary_txt])
 
     # Optional shapefile: only for X analysis
@@ -589,7 +603,7 @@ def execute_from_menu() -> None:
         if dir_input in ("x", "both") and common_x:
             try:
                 import fiona
-            except Exception:
+            except ImportError:
                 fiona = None
 
             if fiona:
@@ -616,11 +630,15 @@ def execute_from_menu() -> None:
 
                 # find candidate baseline file or prompt
                 baseline_file: Path | None = None
-                # Only use a user-provided baseline file (data/ProfileOriginAzimuths.csv)
+                # Only use a user-provided baseline file (src/profcalc/data/required_inputs/ProfileOriginAzimuths.csv)
                 # or a file explicitly supplied by the user. Do NOT implicitly use
                 # the packaged required_inputs file so we don't create shapefiles
                 # unexpectedly when the user has not provided baseline data.
-                candidates = [Path("data/ProfileOriginAzimuths.csv")]
+                candidates = [
+                    Path(
+                        "src/profcalc/data/required_inputs/ProfileOriginAzimuths.csv"
+                    )
+                ]
                 for c in candidates:
                     if c.exists():
                         baseline_file = c
@@ -656,7 +674,7 @@ def execute_from_menu() -> None:
                                 str(k): v for k, v in baselines_raw.items()
                             }
                             convert_fn = convert_2d_to_3d_profile
-                        except Exception:
+                        except (OSError, ValueError, KeyError):
                             from profcalc.common.csv_io import (
                                 _load_profile_origin_azimuths,
                             )
@@ -682,7 +700,7 @@ def execute_from_menu() -> None:
                                     else None,
                                 }
                             convert_fn = convert_2d_to_3d_profile
-                    except Exception as _e:
+                    except (OSError, ValueError, KeyError) as _e:
                         print(
                             f"⚠️  Could not load baselines from {baseline_file}: {_e}; falling back to profile-local X coordinates"
                         )
@@ -710,7 +728,7 @@ def execute_from_menu() -> None:
                             if ox is not None and oy is not None:
                                 try:
                                     samples.append((float(ox), float(oy)))
-                                except Exception:
+                                except (ValueError, TypeError):
                                     continue
 
                         if samples:
@@ -720,12 +738,16 @@ def execute_from_menu() -> None:
                             if crs_obj is not None:
                                 try:
                                     crs_wkt = crs_obj.to_wkt()
-                                except Exception:
+                                except (AttributeError, ValueError, TypeError):
                                     try:
                                         crs_wkt = crs_obj.to_string()
-                                    except Exception:
+                                    except (
+                                        AttributeError,
+                                        ValueError,
+                                        TypeError,
+                                    ):
                                         crs_wkt = None
-                    except Exception:
+                    except (OSError, ValueError, AttributeError, TypeError):
                         crs_wkt = None
 
                     # write shapefile
@@ -783,7 +805,7 @@ def execute_from_menu() -> None:
                                         )
                                         e_off = float(xs_e[0])
                                         n_off = float(ys_n[0])
-                                except Exception:
+                                except (ValueError, TypeError):
                                     e_on = n_on = e_off = n_off = None
 
                             if xon_v is not None:
@@ -840,7 +862,7 @@ def execute_from_menu() -> None:
                     # (i.e., baselines was not None). When baselines is None we
                     # skipped shapefile creation above.
                     written_files.append(shp_path)
-    except Exception as e:
+    except (OSError, IOError, ValueError) as e:
         print(f"⚠️ Warning: could not write shapefile: {e}")
 
     if not written_files:

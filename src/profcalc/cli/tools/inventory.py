@@ -1,18 +1,29 @@
-"""
-File Inventory - Generate comprehensive inventory reports for BMAP files.
+"""Inventory report generator
 
-Analyzes BMAP free format files and generates detailed reports showing:
-- Total profile count
-- Survey dates
-- Point statistics
-- Elevation ranges
-- File metadata
+Generate comprehensive inventory reports for BMAP and related profile
+files. The report includes profile counts, survey dates, point statistics,
+elevation ranges and basic metadata.
+
+Usage examples:
+    - CLI: call the module's CLI entry (if available) or import
+        :func:`generate_inventory_report` directly.
+
+            python -m profcalc.cli.tools.inventory input.bmap -o inventory.txt
+
+    - Menu: Quick Tools → Inventory (invokes :func:`execute_from_menu`).
 """
 
 import argparse
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
+from tabulate import tabulate
+
+from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
+from profcalc.cli.quick_tools.quick_tool_utils import (
+    default_output_path,
+    timestamped_output_path,
+)
 from profcalc.common.bmap_io import read_bmap_freeformat
 
 
@@ -29,7 +40,10 @@ def execute_from_cli(args: list[str]) -> None:
     )
     parser.add_argument("file", help="BMAP file to inventory")
     parser.add_argument(
-        "-o", "--output", required=True, help="Output report file path"
+        "-o",
+        "--output",
+        required=False,
+        help="Output report file path (default: output_inventory.txt)",
     )
     parser.add_argument(
         "-v",
@@ -47,8 +61,19 @@ def execute_from_cli(args: list[str]) -> None:
     )
 
     # Write output
-    Path(parsed_args.output).write_text(report, encoding="utf-8")
-    print(f"✅ Inventory report written to: {parsed_args.output}")
+    out_path = parsed_args.output
+    if not out_path:
+        out_path = default_output_path(
+            "inventory", parsed_args.file, ext=".txt"
+        )
+    try:
+        Path(out_path).write_text(report, encoding="utf-8")
+        print(f"✅ Inventory report written to: {out_path}")
+    except Exception as e:
+        log_quick_tool_error(
+            "inventory", f"Failed to write inventory report: {e}"
+        )
+        print(f"❌ Failed to write inventory report: {e}")
 
 
 def generate_inventory_report(file_path: str, verbose: bool = False) -> str:
@@ -167,6 +192,49 @@ def _format_inventory_report(
     Returns:
         Formatted report string
     """
+
+    # Table 1: One line per profile & survey date
+    table1_headers = [
+        "PROFILE ID",
+        "SURVEY START DATE",
+        "SURVEY END DATE",
+        "FILE NAME",
+    ]
+    table1_rows = []
+    for profile in profiles:
+        # For BMAP, survey start and end date are the same (single date per profile)
+        survey_date = profile.date if profile.date else "Not specified"
+        table1_rows.append([profile.name, survey_date, survey_date, path.name])
+
+    table1 = tabulate(table1_rows, headers=table1_headers, tablefmt="github")
+
+    # Table 2: Per-profile summary (group by profile name)
+    from collections import defaultdict
+
+    profile_dates: dict[str, List[str]] = defaultdict(list)
+    for profile in profiles:
+        if profile.date:
+            profile_dates[profile.name].append(profile.date)
+        else:
+            profile_dates[profile.name].append("")
+
+    table2_headers = [
+        "PROFILE ID",
+        "NUMBER OF SURVEYS",
+        "DATE OF FIRST SURVEY",
+        "DATE OF LAST SURVEY",
+    ]
+    table2_rows = []
+    for pname, dates in sorted(profile_dates.items()):
+        # Remove empty dates, sort
+        clean_dates = sorted([d for d in dates if d])
+        n_surveys = len(dates)
+        first_date = clean_dates[0] if clean_dates else "Not specified"
+        last_date = clean_dates[-1] if clean_dates else "Not specified"
+        table2_rows.append([pname, n_surveys, first_date, last_date])
+
+    table2 = tabulate(table2_rows, headers=table2_headers, tablefmt="github")
+
     lines = [
         "=" * 80,
         "BMAP FILE INVENTORY REPORT",
@@ -175,98 +243,14 @@ def _format_inventory_report(
         f"Path: {path.parent}",
         f"Size: {path.stat().st_size:,} bytes",
         "",
-        "SUMMARY STATISTICS",
-        "-" * 80,
-        f"Total Surveys: {stats['total_profiles']}",
-        f"Unique Profile Names: {stats['unique_profile_names']}",
-        f"Total Data Points: {stats['total_points']:,}",
-        f"Average Points per Survey: {stats['avg_points']:.1f}",
+        "PROFILE & SURVEY TABLE",
+        table1,
         "",
+        "PROFILE SUMMARY TABLE",
+        table2,
+        "",
+        "=" * 80,
     ]
-
-    # Date range
-    if stats["dates"]:
-        lines.append("SURVEY DATES")
-        lines.append("-" * 80)
-        lines.append(
-            f"Date Range: {stats['dates'][0]} to {stats['dates'][-1]}"
-        )
-        lines.append(f"Total Survey Dates: {len(stats['dates'])}")
-        if len(stats["dates"]) <= 10:
-            lines.append("Dates: " + ", ".join(stats["dates"]))
-        lines.append("")
-
-    # Coordinate ranges
-    lines.extend(
-        [
-            "COORDINATE RANGES",
-            "-" * 80,
-            f"X Range: {stats['min_x']:.2f} to {stats['max_x']:.2f} ft "
-            f"(span: {stats['max_x'] - stats['min_x']:.2f} ft)",
-            f"Z Range: {stats['min_elev']:.2f} to {stats['max_elev']:.2f} ft NAVD88 "
-            f"(span: {stats['max_elev'] - stats['min_elev']:.2f} ft)",
-            f"Average Elevation: {stats['avg_elev']:.2f} ft NAVD88",
-            "",
-        ]
-    )
-
-    # Point statistics
-    lines.extend(
-        [
-            "POINT STATISTICS",
-            "-" * 80,
-            f"Minimum Points per Survey: {stats['min_points']}",
-            f"Maximum Points per Survey: {stats['max_points']}",
-            f"Average Points per Survey: {stats['avg_points']:.1f}",
-            "",
-        ]
-    )
-
-    # Profile name summary
-    lines.extend(
-        [
-            "PROFILE SUMMARY",
-            "-" * 80,
-        ]
-    )
-
-    for profile_name, count in sorted(stats["profile_names"].items()):
-        survey_text = "survey" if count == 1 else "surveys"
-        lines.append(f"  {profile_name}: {count} {survey_text}")
-
-    lines.append("")
-
-    # Detailed per-profile information if verbose
-    if verbose:
-        lines.extend(
-            [
-                "DETAILED PROFILE INFORMATION",
-                "-" * 80,
-            ]
-        )
-
-        for i, profile in enumerate(profiles, 1):
-            lines.append(f"\nSurvey #{i}: {profile.name}")
-            lines.append(
-                f"  Date: {profile.date if profile.date else 'Not specified'}"
-            )
-            lines.append(
-                f"  Description: {profile.description if profile.description else 'None'}"
-            )
-            lines.append(f"  Points: {len(profile.x)}")
-            lines.append(
-                f"  X Range: {min(profile.x):.2f} to {max(profile.x):.2f} ft"
-            )
-            lines.append(
-                f"  Z Range: {min(profile.z):.2f} to {max(profile.z):.2f} ft NAVD88"
-            )
-            lines.append(
-                f"  Avg Elevation: {sum(profile.z) / len(profile.z):.2f} ft NAVD88"
-            )
-
-        lines.append("")
-
-    lines.append("=" * 80)
     return "\n".join(lines)
 
 
@@ -277,8 +261,13 @@ def execute_from_menu() -> None:
     print("=" * 60)
 
     # Get user inputs
-    input_file = input("Enter BMAP file path: ").strip()
-    output_file = input("Enter output report file path: ").strip()
+    import glob
+
+    input_patterns = input(
+        "Enter BMAP/data file path(s) or wildcard(s) (e.g., '*.dat src/profcalc/data/required_inputs/*.bmap'): "
+    ).strip()
+
+    output_file = timestamped_output_path("inventory", ext=".txt")
 
     verbose_input = (
         input("Include detailed per-profile information? (y/n) [n]: ")
@@ -287,10 +276,26 @@ def execute_from_menu() -> None:
     )
     verbose = verbose_input == "y"
 
-    try:
-        print("\n🔄 Generating inventory report...")
+    # Expand wildcards and split input
+    patterns = input_patterns.split()
+    all_files = set()
+    for pattern in patterns:
+        matches = glob.glob(pattern, recursive=True)
+        if not matches:
+            print(f"⚠️  No files matched pattern: {pattern}")
+        all_files.update(matches)
+    all_files = sorted(all_files)
+    if not all_files:
+        print("❌ No files to process. Exiting.")
+        input("\nPress Enter to continue...")
+        return
 
-        report = generate_inventory_report(input_file, verbose=verbose)
+    try:
+        print(
+            f"\n🔄 Generating inventory report for {len(all_files)} file(s)..."
+        )
+
+        report = generate_inventory_report(all_files, verbose=verbose)
 
         Path(output_file).write_text(report, encoding="utf-8")
 
@@ -299,8 +304,14 @@ def execute_from_menu() -> None:
         print(f"\n✅ Report saved to: {output_file}")
 
     except FileNotFoundError as e:
+        log_quick_tool_error(
+            "inventory", f"File not found during inventory generation: {e}"
+        )
         print(f"\n❌ Error: {e}")
     except (OSError, ValueError, TypeError, RuntimeError) as e:
+        log_quick_tool_error(
+            "inventory", f"Unexpected error during inventory generation: {e}"
+        )
         print(f"\n❌ Unexpected error: {e}")
 
     input("\nPress Enter to continue...")

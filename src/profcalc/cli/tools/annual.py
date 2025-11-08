@@ -1,8 +1,15 @@
-"""Handlers for annual monitoring workflows.
+"""Annual monitoring handlers
 
-This module contains small CLI-facing handlers used by the interactive
-menu. Each function is intentionally lightweight and delegates to the
-data management handlers or the session object where appropriate.
+Small CLI-facing handlers used by the interactive menu for annual
+monitoring workflows (AER computations, survey import summaries, etc.).
+Functions are intentionally lightweight and delegate to core modules for
+data processing.
+
+Usage examples:
+    - Programmatic: import and call functions directly in scripts.
+    - Menu: choose the corresponding Quick Tool entry in the interactive
+        menu to run the prompt-driven flow (these menu entries delegate to
+        the handlers in this module).
 """
 
 import datetime as _dt
@@ -10,6 +17,7 @@ from pathlib import Path
 from typing import Optional
 
 import profcalc.cli.menu_system as menu_system
+from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
 from profcalc.cli.tools.data import import_data
 from profcalc.cli.tools.data import session as data_session
 from profcalc.common.bmap_io import BMAPImportError
@@ -50,12 +58,21 @@ def import_survey() -> Optional[dict]:
         return result
     except FileNotFoundError as e:
         print(f"File not found: {e}")
+        log_quick_tool_error(
+            "annual", f"File not found during import_survey: {e}"
+        )
         return None
     except ValueError as e:
         print(f"Value error: {e}")
+        log_quick_tool_error(
+            "annual", f"Value error during import_survey: {e}"
+        )
         return None
     except (OSError, IOError) as e:  # Catch file-related errors
         print(f"An unexpected file-related error occurred: {e}")
+        log_quick_tool_error(
+            "annual", f"Unexpected file error during import_survey: {e}"
+        )
         return None
 
 
@@ -253,6 +270,9 @@ def compute_aer() -> Optional[dict]:
             print(f"Summary written to {save}")
         except (OSError, IOError) as exc:  # pragma: no cover - interactive
             print(f"Failed to save summary: {exc}")
+            log_quick_tool_error(
+                "annual", f"Failed to save AER summary CSV: {exc}"
+            )
 
     return res
 

@@ -6,9 +6,6 @@ This document records the workflow and menu logic for the Profile Analysis step 
 
 ## Profile Analysis Menu Structure
 
-
-
-
 1. **Extract & Prepare Shoreline Data**
     - Extract shoreline positions from survey profiles
     - Convert 2D to 3D (XYZ + date)

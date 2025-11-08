@@ -1,9 +1,11 @@
 ﻿# XYZ File Conversion Implementation Status
 
 ## Overview
+
 This document outlines the current status of XYZ file conversion functionality in the ProfCalc coastal profile analysis system.
 
 ## XYZ File Characteristics
+
 - **Format**: Typically space-delimited
 - **Common Structure**: `ID X Y Z` (Profile ID, X coordinate, Y coordinate, Z elevation)
 - **Metadata**: Minimal unless comments are present in the file
@@ -14,6 +16,7 @@ This document outlines the current status of XYZ file conversion functionality i
 ### ✅ Completed Conversions
 
 #### 1. XYZ to Shapefile Conversion
+
 - **Status**: ✅ Fully Implemented
 - **Features**:
   - Format detection and validation
@@ -24,6 +27,7 @@ This document outlines the current status of XYZ file conversion functionality i
   - Comprehensive user prompts and error handling
 
 #### 2. Basic XYZ Format Analysis
+
 - **Function**: `_check_xyz_format()`
 - **Capabilities**:
   - Detects presence of profile headers (`>` or `#` prefixes)
@@ -33,6 +37,7 @@ This document outlines the current status of XYZ file conversion functionality i
 ### ❌ Missing/Incomplete Features
 
 #### 1. XYZ to BMAP Conversion Function
+
 - **Issue**: `execute_xyz_to_bmap()` function is missing
 - **Impact**: Menu option shows "XYZ to BMAP conversion not available"
 - **Location**: Called from `src/profcalc/cli/menu_system.py` line ~60
@@ -43,6 +48,7 @@ This document outlines the current status of XYZ file conversion functionality i
   - BMAP header generation with metadata preservation
 
 #### 2. Enhanced XYZ Format Validation
+
 - **Current State**: Basic column counting
 - **Missing Features**:
   - Specific validation for "ID X Y Z" space-delimited format
@@ -51,6 +57,7 @@ This document outlines the current status of XYZ file conversion functionality i
   - Support for variable column counts with extra data
 
 #### 3. Profile Assignment Workflow
+
 - **Current State**: Partial logic in XYZ to Shapefile
 - **Missing Features**:
   - Integration with profile assignment system (`assign.py`)
@@ -59,6 +66,7 @@ This document outlines the current status of XYZ file conversion functionality i
   - User feedback during assignment process
 
 #### 4. Data Validation Logic
+
 - **Missing Features**:
   - Validation for insufficient data scenarios
   - Clear error messages when conversion cannot proceed
@@ -82,12 +90,14 @@ def execute_xyz_to_bmap() -> None:
 ```
 
 ### Enhanced Format Validation
+
 - Detect space-delimited "ID X Y Z" format specifically
 - Parse comment lines for metadata
 - Validate coordinate data types and ranges
 - Handle files with variable numbers of columns
 
 ### Profile Assignment Integration
+
 - Check if XYZ file has profile information
 - If not, and origin azimuth file is provided:
   - Call profile assignment tool automatically
@@ -95,6 +105,7 @@ def execute_xyz_to_bmap() -> None:
 - Provide clear user feedback during process
 
 ### Validation Logic
+
 - **Scenario 1**: XYZ has Profile_ID field → Convert directly
 - **Scenario 2**: XYZ lacks Profile_ID but has origin azimuth → Assign profiles, then convert
 - **Scenario 3**: XYZ lacks Profile_ID and no origin azimuth → Fail with clear error message
@@ -102,11 +113,13 @@ def execute_xyz_to_bmap() -> None:
 ## File Dependencies
 
 ### Key Files to Modify
+
 - `src/profcalc/cli/quick_tools/convert.py` - Add missing functions
 - `src/profcalc/cli/quick_tools/assign.py` - Integrate profile assignment
 - `src/profcalc/common/csv_io.py` - Enhance XYZ reading functions
 
 ### Reference Files
+
 - `src/profcalc/cli/menu_system.py` - Menu integration
 - `src/profcalc/common/bmap_io.py` - BMAP writing functions
 - `src/profcalc/common/shapefile_io.py` - Shapefile writing functions
@@ -114,6 +127,7 @@ def execute_xyz_to_bmap() -> None:
 ## Testing Requirements
 
 ### Test Cases Needed
+
 1. XYZ file with Profile_ID field → Direct conversion
 2. XYZ file without Profile_ID but with origin azimuth → Assignment + conversion
 3. XYZ file without Profile_ID and no origin azimuth → Proper error handling
@@ -121,6 +135,7 @@ def execute_xyz_to_bmap() -> None:
 5. Malformed XYZ files → Graceful error handling
 
 ### Sample Data
+
 -- `src/profcalc/data/temp/test_no_profiles.xyz` - XYZ without profile headers
 -- Various test files in `src/profcalc/data/input_examples/`
 -- Origin azimuth files in `src/profcalc/data/required/`
@@ -147,4 +162,3 @@ def execute_xyz_to_bmap() -> None:
 **Last Updated**: October 27, 2025
 **Status**: Ready for implementation of XYZ enhancements</content>
 <parameter name="filePath">c:\__PROJECTS\Scripts\Python\Coastal\profcalc\XYZ_CONVERSION_STATUS.md
-

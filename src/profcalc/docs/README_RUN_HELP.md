@@ -1,12 +1,10 @@
 # How to Run ProfCalc Scripts and Tools
 
-
 ## For All Users
 
 - Always run commands from the project root (where `src/` and `dev_scripts/` are siblings).
 - Activate your virtual environment if you have one:
   `./venv/Scripts/Activate.ps1` (PowerShell)
-
 
 ## Running CLI Tools (in src/profcalc)
 
@@ -17,8 +15,6 @@
   ```
 
 - This works for any CLI-enabled module in `src/profcalc`.
-
-
 
 ## Running Scripts in dev_scripts/ (Prototypes Only)
 
@@ -35,7 +31,6 @@
   $env:PYTHONPATH = "src"; python dev_scripts/your_script.py [args]
   ```
 
-
 ## Running Test Scripts (in tests/)
 
 - Test scripts are now in the `tests/` directory:
@@ -43,7 +38,6 @@
   ```powershell
   $env:PYTHONPATH = "src"; python tests/test_bmap_minimal.py [args]
   ```
-
 
 ## Running Validation Scripts (in validation/)
 
@@ -53,11 +47,9 @@
   $env:PYTHONPATH = "src"; python validation/validation_enhanced.py [args]
   ```
 
-
 ## Debug/Demo Scripts (archive/)
 
 - Legacy, debug, and demonstration scripts are in `archive/` for reference only.
-
 
 ## Troubleshooting
 
@@ -65,8 +57,6 @@
   - Are running from the project root
   - Have set `PYTHONPATH` to `src` (for dev_scripts/)
   - Have installed the package in editable mode: `pip install -e .`
-
-
 
 ## Example: Run BMAP Integration Test
 

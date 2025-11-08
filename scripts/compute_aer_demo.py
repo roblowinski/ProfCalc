@@ -2,10 +2,10 @@
 
 Usage examples:
 - Run against two files:
-    python scripts/compute_aer_demo.py --before data/temp/9Col_WithHeader.csv --after data/temp/9Col_WithHeader.csv
+    python scripts/compute_aer_demo.py --before src/profcalc/data/temp/9Col_WithHeader.csv --after src/profcalc/data/temp/9Col_WithHeader.csv
 
 - Register files in the in-memory session and call by dataset id:
-    python scripts/compute_aer_demo.py --register data/temp/9Col_WithHeader.csv --register data/temp/9Col_WithHeader.csv
+    python scripts/compute_aer_demo.py --register src/profcalc/data/temp/9Col_WithHeader.csv --register src/profcalc/data/temp/9Col_WithHeader.csv
 
 This script is intended for interactive exploration and CI demos.
 """

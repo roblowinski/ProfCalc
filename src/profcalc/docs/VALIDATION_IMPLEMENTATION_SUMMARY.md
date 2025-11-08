@@ -16,10 +16,12 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 ### 1. ✅ Profile Names with Spaces (Critical)
 
 **Problem:** Profile names containing spaces were truncated to first word only.
+
 - Input: `"OC 117"` → Output: `"OC"` ❌
 - Caused data corruption in round-trip conversions
 
 **Solution:**
+
 - Fixed `parse_header()` in `bmap_io.py` (line 458)
 - New parser extracts dates and purpose codes first
 - Remaining text treated as profile name (may contain spaces)
@@ -35,6 +37,7 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 ```
 
 **Files Modified:**
+
 - `src/profcalc/common/bmap_io.py` - Updated both class method and standalone function
 - `test_profile_names_with_spaces.py` - Created comprehensive test suite
 
@@ -45,6 +48,7 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 **Problem:** Using `--columns "Y X Z"` on 2-column file caused crash with `IndexError`.
 
 **Solution:**
+
 - Added validation in `_read_xyz_format()` (convert.py)
 - Checks file has sufficient columns before parsing
 - Validates on first data line encountered
@@ -75,6 +79,7 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 ```
 
 **Files Modified:**
+
 - `src/profcalc/cli/quick_tools/convert.py` - Enhanced `_read_xyz_format()`
 - `test_column_count_validation.py` - Created validation test suite
 
@@ -83,9 +88,11 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 ### 3. ✅ Duplicate/Ambiguous Column Names (Critical)
 
 **Problem:** CSV files with multiple columns matching same pattern used first match silently.
+
 - Example: Both `z` and `elevation` columns present → used `z` without warning
 
 **Solution:**
+
 - Enhanced `_infer_column_mapping()` in `csv_io.py`
 - Detects all columns matching each coordinate pattern
 - Warns user when multiple matches found
@@ -110,6 +117,7 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 ```
 
 **Files Modified:**
+
 - `src/profcalc/common/csv_io.py` - Enhanced column matching logic
 - `test_duplicate_columns.py` - Created duplicate detection tests
 
@@ -118,13 +126,16 @@ Implemented comprehensive input validation and fixed critical edge cases in the 
 ## Additional Improvements
 
 ### Error Messages Enhanced
+
 All validation errors now include:
+
 - ✅ **Specific problem** (what went wrong)
 - ✅ **Location** (file path, line number)
 - ✅ **Context** (actual data that caused issue)
 - ✅ **Suggestions** (how to fix it)
 
 ### Documentation Created
+
 - `CONVERSION_EDGE_CASES.md` - Comprehensive catalog of edge cases
   - 15+ documented scenarios
   - Severity ratings (Critical → Low)
@@ -173,6 +184,7 @@ All validation errors now include:
 ```
 
 ### Code Changes Summary
+
 - **Files modified:** 2
   - `src/profcalc/common/bmap_io.py` (parse_header fixes)
   - `src/profcalc/common/csv_io.py` (duplicate detection)
@@ -232,6 +244,7 @@ $ profcalc -c data.csv -o output.xyz
 ## Backward Compatibility
 
 ✅ **All changes are backward compatible:**
+
 - Existing valid files work identically
 - New validation only triggers on invalid/ambiguous cases
 - Warnings are informational, don't stop conversion
@@ -242,6 +255,7 @@ $ profcalc -c data.csv -o output.xyz
 ## Future Enhancements
 
 ### High Priority (Not Implemented)
+
 1. **Mixed coordinate system detection**
    - Validate coordinate value ranges
    - Warn if values suggest different systems
@@ -255,6 +269,7 @@ $ profcalc -c data.csv -o output.xyz
    - Prevent format overflow
 
 ### Medium Priority
+
 4. **Comprehensive pre-flight validation**
    - Run all checks before conversion starts
    - Produce validation report
@@ -295,11 +310,13 @@ mypy src/profcalc/
 ## Summary
 
 ### What Was Fixed
+
 - 🔴 **3 Critical bugs** causing crashes and data corruption
 - 🟡 **3 High-severity** issues causing incorrect results
 - 📚 **15+ edge cases** documented for future work
 
 ### What Was Added
+
 - ✅ **Column count validation** - prevents IndexError crashes
 - ✅ **Duplicate column detection** - warns about ambiguity
 - ✅ **Profile name parsing** - handles spaces correctly
@@ -308,6 +325,7 @@ mypy src/profcalc/
 - ✅ **Complete documentation** - CONVERSION_EDGE_CASES.md
 
 ### Impact
+
 - **Robustness:** Catches errors before processing
 - **User Experience:** Clear, helpful error messages
 - **Data Quality:** Prevents silent corruption
@@ -316,6 +334,7 @@ mypy src/profcalc/
 ---
 
 ## Related Documentation
+
 - `CONVERSION_EDGE_CASES.md` - Full edge case catalog
 - `COLUMN_ORDER_SUMMARY.md` - Column ordering feature
 - `CONVERSION_ENHANCEMENTS.md` - Recent improvements

@@ -1,13 +1,15 @@
-"""
-Fix BMAP Point Counts - Correct inaccurate point counts in BMAP files.
+"""Fix BMAP Point Counts
 
-Scans BMAP free format files and corrects the point count on line 2 of each
-profile to match the actual number of coordinate points in the file.
+Scan BMAP free-format and compatible delimited files to correct incorrect
+point counts written in profile headers. Writes corrected output and an
+optional correction report.
 
-Supports multiple input formats:
-- BMAP free format (any extension)
-- CSV files (with/without headers, automatic column detection)
-- 9-column CSV with metadata headers
+Usage examples:
+    - CLI: run the fixer with an input pattern and output directory::
+
+            python -m profcalc.cli.tools.fix_bmap "*.ASC" -o corrected_dir
+
+    - Menu: Quick Tools → Fix BMAP Point Counts (invokes :func:`execute_from_menu`).
 """
 
 import argparse
@@ -16,6 +18,11 @@ import sys
 from pathlib import Path
 from typing import Dict, Tuple
 
+from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
+from profcalc.cli.quick_tools.quick_tool_utils import (
+    default_output_path,
+    timestamped_output_path,
+)
 from profcalc.common.file_parser import ParsedFile, parse_file
 
 
@@ -277,12 +284,20 @@ def execute_from_cli(args: list[str]) -> None:
     output_dir = Path(parsed_args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Set report path: use specified or default to input directory
+    # Set report path: use specified or a default
     if parsed_args.report:
         report_path = Path(parsed_args.report)
     else:
-        input_dir = input_files[0].parent
-        report_path = input_dir / "bmap_point_count_fix_report.txt"
+        try:
+            report_path = Path(
+                default_output_path(
+                    "fix_bmap", str(input_files[0]), ext=".txt"
+                )
+            )
+        except Exception:
+            report_path = (
+                input_files[0].parent / "bmap_point_count_fix_report.txt"
+            )
 
     # Backup report file if it exists
     if report_path.exists():
@@ -325,8 +340,12 @@ def execute_from_cli(args: list[str]) -> None:
         report_text = _generate_multi_file_report(
             all_corrections, no_corrections
         )
-        report_path.write_text(report_text, encoding="utf-8")
-        print(f"\n📄 Report saved to: {report_path}")
+        try:
+            report_path.write_text(report_text, encoding="utf-8")
+            print(f"\n📄 Report saved to: {report_path}")
+        except Exception as e:
+            log_quick_tool_error("fix_bmap", f"Failed to write report: {e}")
+            print(f"\n❌ Failed to write report: {e}")
 
 
 def _generate_correction_report(
@@ -411,9 +430,9 @@ def execute_from_menu() -> None:
         else:
             print("✅ No point-count corrections needed.")
 
-        # Ask for log file path (default to input_file + .fix.log)
+        # Ask for log file path (default to a timestamped output to avoid overwriting)
         default_log = str(
-            Path(input_file).with_suffix(Path(input_file).suffix + ".fix.log")
+            Path(timestamped_output_path("fix_bmap", ext=".fix.log"))
         )
         log_choice = input(
             f"Save correction log to file? [Y/{default_log}] (enter 'n' to skip): "
@@ -474,8 +493,14 @@ def execute_from_menu() -> None:
                 input_file, output_file, corrections
             )
             if report_file:
-                Path(report_file).write_text(report_text, encoding="utf-8")
-                print(f"\n📄 Report saved to: {report_file}")
+                try:
+                    Path(report_file).write_text(report_text, encoding="utf-8")
+                    print(f"\n📄 Report saved to: {report_file}")
+                except Exception as e:
+                    log_quick_tool_error(
+                        "fix_bmap", f"Failed to write report file: {e}"
+                    )
+                    print(f"\n❌ Failed to write report file: {e}")
 
             # Print summary to screen
             print("\n" + report_text)
@@ -485,6 +510,9 @@ def execute_from_menu() -> None:
                 print("\n✅ No corrections were necessary.")
 
         except (OSError, ValueError, TypeError, RuntimeError) as e:
+            log_quick_tool_error(
+                "fix_bmap", f"Unexpected error during fix_bmap menu: {e}"
+            )
             print(f"\n❌ Unexpected error: {e}")
 
         # Ask whether to process another file
@@ -518,7 +546,7 @@ def execute_modify_headers_menu() -> None:
 
     try:
         parsed = parse_file(Path(input_file), skip_confirmation=False)
-    except Exception as e:
+    except (OSError, ValueError, TypeError) as e:
         print(f"\n❌ Error parsing file: {e}")
         return
 
@@ -555,5 +583,5 @@ def execute_modify_headers_menu() -> None:
     try:
         _write_corrected_file(parsed, Path(out_path))
         print(f"\n✅ Wrote modified file to: {out_path}")
-    except Exception as e:
+    except (OSError, IOError, ValueError) as e:
         print(f"\n❌ Failed to write modified file: {e}")

@@ -5,6 +5,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
+from profcalc.cli.quick_tools.quick_tool_utils import (
+    default_output_path,
+    timestamped_output_path,
+)
 from profcalc.common.bmap_io import (
     Profile,
     read_bmap_freeformat,
@@ -24,13 +29,18 @@ from profcalc.common.shapefile_io import (
     write_survey_points_shapefile,
 )
 
-"""
-Format Converter - Convert between BMAP, CSV, XYZ, and Shapefile formats.
+"""Format Converter
 
-Supports conversions:
-- BMAP free format → CSV (2D: X,Z or 3D: X,Y,Z)
-- BMAP free format → XYZ (X,Y,Z coordinates)
-- BMAP free format → Shapefile (Point or Line features with 3D geometry)
+Convert between BMAP, CSV, XYZ and Shapefile formats. Supports 2D/3D
+exports, origin-azimuth based real-world coordinate calculation, and
+shapefile exports (requires geopandas/fiona).
+
+Usage examples:
+    - CLI: call :func:`execute_from_cli` or run the module::
+
+            python -m profcalc.cli.tools.convert input.dat --to csv -o output.csv
+
+    - Menu: Quick Tools → Format Converter (invokes :func:`execute_from_menu`).
 """
 
 # Type for format (use str for now, as FormatType is not defined as a type alias or class)
@@ -108,7 +118,7 @@ def execute_from_cli(args: list[str]) -> None:
     )
     parser.add_argument("input_file", help="Input file to convert")
     parser.add_argument(
-        "-o", "--output", required=True, help="Output file path"
+        "-o", "--output", required=False, help="Output file path"
     )
     parser.add_argument(
         "--from",
@@ -163,6 +173,18 @@ def execute_from_cli(args: list[str]) -> None:
         except ValueError as e:
             print(f"❌ Error: {e}")
             return
+
+    # If output not provided, set a reasonable default based on input
+    if not parsed_args.output:
+        try:
+            from pathlib import Path
+
+            inp_suffix = Path(parsed_args.input_file).suffix or ".out"
+        except Exception:
+            inp_suffix = ".out"
+        parsed_args.output = default_output_path(
+            "convert", parsed_args.input_file, ext=inp_suffix
+        )
 
     # Auto-detect formats if not specified
     from_format = parsed_args.from_format or _detect_format(
@@ -903,6 +925,9 @@ def execute_from_menu() -> None:
     # Get user inputs
     input_file = input("Enter input file path: ").strip()
     output_file = input("Enter output file path: ").strip()
+    if not output_file:
+        # Use a timestamped default so subsequent format detection has an extension
+        output_file = timestamped_output_path("convert", ext=".dat")
 
     print("\nAvailable formats:")
     print("  1. BMAP free format")
@@ -991,8 +1016,12 @@ def execute_from_menu() -> None:
         print(f"   Output saved to: {output_file}")
 
     except FileNotFoundError as e:
+        log_quick_tool_error(
+            "convert", f"File not found during conversion: {e}"
+        )
         print(f"\n❌ Error: {e}")
     except ValueError as e:
+        log_quick_tool_error("convert", f"Value error during conversion: {e}")
         print(f"\n❌ Error: {e}")
     except (
         OSError,
@@ -1002,6 +1031,9 @@ def execute_from_menu() -> None:
         IndexError,
         ImportError,
     ) as e:
+        log_quick_tool_error(
+            "convert", f"Unexpected error during conversion: {e}"
+        )
         print(f"\n❌ Unexpected error: {e}")
 
     input("\nPress Enter to continue...")

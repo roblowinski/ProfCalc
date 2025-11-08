@@ -200,14 +200,19 @@ def parse_bmap(
                     profile_header = line
                     profile_data = _parse_bmap_profile_header(profile_header)
 
-                    # Read coordinate pairs
+                    # Read coordinate pairs. Read the declared number but also
+                    # continue scanning for additional coordinate lines until
+                    # a non-coordinate or blank line is encountered. This helps
+                    # detect cases where the declared point count is smaller
+                    # than the actual coordinates present in the file.
                     coordinates = []
-                    for j in range(
-                        i + 2, min(i + 2 + point_count, len(lines))
-                    ):
+                    j = i + 2
+                    # Read successive lines that look like coordinate pairs
+                    while j < len(lines):
                         coord_line = lines[j].strip()
+                        # Blank line typically separates profiles
                         if not coord_line:
-                            continue
+                            break
 
                         parts = coord_line.split()
                         if len(parts) >= 2:
@@ -215,8 +220,14 @@ def parse_bmap(
                                 x = float(parts[0])
                                 y = float(parts[1])
                                 coordinates.append({"x": x, "y": y})
-                            except ValueError:
+                                j += 1
                                 continue
+                            except ValueError:
+                                # Not numeric -> likely next profile header
+                                break
+                        else:
+                            # Not enough columns for a coordinate pair
+                            break
 
                     profile_data["point_count"] = point_count
                     profile_data["actual_point_count"] = len(coordinates)
@@ -224,8 +235,8 @@ def parse_bmap(
 
                     profiles.append(profile_data)
 
-                    # Move index past this profile
-                    i += 2 + point_count
+                    # Move index past this profile to the first unconsumed line
+                    i = j
                     continue
             except ValueError:
                 pass

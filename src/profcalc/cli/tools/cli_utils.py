@@ -1,7 +1,14 @@
-"""
-CLI Utilities for formatting and user interaction.
+"""CLI utilities for formatting and user interaction.
 
-This module provides reusable utilities for enhancing the CLI experience.
+Reusable helpers for CLI formatting and simple interactive prompts used by
+the menu-driven quick tools.
+
+Usage examples:
+    - Import helpers in a tool module::
+
+            from profcalc.cli.tools.cli_utils import print_header, prompt_input
+
+    - Use :func:`prompt_input` to ask the user for values with defaults.
 """
 
 import os
