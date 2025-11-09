@@ -17,6 +17,8 @@ import argparse
 import logging
 import sys
 
+from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
+
 
 def main() -> None:
     """Main CLI entry point - routes to menu or quick tools."""
@@ -129,6 +131,11 @@ Examples:
                 AttributeError,
                 ImportError,
             ) as exc:
+                log_quick_tool_error(
+                    "router",
+                    f"Failed to resolve handler '{args.handler}': {exc}",
+                    exc=exc,
+                )
                 print(
                     f"Failed to resolve handler '{args.handler}': {exc}",
                     file=sys.stderr,
@@ -136,6 +143,9 @@ Examples:
                 sys.exit(2)
 
             if handler_callable is None:
+                log_quick_tool_error(
+                    "router", f"Handler '{args.handler}' not found"
+                )
                 print(f"Handler '{args.handler}' not found", file=sys.stderr)
                 sys.exit(2)
 
@@ -170,6 +180,7 @@ Examples:
             sys.exit(1)
 
     except (OSError, ValueError, TypeError, RuntimeError, ImportError) as e:
+        log_quick_tool_error("router", f"Router error: {e}", exc=e)
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 

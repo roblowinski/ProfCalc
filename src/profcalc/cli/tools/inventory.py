@@ -69,9 +69,9 @@ def execute_from_cli(args: list[str]) -> None:
     try:
         Path(out_path).write_text(report, encoding="utf-8")
         print(f"✅ Inventory report written to: {out_path}")
-    except Exception as e:
+    except (OSError, IOError) as e:
         log_quick_tool_error(
-            "inventory", f"Failed to write inventory report: {e}"
+            "inventory", f"Failed to write inventory report: {e}", e
         )
         print(f"❌ Failed to write inventory report: {e}")
 

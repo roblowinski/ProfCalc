@@ -15,6 +15,8 @@ import json
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
+from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
+
 
 class MenuEngine:
     """Simple interactive menu engine that loads a JSON menu and dispatches
@@ -152,6 +154,11 @@ class MenuEngine:
                     handler = self.resolve_handler(handler_key)
                 except (ImportError, ValueError, AttributeError) as e:
                     # Failed to find/resolve the handler; present a friendly message
+                    log_quick_tool_error(
+                        "menu",
+                        f"Failed to resolve handler '{handler_key}': {e}",
+                        exc=e,
+                    )
                     print(f"Failed to resolve handler '{handler_key}': {e}")
                     continue
 
@@ -175,6 +182,11 @@ class MenuEngine:
                     # Top-level interactive loop: surface common handler errors
                     # without crashing the menu. We avoid catching BaseException
                     # so KeyboardInterrupt/SystemExit still propagate.
+                    log_quick_tool_error(
+                        "menu",
+                        f"Handler '{handler_key}' raised an exception: {e}",
+                        exc=e,
+                    )
                     print(f"Handler raised an exception: {e}")
             else:
                 print("No action assigned to this menu item.")

@@ -123,6 +123,9 @@ def compute_aer() -> Optional[dict]:
             return None
         p = Path(pth)
         if not p.exists():
+            log_quick_tool_error(
+                "annual", f"File not found during dataset selection: {pth}"
+            )
             print(f"File not found: {pth}")
             return None
         # Attempt to import/register the file so future tools see it
@@ -151,6 +154,9 @@ def compute_aer() -> Optional[dict]:
     ) as exc:  # pragma: no cover - interactive
         # read_9col_profiles may raise BeachProfileError or ValueError for
         # malformed inputs; surface a friendly message and abort.
+        log_quick_tool_error(
+            "annual", f"Failed to read 9-col profiles for AER: {exc}", exc=exc
+        )
         print(f"Failed to read 9-col profiles: {exc}")
         return None
 
@@ -222,6 +228,9 @@ def compute_aer() -> Optional[dict]:
     ) as exc:  # pragma: no cover - interactive
         # calculate_aer can raise ValueError or other numeric errors; in
         # interactive mode present a message and abort.
+        log_quick_tool_error(
+            "annual", f"AER computation failed: {exc}", exc=exc
+        )
         print(f"AER computation failed: {exc}")
         return None
 
@@ -269,10 +278,10 @@ def compute_aer() -> Optional[dict]:
                 )
             print(f"Summary written to {save}")
         except (OSError, IOError) as exc:  # pragma: no cover - interactive
-            print(f"Failed to save summary: {exc}")
             log_quick_tool_error(
-                "annual", f"Failed to save AER summary CSV: {exc}"
+                "annual", f"Failed to save AER summary CSV: {exc}", exc=exc
             )
+            print(f"Failed to save summary: {exc}")
 
     return res
 

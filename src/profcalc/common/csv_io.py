@@ -13,6 +13,7 @@ Supported CSV structures:
 - Support for various delimiters and quote characters
 """
 
+import re
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -170,6 +171,12 @@ class CSVParser:
         """
         mapping: ColumnMapping = {}
         columns_lower = [col.lower().strip() for col in columns]
+        # Normalized column names (remove punctuation) to match cases like
+        # 'EASTING (X)' or 'NORTHING (Y)'. This increases robustness when
+        # headers include parentheses or extra characters.
+        columns_normalized = [
+            re.sub(r"[^a-z0-9]", " ", col).strip() for col in columns_lower
+        ]
 
         # Common column name variations
         # Note: More specific patterns first to avoid false matches
@@ -245,14 +252,22 @@ class CSVParser:
             matched_columns = []  # Track all matching columns for this coordinate
 
             for i, col_lower in enumerate(columns_lower):
-                # Use exact match for single-letter coordinates to avoid false positives
+                col_norm = columns_normalized[i]
+                # Use flexible substring matching for coordinate columns so we
+                # catch variants like 'easting (x)' or 'northing - Y'.
                 if standard_name in ["x", "y", "z"]:
-                    if col_lower == standard_name or any(
-                        pattern == col_lower for pattern in patterns
+                    if (
+                        col_lower == standard_name
+                        or any(pattern == col_lower for pattern in patterns)
+                        or any(pattern in col_lower for pattern in patterns)
+                        or any(pattern in col_norm for pattern in patterns)
                     ):
                         matched_columns.append((columns[i], i))
                 else:
-                    if any(pattern in col_lower for pattern in patterns):
+                    if any(
+                        pattern in col_lower or pattern in col_norm
+                        for pattern in patterns
+                    ):
                         matched_columns.append((columns[i], i))
 
             # If multiple columns match, warn about ambiguity
@@ -378,11 +393,22 @@ class CSVParser:
                         if extra_column_names:
                             extra_values: list = []
                             for col_name in extra_column_names:
-                                # row.get works with Pandas Series
-                                # Removed unused variable `extra_value`
-                                # Ensure val is a scalar if it's a Series
+                                # Safely extract the value for this extra column
+                                # from the pandas Series row.
+                                try:
+                                    val = (
+                                        row.get(col_name)
+                                        if hasattr(row, "get")
+                                        else row[col_name]
+                                    )
+                                except (KeyError, AttributeError, IndexError):
+                                    # Fallback to None if the column is missing or inaccessible
+                                    val = None
+
+                                # Ensure val is scalar if it's a Series
                                 if isinstance(val, pd.Series):
                                     val = val.iloc[0] if len(val) > 0 else None
+
                                 if pd.notna(val):  # type: ignore
                                     # Try to convert to float, otherwise keep as string
                                     try:
@@ -536,6 +562,7 @@ class CSVParser:
             "%Y-%m-%d",
             "%Y-%m-%dT%H:%M:%S",
             "%Y-%m-%d %H:%M:%S",
+            "%Y%m%d",
             "%m/%d/%Y",
             "%d/%m/%Y",
             "%Y/%m/%d",

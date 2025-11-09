@@ -171,6 +171,9 @@ def execute_from_cli(args: list[str]) -> None:
                 f"Y=col{column_order['y']}, Z=col{column_order['z']}"
             )
         except ValueError as e:
+            log_quick_tool_error(
+                "convert", f"Column order parse error: {e}", exc=e
+            )
             print(f"❌ Error: {e}")
             return
 
@@ -180,7 +183,7 @@ def execute_from_cli(args: list[str]) -> None:
             from pathlib import Path
 
             inp_suffix = Path(parsed_args.input_file).suffix or ".out"
-        except Exception:
+        except (TypeError, OSError):
             inp_suffix = ".out"
         parsed_args.output = default_output_path(
             "convert", parsed_args.input_file, ext=inp_suffix
@@ -194,6 +197,10 @@ def execute_from_cli(args: list[str]) -> None:
 
     # Check for shapefile support
     if to_format in ("shp-points", "shp-lines") and not SHAPEFILE_AVAILABLE:
+        log_quick_tool_error(
+            "convert",
+            "Shapefile export requested but geopandas is not available",
+        )
         print("❌ Error: Shapefile export requires geopandas.")
         print("   Install with: pip install profile-analysis[gis]")
         print("   Or: pip install geopandas>=0.14.0")
@@ -1236,6 +1243,10 @@ def execute_bmap_to_csv() -> None:
                 "Enter origin azimuth file path (required for 3D coordinates): "
             ).strip()
             if not origin_azimuth_file:
+                log_quick_tool_error(
+                    "convert",
+                    "Origin azimuth file required for 9-column conversion but not provided",
+                )
                 print("❌ Origin azimuth file is required for 9-column conversion.")
                 back_choice = input(
                     "Press Enter to go back to previous menu, or enter a file path: "
@@ -1246,6 +1257,10 @@ def execute_bmap_to_csv() -> None:
                 continue
 
             if not Path(origin_azimuth_file).exists():
+                log_quick_tool_error(
+                    "convert",
+                    f"Origin azimuth file does not exist: {origin_azimuth_file}",
+                )
                 print(
                     f"❌ Origin azimuth file '{origin_azimuth_file}' does not exist."
                 )
@@ -1274,6 +1289,10 @@ def execute_bmap_to_csv() -> None:
                 "Enter origin azimuth file path (required for 3D coordinates): "
             ).strip()
             if not origin_azimuth_file:
+                log_quick_tool_error(
+                    "convert",
+                    "Origin azimuth file required for XYZ conversion but not provided",
+                )
                 print("❌ Origin azimuth file is required for XYZ conversion.")
                 back_choice = input(
                     "Press Enter to go back to previous menu, or enter a file path: "
@@ -1284,6 +1303,10 @@ def execute_bmap_to_csv() -> None:
                 continue
 
             if not Path(origin_azimuth_file).exists():
+                log_quick_tool_error(
+                    "convert",
+                    f"Origin azimuth file does not exist: {origin_azimuth_file}",
+                )
                 print(
                     f"❌ Origin azimuth file '{origin_azimuth_file}' does not exist."
                 )
@@ -1301,9 +1324,15 @@ def execute_bmap_to_csv() -> None:
     while True:
         input_file = input("Enter input BMAP file path: ").strip()
         if not input_file:
+            log_quick_tool_error(
+                "convert", "Input file path required but not provided"
+            )
             print("❌ Input file path is required.")
             continue
         if not Path(input_file).exists():
+            log_quick_tool_error(
+                "convert", f"Input file does not exist: {input_file}"
+            )
             print(f"❌ Input file '{input_file}' does not exist.")
             continue
         break
@@ -1343,6 +1372,9 @@ def execute_bmap_to_csv() -> None:
                 IndexError,
                 ImportError,
             ) as e:
+                log_quick_tool_error(
+                    "convert", f"9-Column conversion failed: {e}", exc=e
+                )
                 print(f"❌ 9-Column conversion failed: {e}")
         elif output_format == "xyz":
             # XYZ conversion with origin azimuth
@@ -1358,6 +1390,9 @@ def execute_bmap_to_csv() -> None:
                 IndexError,
                 ImportError,
             ) as e:
+                log_quick_tool_error(
+                    "convert", f"XYZ conversion failed: {e}", exc=e
+                )
                 print(f"❌ XYZ conversion failed: {e}")
     except (
         OSError,
@@ -1368,6 +1403,7 @@ def execute_bmap_to_csv() -> None:
         IndexError,
         ImportError,
     ) as e:
+        log_quick_tool_error("convert", f"Conversion failed: {e}", exc=e)
         print(f"❌ Conversion failed: {e}")
 
     input("\nPress Enter to continue...")

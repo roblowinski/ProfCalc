@@ -25,7 +25,7 @@ def parse_date(val: str) -> Optional[datetime]:
     for fmt in DATE_FORMATS:
         try:
             return datetime.strptime(val, fmt)
-        except Exception:
+        except ValueError:
             continue
     return None
 
@@ -36,7 +36,7 @@ def is_header(row: List[str]) -> bool:
         # If first three columns cast to float, this is likely data, not a header
         _ = [float(row[i]) for i in range(3)]
         return False
-    except Exception:
+    except (ValueError, IndexError):
         return True
 
 
@@ -85,7 +85,7 @@ def default_output_path(tool_name: str, input_path: Optional[str] = None, ext: O
         if input_path:
             try:
                 ext = Path(input_path).suffix or ".txt"
-            except Exception:
+            except OSError:
                 ext = ".txt"
         else:
             ext = ".txt"

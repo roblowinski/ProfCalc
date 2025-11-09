@@ -44,6 +44,30 @@ Generated data and large binary artifacts (CSV outputs, shapefiles, archives) ar
 
 See `README_RUN_HELP.md` for details on running scripts and tests.
 
+## Quick tools: centralized logging and tests
+
+Quick tools (the small utilities under `src/profcalc/cli/quick_tools`) now use a
+centralized rotating logger to capture error and diagnostic messages. The log
+file is located at `src/profcalc/QuickToolErrors.log` by default and is written
+using a RotatingFileHandler to avoid unbounded log growth.
+
+If you're running tests or need to capture logs to a specific location, the
+test-suite reconfigures the logger at runtime by overriding
+`profcalc.cli.quick_tools.quick_tool_logger.LOG_FILE` and clearing the logger
+handlers. This allows tests to assert log contents without affecting the
+repository-level log file.
+
+To run the quick-tool logging tests locally:
+
+```powershell
+# Run only logging-related tests
+python -m pytest tests/test_quick_tools_logging.py -q
+python -m pytest tests/test_quick_tools_logging_extended.py -q
+python -m pytest tests/test_quick_tools_logging_more.py -q
+```
+
+You can run the full test suite similarly with `python -m pytest tests/ -v`.
+
 ## Installation
 
 ### Clone the Repository

@@ -146,6 +146,7 @@ def execute_from_cli(args: list[str]) -> None:
             df = read_points_file(f)
             all_dfs.append(df)
         except (OSError, IOError, ValueError) as e:
+            log_quick_tool_error("assign", f"Error reading file {f}: {e}", exc=e)
             print(f"❌ Error reading {f}: {e}")
     if not all_dfs:
         print("❌ No valid data loaded. Exiting.")
@@ -198,8 +199,10 @@ def execute_from_cli(args: list[str]) -> None:
             profiles, output_path, input_paths[0] if input_paths else None
         )
         print("✅ Profile assignment complete!")
-    except Exception as e:
-        log_quick_tool_error("assign", f"Failed to write assign output: {e}")
+    except (OSError, IOError, ValueError) as e:
+        log_quick_tool_error(
+            "assign", f"Failed to write assign output: {e}", e
+        )
         print(f"❌ Failed to write assign output: {e}")
 
 
@@ -302,6 +305,7 @@ def execute_from_menu() -> None:
                 df = read_points_file(f)
                 all_dfs.append(df)
             except (OSError, IOError, ValueError) as e:
+                log_quick_tool_error("assign", f"Error reading file {f}: {e}", exc=e)
                 print(f"❌ Error reading {f}: {e}")
         if not all_dfs:
             print("❌ No valid data loaded. Exiting.")
@@ -345,9 +349,9 @@ def execute_from_menu() -> None:
             with open(summary_path, "w", encoding="utf-8") as f:
                 f.write(make_profile_summary(profiles) + "\n")
             print(f"\n📝 Profile summary saved to: {summary_path}")
-        except Exception as e:
+        except (OSError, IOError) as e:
             log_quick_tool_error(
-                "assign", f"Failed to write summary file: {e}"
+                "assign", f"Failed to write summary file: {e}", e
             )
             print(f"\n❌ Failed to write summary file: {e}")
 
@@ -359,15 +363,17 @@ def execute_from_menu() -> None:
             )
             print("\n✅ Profile assignment complete!")
             print(f"   Output saved to: {output_path}")
-        except Exception as e:
+        except (OSError, IOError, ValueError) as e:
             log_quick_tool_error(
-                "assign", f"Failed to write assign output: {e}"
+                "assign", f"Failed to write assign output: {e}", e
             )
             print(f"❌ Failed to write assign output: {e}")
 
     except FileNotFoundError:
+        log_quick_tool_error("assign", "Input file not found")
         print("\n❌ Error: Input file not found.")
     except (OSError, ValueError, TypeError, ImportError) as e:
+        log_quick_tool_error("assign", f"Error during assign operation: {e}", exc=e)
         print(f"\n❌ Error: {e}")
 
     input("\nPress Enter to continue...")

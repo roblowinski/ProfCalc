@@ -25,7 +25,8 @@ for ln in lines[1:]:
         try:
             z = float(parts[6])
             parts[6] = f"{z+0.5:.2f}"
-        except Exception:
+        except ValueError:
+            # Non-numeric elevation value, skip modification for this row
             pass
     out_lines.append(','.join(parts))
 

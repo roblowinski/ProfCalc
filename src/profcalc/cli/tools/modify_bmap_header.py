@@ -22,8 +22,8 @@ except ImportError:
             "modify_bmap_header",
             "curses module not available on this system; interactive curses UI disabled",
         )
-    except Exception:
-        # best-effort logging; ignore failures
+    except (ImportError, ModuleNotFoundError):
+        # best-effort logging; ignore failures to import logger
         pass
     print("\n❌ The 'curses' module is not available on this system.\n" \
           "If you are on Windows, install it with: pip install windows-curses\n" \
@@ -57,7 +57,8 @@ def execute_from_menu():
                 "modify_bmap_header",
                 f"Error reading file {input_file}: {e}",
             )
-        except Exception:
+        except (ImportError, ModuleNotFoundError):
+            # If central logger isn't available, ignore logging failure
             pass
         print(f"❌ Error reading file: {e}")
         input("Press Enter to continue...")
@@ -108,7 +109,8 @@ def execute_from_menu():
                     "modify_bmap_header",
                     f"Error reading file {input_file}: {e}",
                 )
-            except Exception:
+            except (ImportError, ModuleNotFoundError):
+                # If central logger isn't available, ignore logging failure
                 pass
             print(f"❌ Error reading file: {e}")
             input("Press Enter to continue...")
@@ -345,10 +347,28 @@ def execute_from_menu():
         # Launch curses UI
         try:
             result = curses.wrapper(curses_header_editor)
-        except (curses.error, Exception) as e:
+        except curses.error as e:
+            # Known curses-related failure (e.g., terminal doesn't support required features)
             print(f"❌ Error in curses UI: {e}")
             input("Press Enter to continue...")
             return
+        except Exception as e:
+            # Unexpected errors should be logged with the central quick-tool logger
+            try:
+                from profcalc.cli.quick_tools.quick_tool_logger import (
+                    log_quick_tool_error,
+                )
+
+                log_quick_tool_error(
+                    "modify_bmap_header",
+                    f"Unexpected error in curses UI: {e}",
+                    exc=e,
+                )
+            except (ImportError, ModuleNotFoundError):
+                # best-effort logging; if logger is unavailable, continue to raise
+                pass
+            # Re-raise to avoid silently hiding bugs
+            raise
 
         if result is None:
             print("Edit cancelled.")
@@ -399,7 +419,8 @@ def execute_from_menu():
                     "modify_bmap_header",
                     f"Error writing modified file {out_file}: {e}",
                 )
-            except Exception:
+            except (ImportError, ModuleNotFoundError):
+                # If the central logger cannot be imported, ignore logging failure
                 pass
             print(f"❌ Error writing file: {e}")
 

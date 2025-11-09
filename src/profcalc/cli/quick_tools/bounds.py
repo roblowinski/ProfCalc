@@ -4,19 +4,21 @@ Delegates to `profcalc.cli.tools.bounds` for implementation.
 """
 
 try:
-    from profcalc.cli.tools.bounds import (
-        execute_from_cli as impl_execute_from_cli,
-    )
-    from profcalc.cli.tools.bounds import (
-        execute_from_menu as impl_execute_from_menu,
-    )
+    # Import the interactive entry if available; the implementation may not
+    # expose a CLI shim (execute_from_cli), so handle that gracefully.
+    from profcalc.cli.tools import bounds as _bounds_impl
+
+    impl_execute_from_menu = getattr(_bounds_impl, "execute_from_menu", None)
+    impl_execute_from_cli = getattr(_bounds_impl, "execute_from_cli", None)
 except ImportError:  # pragma: no cover - import fallback
 
     def execute_from_menu() -> None:  # type: ignore
         raise ImportError("bounds tool is not available")
 
     def execute_from_cli(args: list[str]) -> None:  # type: ignore
-        raise ImportError("bounds tool is not available")
+        raise NotImplementedError(
+            "Quick tools are menu-only; run via the interactive menu."
+        )
 else:
     from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
 
@@ -24,7 +26,10 @@ else:
         try:
             if impl_execute_from_menu:
                 return impl_execute_from_menu()
-            return impl_execute_from_cli([])
+            # Fallback: if only a CLI shim exists, call it with no args.
+            if impl_execute_from_cli:
+                return impl_execute_from_cli([])
+            raise ImportError("bounds implementation has no usable entrypoint")
         except Exception as e:  # pragma: no cover - log and re-raise
             log_quick_tool_error("bounds", f"Unhandled exception in bounds quick tool: {e}")
             raise

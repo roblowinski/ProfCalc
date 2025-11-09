@@ -1,8 +1,10 @@
 from datetime import datetime
-from datetime import datetime as _dt
+from typing import Optional, cast
 
 from profcalc.cli.tools import bounds as b
 from profcalc.common.bmap_io import format_date_for_bmap
+
+_dt = datetime
 
 # simulate raw date inputs and entries
 raws = ["2024-10-26", "26OCT2024", "", "04/01/2025", None]
@@ -17,13 +19,13 @@ for raw in raws:
     if raw:
         try:
             date_key = datetime.fromisoformat(str(raw))
-        except Exception:
+        except ValueError:
             try:
                 date_key = datetime.strptime(str(raw).upper(), "%d%b%Y")
-            except Exception:
+            except ValueError:
                 try:
                     date_key = datetime.strptime(str(raw), "%m/%d/%Y")
-                except Exception:
+                except ValueError:
                     date_key = None
     entries.append(("P1", date_norm, date_key, 1.0,5.0,None,None))
 # add another profile with dates
@@ -35,6 +37,16 @@ entries.sort(key=lambda e: (e[0], 0 if e[2] is not None else 1, e[2] or _dt.max)
 
 # build display rows
 display_rows = [(p, d or "", xmin, xmax, ymin, ymax) for p,d,dk,xmin,xmax,ymin,ymax in entries]
-print(b._format_survey_csv_combined(display_rows))
+# mypy wants the numeric positions to be Optional[float]; cast for the test harness
+DisplayRow = tuple[
+    str,
+    str,
+    Optional[float],
+    Optional[float],
+    Optional[float],
+    Optional[float],
+]
+display_rows_t = cast(list[DisplayRow], display_rows)
+print(b._format_survey_csv_combined(display_rows_t))
 print()
-print(b._format_survey_table_combined(display_rows))
+print(b._format_survey_table_combined(display_rows_t))

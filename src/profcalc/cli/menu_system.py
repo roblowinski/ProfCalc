@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     pass
 
 # Use the package-level data tools to keep dataset registration centralized
+from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
 from profcalc.cli.tools import data as data_tools
 
 
@@ -84,10 +85,13 @@ def main_menu() -> None:
             data_management_menu()
         elif choice == "2":
             annual_monitoring_menu()
-        elif choice == "3":
-            # Route to conversion submenu (interactive convert tool)
-            conversion_submenu()
-        elif choice == "4":
+        elif choice == "8":
+            # Help & Documentation
+            about()
+        elif choice == "9":
+            print("Goodbye!")
+            # Return from main_menu to allow clean shutdown of the launcher
+            return
             profcalc_profcalc_menu()
         elif choice == "5":
             print("Batch Processing - Coming Soon!")
@@ -95,9 +99,10 @@ def main_menu() -> None:
             print("Configuration & Settings - Coming Soon!")
         elif choice == "7":
             quick_tools_menu()
-        elif choice == "3":
+        elif choice == "9":
             print("Goodbye!")
-            exit(0)
+            # Return from main_menu to allow clean shutdown of the launcher
+            return
         else:
             print("Invalid selection. Please try again.")
 
@@ -135,6 +140,11 @@ def ensure_data_source(io: Optional[AppIO] = None) -> None:
                 NotImplementedError,
                 OSError,
             ) as exc:  # pragma: no cover - interactive
+                log_quick_tool_error(
+                    "menu_system",
+                    f"Import failed during ensure_data_source: {exc}",
+                    exc=exc,
+                )
                 print_fn(f"Import failed: {exc}")
     elif choice == "2":
         app_state.data_source = "database"
@@ -190,6 +200,11 @@ def data_management_menu(io: Optional[AppIO] = None) -> None:
                 NotImplementedError,
                 OSError,
             ) as exc:  # pragma: no cover - interactive
+                log_quick_tool_error(
+                    "menu_system",
+                    f"Import failed in data_management_menu: {exc}",
+                    exc=exc,
+                )
                 print_fn(f"Import failed: {exc}")
         elif choice == "3":
             data_tools.list_datasets()
@@ -257,6 +272,9 @@ def annual_monitoring_menu() -> None:
                 NotImplementedError,
                 OSError,
             ) as exc:  # pragma: no cover - interactive
+                log_quick_tool_error(
+                    "menu_system", f"Import failed: {exc}", exc=exc
+                )
                 print(f"Import failed: {exc}")
         elif choice == "2":
             # Compute AER via the Annual tools handler
@@ -268,16 +286,24 @@ def annual_monitoring_menu() -> None:
                 ImportError,
                 AttributeError,
             ) as exc:  # pragma: no cover - interactive
+                log_quick_tool_error(
+                    "menu_system", f"Failed to run AER handler: {exc}", exc=exc
+                )
                 print(f"Failed to run AER handler: {exc}")
         elif choice == "3":
-            shoreline_analysis_menu()
+            # Profile Analysis submenu
+            profcalc_profcalc_menu()
         elif choice == "4":
-            print("[STUB] Condition Evaluation - Not yet implemented.")
+            # Shoreline Analysis submenu
+            shoreline_analysis_menu()
         elif choice == "5":
-            print("[STUB] Reporting & Export - Not yet implemented.")
+            # Condition Evaluation (stub)
+            print("[STUB] Condition Evaluation - Not yet implemented.")
         elif choice == "6":
-            break
+            # Reporting & Export (stub)
+            print("[STUB] Reporting & Export - Not yet implemented.")
         elif choice == "7":
+            # Back to Main Menu
             break
         else:
             print("Invalid selection. Please try again.")
@@ -506,6 +532,11 @@ def quick_tools_menu() -> None:
                 ImportError,
                 AttributeError,
             ) as exc:  # pragma: no cover - interactive
+                log_quick_tool_error(
+                    "menu_system",
+                    f"Failed to run BMAP fixer tool: {exc}",
+                    exc=exc,
+                )
                 print(f"Failed to run BMAP fixer tool: {exc}")
 
         elif choice == "2":
@@ -517,6 +548,9 @@ def quick_tools_menu() -> None:
                 ImportError,
                 AttributeError,
             ) as exc:  # pragma: no cover - interactive
+                log_quick_tool_error(
+                    "menu_system", f"Failed to run bounds tool: {exc}", exc=exc
+                )
                 print(f"Failed to run bounds tool: {exc}")
 
         elif choice == "3":
@@ -530,6 +564,11 @@ def quick_tools_menu() -> None:
                 ImportError,
                 AttributeError,
             ) as exc:  # pragma: no cover - interactive
+                log_quick_tool_error(
+                    "menu_system",
+                    f"Failed to run inventory tool: {exc}",
+                    exc=exc,
+                )
                 print(f"Failed to run inventory tool: {exc}")
 
         elif choice == "4":
@@ -541,6 +580,9 @@ def quick_tools_menu() -> None:
                 ImportError,
                 AttributeError,
             ) as exc:  # pragma: no cover - interactive
+                log_quick_tool_error(
+                    "menu_system", f"Failed to run assign tool: {exc}", exc=exc
+                )
                 print(f"Failed to run assign tool: {exc}")
 
         elif choice == "5":
@@ -558,6 +600,11 @@ def quick_tools_menu() -> None:
                 ImportError,
                 AttributeError,
             ) as exc:  # pragma: no cover - interactive
+                log_quick_tool_error(
+                    "menu_system",
+                    f"Failed to run header modification tool: {exc}",
+                    exc=exc,
+                )
                 print(f"Failed to run header modification tool: {exc}")
 
         elif choice == "6":
@@ -566,12 +613,22 @@ def quick_tools_menu() -> None:
                     get_profile_dates as get_profile_dates_tool,
                 )
             except (ImportError, AttributeError) as exc:
+                log_quick_tool_error(
+                    "menu_system",
+                    f"Failed to import get_profile_dates tool: {exc}",
+                    exc=exc,
+                )
                 print(f"Failed to import get_profile_dates tool: {exc}")
                 input("\nPress Enter to continue...")
                 continue
             try:
                 get_profile_dates_tool.execute_from_menu()
             except Exception as exc:
+                log_quick_tool_error(
+                    "menu_system",
+                    f"Failed to run get_profile_dates tool: {exc}",
+                    exc=exc,
+                )
                 print(f"Failed to run get_profile_dates tool: {exc}")
             input("\nPress Enter to continue...")
 
@@ -673,7 +730,8 @@ def conversion_submenu() -> None:
 
 def launch_menu() -> None:
     """Launch the interactive menu system."""
-    ensure_data_source()
+    # Start at the main menu immediately. Data source selection is handled
+    # by the Data Management menu (or by individual tools) when needed.
     main_menu()
 
 

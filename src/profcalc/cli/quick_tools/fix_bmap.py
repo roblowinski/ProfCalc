@@ -43,11 +43,9 @@ else:
             raise
 
     def execute_from_cli(args: list[str]) -> None:
-        try:
-            return impl_execute_from_cli(args)
-        except Exception as e:
-            log_quick_tool_error("fix_bmap", f"Unhandled exception in fix_bmap quick tool (CLI): {e}")
-            raise
+        raise NotImplementedError(
+            "Quick tools are menu-only; run via the interactive menu."
+        )
 
     def fix_bmap_point_counts(*args: Any, **kwargs: Any) -> Any:
         return impl_fix_bmap_point_counts(*args, **kwargs)

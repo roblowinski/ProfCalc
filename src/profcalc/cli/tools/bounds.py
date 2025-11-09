@@ -574,9 +574,9 @@ def execute_from_menu() -> None:
             survey_txt.write_text(
                 _format_survey_table_combined(display_rows), encoding="utf-8"
             )
-        except Exception as e:
+        except (OSError, IOError) as e:
             log_quick_tool_error(
-                "bounds", f"Failed to write survey outputs: {e}"
+                "bounds", f"Failed to write survey outputs: {e}", e
             )
             print(f"❌ Failed to write survey outputs: {e}")
         written_files.extend([survey_csv, survey_txt])
@@ -591,9 +591,9 @@ def execute_from_menu() -> None:
             summary_txt.write_text(
                 _format_summary_table_combined(summary_rows), encoding="utf-8"
             )
-        except Exception as e:
+        except (OSError, IOError) as e:
             log_quick_tool_error(
-                "bounds", f"Failed to write summary outputs: {e}"
+                "bounds", f"Failed to write summary outputs: {e}", e
             )
             print(f"❌ Failed to write summary outputs: {e}")
         written_files.extend([summary_csv, summary_txt])

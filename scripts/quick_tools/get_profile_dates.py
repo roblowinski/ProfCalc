@@ -105,8 +105,13 @@ def main(argv=None):
         reader = csv.reader(f)
         try:
             first = next(reader)
-        except Exception:
-            msg = "ERROR: File is empty or unreadable."
+        except StopIteration:
+            msg = "ERROR: File is empty."
+            print(msg)
+            log_quick_tool_error(tool_name, msg)
+            return
+        except (csv.Error, OSError) as e:
+            msg = f"ERROR: Could not read CSV file: {e}"
             print(msg)
             log_quick_tool_error(tool_name, msg)
             return
@@ -226,4 +231,14 @@ def main(argv=None):
                 print("tabulate library not found. Skipping pretty text table output.")
 
 if __name__ == "__main__":
-    main()
+    # Quick tools are intended to be run from the interactive menu only.
+    # Running the script directly from the command line is deprecated in
+    # this repository layout. Provide a short help message directing users
+    # to the menu launcher.
+    print(
+        "This quick tool is menu-only. Start the interactive menu with: .\\run_menu.ps1"
+    )
+    print(
+        "If you need a non-interactive invocation, run the tool via the menu system or use the library APIs."
+    )
+    sys.exit(2)

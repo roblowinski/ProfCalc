@@ -55,7 +55,7 @@ def infer_state_plane_crs_from_samples(
         return None, None
 
     best_score = 0.0
-    best = (None, None)
+    best: Tuple[Optional[Any], Optional[str]] = (None, None)
 
     for epsg, label, bbox in candidates:
         try:

@@ -17,14 +17,10 @@ def execute_from_cli(args: list[str]) -> None:
     This is a small dispatcher that currently forwards to
     `profcalc.cli.tools.convert.execute_from_cli`.
     """
-    try:
-        from profcalc.cli.tools.convert import execute_from_cli as _conv
-
-        # Call the conversion CLI and allow runtime exceptions to propagate
-        # (FileNotFoundError, ValueError, etc.). Only catch ImportError which
-        # means the conversion implementation is not available.
-        return _conv(args)
-    except ImportError as exc:  # pragma: no cover - thin dispatcher
-        raise ImportError(
-            "No conversion CLI available in profcalc.cli.tools.convert"
-        ) from exc
+    # Quick tools are intentionally menu-only. If a caller attempts to
+    # dispatch quick-tools from a CLI context, raise a clear error and
+    # advise using the interactive menu via run_menu.ps1 or the Python
+    # menu entrypoint.
+    raise NotImplementedError(
+        "Quick tools are menu-only; run them from the interactive menu (run_menu.ps1)"
+    )

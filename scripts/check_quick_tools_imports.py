@@ -20,7 +20,7 @@ for m in modules:
     try:
         importlib.import_module(m)
         print(f"{m} OK")
-    except Exception as e:
+    except (ImportError, ModuleNotFoundError) as e:
         print(f"{m} ERR: {e}")
 
 print("Done.")

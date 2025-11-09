@@ -50,6 +50,9 @@ def fix_bmap_point_counts(
     try:
         parsed = parse_file(input_path, skip_confirmation=skip_confirmation)
     except (OSError, ValueError, TypeError, ImportError) as e:
+        log_quick_tool_error(
+            "fix_bmap", f"Error parsing file {input_path}: {e}", exc=e
+        )
         if verbose:
             print(f"\n❌ Error parsing file: {e}")
         raise
@@ -278,7 +281,9 @@ def execute_from_cli(args: list[str]) -> None:
         Path(f) for f in sorted(glob.glob(parsed_args.input_pattern))
     ]
     if not input_files:
-        print(f"❌ No files matched pattern: {parsed_args.input_pattern}")
+        msg = f"❌ No files matched pattern: {parsed_args.input_pattern}"
+        log_quick_tool_error("fix_bmap", msg)
+        print(msg)
         sys.exit(1)
 
     output_dir = Path(parsed_args.output_dir)
@@ -294,7 +299,7 @@ def execute_from_cli(args: list[str]) -> None:
                     "fix_bmap", str(input_files[0]), ext=".txt"
                 )
             )
-        except Exception:
+        except (OSError, ValueError, TypeError):
             report_path = (
                 input_files[0].parent / "bmap_point_count_fix_report.txt"
             )
@@ -343,8 +348,8 @@ def execute_from_cli(args: list[str]) -> None:
         try:
             report_path.write_text(report_text, encoding="utf-8")
             print(f"\n📄 Report saved to: {report_path}")
-        except Exception as e:
-            log_quick_tool_error("fix_bmap", f"Failed to write report: {e}")
+        except (OSError, IOError) as e:
+            log_quick_tool_error("fix_bmap", f"Failed to write report: {e}", e)
             print(f"\n❌ Failed to write report: {e}")
 
 
@@ -414,9 +419,15 @@ def execute_from_menu() -> None:
                 input_file, skip_confirmation=False
             )
         except FileNotFoundError as e:
+            log_quick_tool_error(
+                "fix_bmap", f"File not found during scan: {e}", exc=e
+            )
             print(f"\n❌ Error: {e}")
             continue
         except (OSError, ValueError, TypeError, ImportError) as e:
+            log_quick_tool_error(
+                "fix_bmap", f"Error parsing file during menu scan: {e}", exc=e
+            )
             print(f"\n❌ Error parsing file: {e}")
             continue
 
@@ -496,9 +507,9 @@ def execute_from_menu() -> None:
                 try:
                     Path(report_file).write_text(report_text, encoding="utf-8")
                     print(f"\n📄 Report saved to: {report_file}")
-                except Exception as e:
+                except (OSError, IOError) as e:
                     log_quick_tool_error(
-                        "fix_bmap", f"Failed to write report file: {e}"
+                        "fix_bmap", f"Failed to write report file: {e}", e
                     )
                     print(f"\n❌ Failed to write report file: {e}")
 

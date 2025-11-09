@@ -21,6 +21,7 @@ for name, ispkg in modules:
     try:
         importlib.import_module(name)
     except Exception:
+        # Capture full traceback for diagnostics
         failed.append((name, traceback.format_exc()))
 
 if not failed:

@@ -11,6 +11,29 @@ If you use the project's venv in the repository root, activate it with PowerShel
 
 . .\.venv\Scripts\Activate.ps1
 
+Run the interactive menu (Quick Tools are menu-only)
+---------------------------------------
+Quick Tools are intended to be used from the interactive menu only. The
+menu launcher sets up `PYTHONPATH` and starts the menu UI where Quick
+Tools, Data Management and other workflows are available.
+
+Recommended (PowerShell):
+
+```powershell
+.\run_menu.ps1
+```
+
+Convenience shim (Windows)
+---------------------------
+If you'd like to run the menu without the `.\` prefix on Windows, use the
+provided `run_menu.cmd` shim in the repository root (see below). You can
+also set `PYTHONPATH` manually and run the Python menu entrypoint:
+
+```powershell
+$env:PYTHONPATH = 'src'
+python src\profcalc\cli\menu_system.py
+```
+
 Install dependencies
 
 Install the pinned requirements (if you haven't already):
@@ -140,3 +163,50 @@ What the new numeric tests cover (plain language)
 
 If you'd like, I can add a short CI job YAML that runs the tests, linter and
 type-checks on every push. Say the word and I'll add it.
+
+Recent changes and important notes
+---------------------------------
+
+- Quick Tools are now menu-only: quick tools must be launched from the
+  interactive menu (run via `.\run_menu.ps1` or `run_menu.cmd`). Attempting
+  to run the quick-tool CLI entrypoints directly will raise a clear
+  NotImplementedError or print guidance telling you to use the menu.
+
+- Launcher helpers:
+  - PowerShell: `.\run_menu.ps1` — sets `PYTHONPATH=src` and runs the menu.
+  - Windows shim: `run_menu.cmd` — convenience shim in the repo root so you
+    can run `run_menu` from cmd.exe / PowerShell without the `./` prefix.
+
+- Menu navigation:
+  - Help & Documentation is option 8 in the Main Menu and calls the
+    `about()` summary.
+  - Exit is option 9 in the Main Menu. Choosing `9` prints "Goodbye!" and
+    returns from the menu so the launcher can exit cleanly.
+
+- CSV parsing improvements:
+  - The 9-column CSV parser now performs header normalization (strips
+    punctuation and tolerates variant header forms like "EASTING (X)"
+    / "NORTHING (Y)") and accepts compact date formats such as `YYYYMMDD`.
+  - These fixes reduce common parsing failures when using external data
+    exports.
+
+- Central quick-tool logging:
+  - Quick-tool exceptions are recorded to `src/profcalc/QuickToolErrors.log`.
+    The quick-tool wrappers log unexpected exceptions and re-raise so
+    failures are visible both in the log and the interactive session.
+
+- Tests added:
+  - Unit tests for the interactive menu and all submenus were added:
+    `tests/test_menu_system.py` and `tests/test_menus_all_levels.py`.
+    These use `monkeypatch` to simulate user input and stub heavy tool
+    modules so menu routing can be validated quickly in CI.
+
+- How to run the (new) menu tests locally:
+
+```powershell
+python -m pytest tests/test_menu_system.py -q
+python -m pytest tests/test_menus_all_levels.py -q
+```
+
+If you want the full test suite run, just run `python -m pytest tests/ -v` as
+before.
