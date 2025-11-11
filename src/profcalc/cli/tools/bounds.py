@@ -1,3 +1,47 @@
+# =============================================================================
+# Beach Profile Coordinate Bounds Analysis Tool
+# =============================================================================
+#
+# FILE: src/profcalc/cli/tools/bounds.py
+#
+# PURPOSE:
+# This tool analyzes beach profile survey data to determine common coordinate
+# ranges and boundaries across multiple surveys and profiles. It computes
+# spatial extents, identifies overlapping regions, and generates reports on
+# coordinate coverage for quality assessment and analysis planning.
+#
+# WHAT IT'S FOR:
+# - Analyzes X/Y coordinate ranges across multiple profile surveys
+# - Computes per-survey and per-profile spatial bounds
+# - Identifies common coordinate ranges for comparative analysis
+# - Generates CSV and formatted text reports of bounds data
+# - Optionally creates shapefiles of shoreline positions (Xon/Xoff)
+# - Supports multiple input formats (BMAP, CSV, XYZ)
+# - Handles both cross-shore (X) and alongshore (Y) coordinate analysis
+#
+# WORKFLOW POSITION:
+# This tool is used during the data exploration and quality assessment phase
+# of beach profile analysis. It helps users understand the spatial coverage
+# and consistency of their survey data before performing detailed analysis.
+# The bounds information is crucial for setting appropriate analysis parameters
+# and ensuring meaningful comparisons between surveys.
+#
+# LIMITATIONS:
+# - Requires consistent coordinate systems across input files
+# - May not handle complex baseline geometries without proper metadata
+# - Shapefile output depends on optional dependencies (geopandas, shapely)
+# - Coordinate transformations require baseline azimuth information
+# - Large datasets may require significant memory for bounds calculations
+#
+# ASSUMPTIONS:
+# - Input files contain valid coordinate data in supported formats
+# - Coordinate systems are consistent within and across files
+# - Profile data represents meaningful spatial transects
+# - Users understand coordinate system conventions and units
+# - Baseline data is available when shoreline position analysis is needed
+#
+# =============================================================================
+
 """Bounds Finder
 
 Find common X/Y coordinate ranges across profile surveys. Reads BMAP,
@@ -14,7 +58,6 @@ Usage examples:
     - Menu: Quick Tools → Find Common Bounds (invokes :func:`execute_from_menu`).
 """
 
-import glob
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -34,6 +77,8 @@ try:
 except ImportError:  # pragma: no cover - optional dependency
     tabulate = None  # type: ignore
     _HAS_TABULATE = False
+
+from profcalc.cli.menu_system import notify_and_wait
 
 
 def _profiles_to_dict_for_axis(
@@ -113,16 +158,12 @@ def _format_summary_csv_combined(
         xmin_s = f"{xmin:.2f}" if xmin is not None else ""
         xmax_s = f"{xmax:.2f}" if xmax is not None else ""
         x_range = (
-            f"{(xmax - xmin):.2f}"
-            if xmin is not None and xmax is not None
-            else ""
+            f"{(xmax - xmin):.2f}" if xmin is not None and xmax is not None else ""
         )
         ymin_s = f"{ymin:.2f}" if ymin is not None else ""
         ymax_s = f"{ymax:.2f}" if ymax is not None else ""
         y_range = (
-            f"{(ymax - ymin):.2f}"
-            if ymin is not None and ymax is not None
-            else ""
+            f"{(ymax - ymin):.2f}" if ymin is not None and ymax is not None else ""
         )
         x_surveys_s = f"{x_surveys}" if x_surveys is not None else ""
         y_surveys_s = f"{y_surveys}" if y_surveys is not None else ""
@@ -154,16 +195,12 @@ def _format_survey_table_combined(
         xmin_s = f"{xmin:.2f}" if xmin is not None else ""
         xmax_s = f"{xmax:.2f}" if xmax is not None else ""
         x_range = (
-            f"{(xmax - xmin):.2f}"
-            if xmin is not None and xmax is not None
-            else ""
+            f"{(xmax - xmin):.2f}" if xmin is not None and xmax is not None else ""
         )
         ymin_s = f"{ymin:.2f}" if ymin is not None else ""
         ymax_s = f"{ymax:.2f}" if ymax is not None else ""
         y_range = (
-            f"{(ymax - ymin):.2f}"
-            if ymin is not None and ymax is not None
-            else ""
+            f"{(ymax - ymin):.2f}" if ymin is not None and ymax is not None else ""
         )
         rows.append(
             [
@@ -230,17 +267,13 @@ def _format_summary_table_combined(
         xmin_s = f"{xmin:.2f}" if xmin is not None else ""
         xmax_s = f"{xmax:.2f}" if xmax is not None else ""
         x_range = (
-            f"{(xmax - xmin):.2f}"
-            if xmin is not None and xmax is not None
-            else ""
+            f"{(xmax - xmin):.2f}" if xmin is not None and xmax is not None else ""
         )
         x_surveys_s = f"{x_surveys}" if x_surveys is not None else ""
         ymin_s = f"{ymin:.2f}" if ymin is not None else ""
         ymax_s = f"{ymax:.2f}" if ymax is not None else ""
         y_range = (
-            f"{(ymax - ymin):.2f}"
-            if ymin is not None and ymax is not None
-            else ""
+            f"{(ymax - ymin):.2f}" if ymin is not None and ymax is not None else ""
         )
         y_surveys_s = f"{y_surveys}" if y_surveys is not None else ""
         rows.append(
@@ -286,28 +319,22 @@ def execute_from_menu() -> None:
     shapefile of Xon/Xoff points with X/Y attributes when an origin azimuth
     file is provided or supplied by the user.
     """
-    print("\n" + "=" * 60)
-    print("FIND COMMON BOUNDS")
-    print("=" * 60)
+    from profcalc.cli.file_dialogs import select_input_file
+    from profcalc.common.colors import print_header
 
-    file_pattern = input("Enter BMAP file pattern (e.g., *.dat): ").strip()
-    # always write both CSV and text
+    print_header("Find Common Bounds")
 
-    mhw_input = input(
-        "Enter MHW elevation (ft NAVD88) [optional, press Enter to skip]: "
-    ).strip()
-    mhw_elev = float(mhw_input) if mhw_input else None
+    print("Select a 9-column file...")
+    file_path = select_input_file("Select 9-Column File")
+    if not file_path:
+        print("No file selected.")
+        return
 
-    dir_input = (
-        input("Direction to analyze (x/y/both) [x]: ").strip().lower() or "x"
-    )
-    if dir_input not in ("x", "y", "both"):
-        print("Invalid direction selection. Defaulting to 'x'.")
-        dir_input = "x"
+    mhw_elev = None
 
-    matched_files = glob.glob(file_pattern)
-    if not matched_files:
-        matched_files = [file_pattern]
+    dir_input = "both"
+
+    matched_files = [file_path] if file_path else []
 
     all_profiles_x: dict[str, list] = {}
     all_profiles_y: dict[str, list] = {}
@@ -329,9 +356,7 @@ def execute_from_menu() -> None:
                         return "xyz"
                     # Peek at first non-empty line
                     try:
-                        with path.open(
-                            "r", encoding="utf-8", errors="ignore"
-                        ) as fh:
+                        with path.open("r", encoding="utf-8", errors="ignore") as fh:
                             for _ in range(10):
                                 line = fh.readline()
                                 if not line:
@@ -346,10 +371,7 @@ def execute_from_menu() -> None:
                                 parts = s.split()
                                 if len(parts) >= 3:
                                     try:
-                                        [
-                                            float(x.replace(",", ""))
-                                            for x in parts[:3]
-                                        ]
+                                        [float(x.replace(",", "")) for x in parts[:3]]
                                         return "xyz"
                                     except (ValueError, TypeError):
                                         pass
@@ -398,9 +420,7 @@ def execute_from_menu() -> None:
                                 "%Y/%m/%d",
                             ):
                                 try:
-                                    date_key = datetime.strptime(
-                                        str(raw_date), fmt
-                                    )
+                                    date_key = datetime.strptime(str(raw_date), fmt)
                                     break
                                 except (ValueError, TypeError):
                                     continue
@@ -548,13 +568,11 @@ def execute_from_menu() -> None:
             ymin = ys[0]
             ymax = ys[1]
             y_surveys = ys[2]
-        summary_rows.append(
-            (pname, xmin, xmax, x_surveys, ymin, ymax, y_surveys)
-        )
+        summary_rows.append((pname, xmin, xmax, x_surveys, ymin, ymax, y_surveys))
 
     if not display_rows and not summary_rows:
         print("No results to write.")
-        input("\nPress Enter to continue...")
+        notify_and_wait("", prompt="\nPress Enter to continue...")
         return
 
     # Write outputs to auto-generated files
@@ -575,9 +593,7 @@ def execute_from_menu() -> None:
                 _format_survey_table_combined(display_rows), encoding="utf-8"
             )
         except (OSError, IOError) as e:
-            log_quick_tool_error(
-                "bounds", f"Failed to write survey outputs: {e}", e
-            )
+            log_quick_tool_error("bounds", f"Failed to write survey outputs: {e}", e)
             print(f"❌ Failed to write survey outputs: {e}")
         written_files.extend([survey_csv, survey_txt])
 
@@ -592,9 +608,7 @@ def execute_from_menu() -> None:
                 _format_summary_table_combined(summary_rows), encoding="utf-8"
             )
         except (OSError, IOError) as e:
-            log_quick_tool_error(
-                "bounds", f"Failed to write summary outputs: {e}", e
-            )
+            log_quick_tool_error("bounds", f"Failed to write summary outputs: {e}", e)
             print(f"❌ Failed to write summary outputs: {e}")
         written_files.extend([summary_csv, summary_txt])
 
@@ -624,20 +638,16 @@ def execute_from_menu() -> None:
                 # collect dates per profile
                 dates_map: dict[str, List[str]] = {}
                 for pname, date_norm, _k, _xmin, _xmax in all_surveys_x:
-                    dates_map.setdefault(pname, []).append(
-                        date_norm or "UNKNOWN"
-                    )
+                    dates_map.setdefault(pname, []).append(date_norm or "UNKNOWN")
 
                 # find candidate baseline file or prompt
                 baseline_file: Path | None = None
-                # Only use a user-provided baseline file (src/profcalc/data/required_inputs/ProfileOriginAzimuths.csv)
+                # Only use a user-provided baseline file (data/reference/baselines/ProfileOriginAzimuths.csv)
                 # or a file explicitly supplied by the user. Do NOT implicitly use
-                # the packaged required_inputs file so we don't create shapefiles
+                # the packaged reference file so we don't create shapefiles
                 # unexpectedly when the user has not provided baseline data.
                 candidates = [
-                    Path(
-                        "src/profcalc/data/required_inputs/ProfileOriginAzimuths.csv"
-                    )
+                    Path("data/reference/baselines/ProfileOriginAzimuths.csv")
                 ]
                 for c in candidates:
                     if c.exists():
@@ -667,21 +677,15 @@ def execute_from_menu() -> None:
                         )
 
                         try:
-                            baselines_raw = load_profile_baselines(
-                                str(baseline_file)
-                            )
-                            baselines = {
-                                str(k): v for k, v in baselines_raw.items()
-                            }
+                            baselines_raw = load_profile_baselines(str(baseline_file))
+                            baselines = {str(k): v for k, v in baselines_raw.items()}
                             convert_fn = convert_2d_to_3d_profile
                         except (OSError, ValueError, KeyError):
                             from profcalc.common.csv_io import (
                                 _load_profile_origin_azimuths,
                             )
 
-                            df = _load_profile_origin_azimuths(
-                                str(baseline_file)
-                            )
+                            df = _load_profile_origin_azimuths(str(baseline_file))
                             baselines = {}
                             for _idx, row in df.iterrows():
                                 baselines[str(row["profile_id"])] = {
@@ -732,8 +736,8 @@ def execute_from_menu() -> None:
                                     continue
 
                         if samples:
-                            crs_obj, crs_label = (
-                                infer_state_plane_crs_from_samples(samples)
+                            crs_obj, crs_label = infer_state_plane_crs_from_samples(
+                                samples
                             )
                             if crs_obj is not None:
                                 try:
@@ -809,9 +813,7 @@ def execute_from_menu() -> None:
                                     e_on = n_on = e_off = n_off = None
 
                             if xon_v is not None:
-                                geom_x = (
-                                    e_on if e_on is not None else float(xon_v)
-                                )
+                                geom_x = e_on if e_on is not None else float(xon_v)
                                 geom_y = n_on if n_on is not None else 0.0
                                 rec_on = {
                                     "geometry": {
@@ -833,11 +835,7 @@ def execute_from_menu() -> None:
                                 dst.write(rec_on)
 
                             if xoff_v is not None:
-                                geom_x = (
-                                    e_off
-                                    if e_off is not None
-                                    else float(xoff_v)
-                                )
+                                geom_x = e_off if e_off is not None else float(xoff_v)
                                 geom_y = n_off if n_off is not None else 0.0
                                 rec_off = {
                                     "geometry": {
@@ -867,11 +865,11 @@ def execute_from_menu() -> None:
 
     if not written_files:
         print("No results to write.")
-        input("\nPress Enter to continue...")
+        notify_and_wait("", prompt="\nPress Enter to continue...")
         return
 
     print("✅ Results written:")
     for p in written_files:
         print(f"   {p}")
 
-    input("\nPress Enter to continue...")
+    notify_and_wait("", prompt="\nPress Enter to continue...")

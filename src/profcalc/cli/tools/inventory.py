@@ -1,3 +1,48 @@
+# =============================================================================
+# Beach Profile Inventory Report Generator
+# =============================================================================
+#
+# FILE: src/profcalc/cli/tools/inventory.py
+#
+# PURPOSE:
+# This tool generates comprehensive inventory reports for BMAP and related
+# beach profile files, providing detailed metadata and statistics about survey
+# data collections. It analyzes file contents to extract profile counts, survey
+# dates, point statistics, elevation ranges, and other key metadata for data
+# management and quality assessment.
+#
+# WHAT IT'S FOR:
+# - Analyzes BMAP and compatible profile data files
+# - Generates detailed inventory reports with file metadata
+# - Provides profile counts, date ranges, and spatial statistics
+# - Supports both single file and batch directory analysis
+# - Offers verbose mode for detailed per-profile breakdowns
+# - Enables data discovery and quality assessment workflows
+# - Supports multiple file selection through graphical dialogs
+#
+# WORKFLOW POSITION:
+# This tool is used in the "Quick Tools" section for data exploration and
+# management. It's typically one of the first tools used when working with
+# new survey datasets, helping users understand what data they have before
+# proceeding to detailed analysis. It's also useful for data validation and
+# quality control processes.
+#
+# LIMITATIONS:
+# - Primarily designed for BMAP format files (may work with similar formats)
+# - Statistical calculations assume standard profile data structure
+# - Directory scanning is recursive and may be slow for large file collections
+# - Report formatting depends on tabulate library for table display
+# - Memory usage scales with number of profiles and file size
+#
+# ASSUMPTIONS:
+# - Input files contain valid beach profile data in supported formats
+# - File system permissions allow reading of selected files and directories
+# - Profile data includes standard fields (X, Z coordinates, dates, etc.)
+# - Users can interpret statistical summaries and metadata reports
+# - Tabulate library is available for report formatting
+#
+# =============================================================================
+
 """Inventory report generator
 
 Generate comprehensive inventory reports for BMAP and related profile
@@ -5,75 +50,20 @@ files. The report includes profile counts, survey dates, point statistics,
 elevation ranges and basic metadata.
 
 Usage examples:
-    - CLI: call the module's CLI entry (if available) or import
-        :func:`generate_inventory_report` directly.
-
-            python -m profcalc.cli.tools.inventory input.bmap -o inventory.txt
-
     - Menu: Quick Tools → Inventory (invokes :func:`execute_from_menu`).
 """
 
-import argparse
 from pathlib import Path
 from typing import Any, Dict, List
 
 from tabulate import tabulate
 
+from profcalc.cli.file_dialogs import select_directory, select_multiple_files
 from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
 from profcalc.cli.quick_tools.quick_tool_utils import (
-    default_output_path,
     timestamped_output_path,
 )
 from profcalc.common.bmap_io import read_bmap_freeformat
-
-
-def execute_from_cli(args: list[str]) -> None:
-    """
-    Execute file inventory from command line.
-
-    Args:
-        args: Command-line arguments (excluding the -i flag)
-    """
-    parser = argparse.ArgumentParser(
-        prog="profcalc -i",
-        description="Generate comprehensive inventory report for BMAP files",
-    )
-    parser.add_argument("file", help="BMAP file to inventory")
-    parser.add_argument(
-        "-o",
-        "--output",
-        required=False,
-        help="Output report file path (default: output_inventory.txt)",
-    )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Include detailed per-profile statistics",
-    )
-
-    parsed_args = parser.parse_args(args)
-
-    # Execute inventory
-    print(f"🔍 Analyzing {parsed_args.file}...")
-    report = generate_inventory_report(
-        parsed_args.file, verbose=parsed_args.verbose
-    )
-
-    # Write output
-    out_path = parsed_args.output
-    if not out_path:
-        out_path = default_output_path(
-            "inventory", parsed_args.file, ext=".txt"
-        )
-    try:
-        Path(out_path).write_text(report, encoding="utf-8")
-        print(f"✅ Inventory report written to: {out_path}")
-    except (OSError, IOError) as e:
-        log_quick_tool_error(
-            "inventory", f"Failed to write inventory report: {e}", e
-        )
-        print(f"❌ Failed to write inventory report: {e}")
 
 
 def generate_inventory_report(file_path: str, verbose: bool = False) -> str:
@@ -135,9 +125,7 @@ def _calculate_file_statistics(
 
     min_elev = min(all_elevations) if all_elevations else 0.0
     max_elev = max(all_elevations) if all_elevations else 0.0
-    avg_elev = (
-        sum(all_elevations) / len(all_elevations) if all_elevations else 0.0
-    )
+    avg_elev = sum(all_elevations) / len(all_elevations) if all_elevations else 0.0
 
     # Calculate X coordinate statistics
     all_x = []
@@ -152,9 +140,7 @@ def _calculate_file_statistics(
     min_points = min(points_per_profile) if points_per_profile else 0
     max_points = max(points_per_profile) if points_per_profile else 0
     avg_points = (
-        sum(points_per_profile) / len(points_per_profile)
-        if points_per_profile
-        else 0
+        sum(points_per_profile) / len(points_per_profile) if points_per_profile else 0
     )
 
     return {
@@ -262,38 +248,70 @@ def execute_from_menu() -> None:
 
     # Get user inputs
     import glob
+    import os
 
-    input_patterns = input(
-        "Enter BMAP/data file path(s) or wildcard(s) (e.g., '*.dat src/profcalc/data/required_inputs/*.bmap'): "
-    ).strip()
+    print("\nSelect files to inventory:")
+    print("1. Select individual files")
+    print("2. Select directories to scan recursively")
+    print("3. Cancel")
+
+    choice = input("\nSelect option [1/2/3]: ").strip()
+
+    all_files = set()
+
+    if choice == "1":
+        # Select multiple individual files
+        selected_files = select_multiple_files("Select BMAP/data files for inventory")
+        if not selected_files:
+            print("❌ No files selected. Exiting.")
+            input("\nPress Enter to continue...")
+            return
+        all_files.update(selected_files)
+
+    elif choice == "2":
+        # Select directories to scan
+        selected_dirs = []
+        while True:
+            dir_path = select_directory("Select directory to scan for BMAP/data files")
+            if not dir_path:
+                break
+            selected_dirs.append(dir_path)
+            if input("Select another directory? (y/N): ").strip().lower() != "y":
+                break
+
+        if not selected_dirs:
+            print("❌ No directories selected. Exiting.")
+            input("\nPress Enter to continue...")
+            return
+
+        # Scan selected directories for common file extensions
+        for dir_path in selected_dirs:
+            # Look for common profile file extensions
+            for ext in ["*.dat", "*.bmap", "*.txt", "*.csv"]:
+                pattern = os.path.join(dir_path, "**", ext)
+                matches = glob.glob(pattern, recursive=True)
+                all_files.update(matches)
+
+    else:
+        print("❌ Cancelled.")
+        input("\nPress Enter to continue...")
+        return
+
+    all_files = sorted(all_files)
+    if not all_files:
+        print("❌ No files found to process. Exiting.")
+        input("\nPress Enter to continue...")
+        return
 
     output_file = timestamped_output_path("inventory", ext=".txt")
 
     verbose_input = (
-        input("Include detailed per-profile information? (y/n) [n]: ")
-        .strip()
-        .lower()
+        input("Include detailed per-profile information? (y/n) [n]: ").strip().lower()
     )
     verbose = verbose_input == "y"
 
-    # Expand wildcards and split input
-    patterns = input_patterns.split()
-    all_files = set()
-    for pattern in patterns:
-        matches = glob.glob(pattern, recursive=True)
-        if not matches:
-            print(f"⚠️  No files matched pattern: {pattern}")
-        all_files.update(matches)
-    all_files = sorted(all_files)
-    if not all_files:
-        print("❌ No files to process. Exiting.")
-        input("\nPress Enter to continue...")
-        return
-
     try:
-        print(
-            f"\n🔄 Generating inventory report for {len(all_files)} file(s)..."
-        )
+        print(f"\n🔄 Generating inventory report for {len(all_files)} file(s)...")
 
         report = generate_inventory_report(all_files, verbose=verbose)
 

@@ -1,3 +1,41 @@
+# =============================================================================
+# BMAP Profile Comparison Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_compare.py
+#
+# PURPOSE:
+# This module provides profile comparison functionality for BMAP analysis,
+# enabling quantitative comparison of two beach profiles within specified
+# cross-shore ranges. It computes elevation differences, volumetric changes,
+# and contour shifts to assess morphological changes between surveys.
+#
+# WHAT IT'S FOR:
+# - Computing elevation differences between paired profiles
+# - Calculating volume changes per unit width within specified ranges
+# - Measuring horizontal shifts of specified contours
+# - Supporting XOn/XOff boundary restrictions for analysis regions
+# - Generating comparison reports with statistical summaries
+#
+# WORKFLOW POSITION:
+# This tool is fundamental to change detection workflows in beach profile
+# monitoring. It's used to quantify morphological changes between surveys,
+# supporting erosion/accretion analysis and shoreline change assessments.
+#
+# LIMITATIONS:
+# - Requires profiles to have overlapping cross-shore ranges
+# - Contour shift calculations depend on contour intersection
+# - Volume calculations assume consistent coordinate systems
+# - XOn/XOff boundaries must be within profile extents
+#
+# ASSUMPTIONS:
+# - Profile pairs represent the same physical cross-section over time
+# - Elevation data is relative to consistent vertical datums
+# - Profile spacing and resolution is adequate for comparison
+# - Users specify meaningful XOn/XOff analysis boundaries
+#
+# =============================================================================
+
 """
 Module: compare_profiles
 Location: profcalc.modules.profiles
@@ -27,9 +65,7 @@ import pandas as pd
 from profcalc.common.config_utils import get_dx
 
 
-def _interp_x_at_contour(
-    profile: pd.DataFrame, contour: float
-) -> float | None:
+def _interp_x_at_contour(profile: pd.DataFrame, contour: float) -> float | None:
     """
     Find the X coordinate where the profile crosses the specified elevation (contour)
     using linear interpolation between adjacent points.

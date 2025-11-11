@@ -40,9 +40,9 @@ This package includes tools for beach profile analysis, beachfill construction m
 
 ## Data files and policy
 
-Generated data and large binary artifacts (CSV outputs, shapefiles, archives) are kept out of source-controlled package code. See `DATA.md` for the data placement and handling policy, how to regenerate outputs, and recommended Git workflows (Git LFS, bundles, backups).
+Generated data and large binary artifacts (CSV outputs, shapefiles, archives) are kept out of source-controlled package code. See `docs/development/DATA.md` for the data placement and handling policy, how to regenerate outputs, and recommended Git workflows (Git LFS, bundles, backups).
 
-See `README_RUN_HELP.md` for details on running scripts and tests.
+See `docs/guides/README_RUN_HELP.md` for details on running scripts and tests.
 
 ## Quick tools: centralized logging and tests
 

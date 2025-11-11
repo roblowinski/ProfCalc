@@ -1,3 +1,44 @@
+# =============================================================================
+# BMAP Least Squares Profile Fitting Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_least_squares.py
+#
+# PURPOSE:
+# This module performs least-squares regression analysis of beach profiles
+# against Dean's equilibrium profile equation. It estimates the Dean A-parameter,
+# correlation coefficient, and corresponding median grain size, providing
+# quantitative assessment of how well observed profiles match theoretical
+# equilibrium morphology.
+#
+# WHAT IT'S FOR:
+# - Fitting observed profiles to Dean's equilibrium equation (h = A * x^(2/3))
+# - Estimating Dean A-parameter from profile shape
+# - Calculating correlation coefficients (R²) for fit quality assessment
+# - Deriving median grain size from fitted A-parameter
+# - Supporting XOn/XOff range restrictions for fitting
+# - Generating fitted profiles and statistical reports
+#
+# WORKFLOW POSITION:
+# This tool is used in profile analysis to assess beach equilibrium state
+# and sediment characteristics. It helps determine whether profiles represent
+# equilibrium conditions and provides estimates of sediment size based on
+# profile shape.
+#
+# LIMITATIONS:
+# - Assumes Dean's equilibrium theory is applicable
+# - Fit quality depends on profile range selection
+# - Grain size estimation is indirect and approximate
+# - Requires sufficient profile data within fitting range
+#
+# ASSUMPTIONS:
+# - Profile shape follows Dean's equilibrium relationship
+# - Selected XOn/XOff range represents equilibrium profile segment
+# - Sediment is well-sorted and representative of Dean's assumptions
+# - Profile data is accurate and covers appropriate cross-shore range
+#
+# =============================================================================
+
 """
 Module: least_squares
 Location: profcalc.modules.profiles
@@ -58,9 +99,7 @@ def compute_least_squares(
     # --- Subset profile within range ---
     prof = profile[(profile["X"] >= xon) & (profile["X"] <= xoff)].copy()
     if len(prof) < 3:
-        raise ValueError(
-            "Not enough points within Xon/Xoff range for regression."
-        )
+        raise ValueError("Not enough points within Xon/Xoff range for regression.")
 
     x = np.array(prof["X"], dtype=float)
     z = np.array(prof["Z"], dtype=float)
@@ -89,9 +128,7 @@ def compute_least_squares(
     sum_xy = np.sum(X * Y)
 
     slope = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x**2)
-    intercept = (
-        sum_y - slope * sum_x
-    ) / n  # not used, included for completeness
+    intercept = (sum_y - slope * sum_x) / n  # not used, included for completeness
 
     # --- A-parameter and correlation ---
     A = slope ** (2.0 / 3.0)

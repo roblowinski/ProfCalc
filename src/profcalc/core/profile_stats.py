@@ -1,3 +1,44 @@
+# =============================================================================
+# Profile Statistics and Geometric Calculations Module
+# =============================================================================
+#
+# FILE: src/profcalc/core/profile_stats.py
+#
+# PURPOSE:
+# This module provides comprehensive statistical and geometric analysis
+# functions for beach profile data. It calculates key morphological
+# characteristics including slopes, berm widths, elevation statistics,
+# and spatial relationships that are essential for understanding beach
+# morphology and morphodynamic state.
+#
+# WHAT IT'S FOR:
+# - Computing profile length and point spacing statistics
+# - Calculating elevation statistics (min, max, mean, std)
+# - Determining beach face slopes from profile segments
+# - Detecting and measuring berm widths
+# - Finding common spatial ranges across multiple profiles
+# - Identifying low-slope segments in profile data
+#
+# WORKFLOW POSITION:
+# This module is fundamental to profile analysis workflows, providing the
+# quantitative metrics that characterize beach morphology. It's used
+# throughout the analysis pipeline to extract meaningful statistics from
+# raw profile data for reporting and decision-making.
+#
+# LIMITATIONS:
+# - Slope calculations assume linear segments between points
+# - Berm detection relies on MHW elevation thresholds
+# - Statistical calculations sensitive to data quality and outliers
+# - Geometric calculations assume 2D profile representation
+#
+# ASSUMPTIONS:
+# - Profile points are ordered by cross-shore distance
+# - Elevation data is consistent and properly referenced
+# - MHW elevations are accurately specified
+# - Profile data represents continuous beach morphology
+#
+# =============================================================================
+
 """
 Profile statistics and geometric calculations module.
 
@@ -182,9 +223,7 @@ def calculate_common_ranges(
                 )
 
                 # Data completeness
-                surveyed_range = (
-                    max(max_xs) - min(min_xs) if max_xs and min_xs else 0.0
-                )
+                surveyed_range = max(max_xs) - min(min_xs) if max_xs and min_xs else 0.0
                 common_range_length = xmax_common - xmin_common
                 completeness = (
                     (common_range_length / surveyed_range) * 100
@@ -221,9 +260,7 @@ def calculate_common_ranges(
 
                 if mhw_elev is not None:
                     berm_width = calculate_berm_width(all_points, mhw_elev)
-                    beach_face_slope = calculate_beach_face_slope(
-                        all_points, mhw_elev
-                    )
+                    beach_face_slope = calculate_beach_face_slope(all_points, mhw_elev)
                     beach_type = classify_beach_type(beach_face_slope)
 
                 common_ranges[profile_name] = (

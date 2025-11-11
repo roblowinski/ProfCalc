@@ -1,3 +1,45 @@
+# =============================================================================
+# Coordinate Transformation and Baseline Management Utilities
+# =============================================================================
+#
+# FILE: src/profcalc/common/coordinate_transforms.py
+#
+# PURPOSE:
+# This module provides comprehensive coordinate transformation functionality
+# for beach profile analysis, handling conversions between different coordinate
+# systems commonly used in coastal engineering. It manages the complex
+# transformations between geographic coordinates, profile-relative coordinates,
+# and baseline-based systems.
+#
+# WHAT IT'S FOR:
+# - Transforms 3D survey points (X, Y, Z) to 2D profile coordinates
+# - Converts geographic/projected coordinates to profile-relative distances
+# - Manages profile baseline definitions and calculations
+# - Handles azimuth-based transformations for shoreline orientation
+# - Supports batch processing of multiple profiles and points
+# - Provides accurate geometric calculations for coastal analysis
+#
+# WORKFLOW POSITION:
+# This module is fundamental to beach profile analysis, as it handles the
+# coordinate transformations that convert raw survey data into meaningful
+# profile representations. It's used whenever profile data needs to be
+# analyzed in cross-shore vs. elevation space rather than geographic coordinates.
+#
+# LIMITATIONS:
+# - Requires accurate baseline definitions (origin points and azimuths)
+# - Assumes planar geometry (may not be suitable for very large areas)
+# - Coordinate transformations depend on consistent coordinate systems
+# - Complex geometries may require multiple baseline segments
+#
+# ASSUMPTIONS:
+# - Coordinate systems are consistent and properly referenced
+# - Baseline azimuths are accurately measured and specified
+# - Profile geometries can be represented by straight baselines
+# - Elevation data is relative to appropriate vertical datums
+# - Users understand coordinate system transformations
+#
+# =============================================================================
+
 """
 Coordinate Transformation Utilities
 
@@ -215,9 +257,7 @@ def batch_transform_profiles_to_2d(
 
     for profile in profiles:
         try:
-            transformed = transform_profile_to_2d(
-                profile, origin_x, origin_y, azimuth
-            )
+            transformed = transform_profile_to_2d(profile, origin_x, origin_y, azimuth)
             transformed_profiles.append(transformed)
         except BeachProfileError as e:
             logger = get_logger(LogComponent.SPATIAL)
@@ -259,9 +299,7 @@ def estimate_profile_baseline(
     # Calculate azimuth from principal component
     # Principal component gives direction vector
     dx, dy = principal_component
-    azimuth = np.degrees(
-        np.arctan2(dx, dy)
-    )  # atan2(dx, dy) gives angle from north
+    azimuth = np.degrees(np.arctan2(dx, dy))  # atan2(dx, dy) gives angle from north
 
     # Ensure azimuth is between 0 and 360
     if azimuth < 0:
@@ -301,9 +339,7 @@ def load_profile_baselines(
     required_cols = ["profile_name", "x0", "y0", "azimuth"]
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
-        raise ValueError(
-            f"Baseline file missing required columns: {missing_cols}"
-        )
+        raise ValueError(f"Baseline file missing required columns: {missing_cols}")
 
     baselines = {}
     for _, row in df.iterrows():
@@ -495,9 +531,7 @@ def batch_transform_profiles_to_3d(
 
     for profile in profiles:
         try:
-            transformed = transform_profile_to_3d(
-                profile, origin_x, origin_y, azimuth
-            )
+            transformed = transform_profile_to_3d(profile, origin_x, origin_y, azimuth)
             transformed_profiles.append(transformed)
         except BeachProfileError as e:
             logger = get_logger(LogComponent.SPATIAL)

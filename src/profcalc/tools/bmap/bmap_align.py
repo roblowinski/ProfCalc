@@ -1,3 +1,42 @@
+# =============================================================================
+# BMAP Profile Alignment Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_align.py
+#
+# PURPOSE:
+# This module provides profile alignment functionality for BMAP analysis,
+# allowing horizontal alignment of beach profiles at specified reference
+# elevations. It's essential for comparing profiles that may have been
+# surveyed at different horizontal positions or need to be aligned for
+# accurate morphological comparison.
+#
+# WHAT IT'S FOR:
+# - Horizontally aligning target profiles to reference profiles at specified elevations
+# - Finding intersection points where profiles cross reference elevations
+# - Supporting manual override of computed alignment positions
+# - Enabling accurate profile comparisons by removing horizontal offsets
+#
+# WORKFLOW POSITION:
+# This tool is used in profile comparison workflows when profiles need to
+# be aligned before analysis. It's particularly important for comparing
+# surveys taken at different times or by different methods that may have
+# horizontal positioning variations.
+#
+# LIMITATIONS:
+# - Requires profiles to cross the reference elevation
+# - Assumes linear interpolation between profile points is adequate
+# - Manual X_ref override may not be physically meaningful
+# - Alignment assumes profiles represent the same physical location
+#
+# ASSUMPTIONS:
+# - Reference elevation is meaningful for alignment (e.g., MHW, MSL)
+# - Profile data is sorted by cross-shore distance
+# - Alignment corrections are small relative to profile length
+# - Users understand the implications of horizontal profile shifts
+#
+# =============================================================================
+
 """
 Module: align_profiles
 Location: profcalc.modules.profiles

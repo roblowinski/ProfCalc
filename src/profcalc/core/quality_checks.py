@@ -1,3 +1,41 @@
+# =============================================================================
+# Data Quality Assessment Module for Coastal Profiles
+# =============================================================================
+#
+# FILE: src/profcalc/core/quality_checks.py
+#
+# PURPOSE:
+# This module provides data quality assessment functions for beach profile
+# data, detecting issues that could affect analysis accuracy. It identifies
+# gaps in survey coverage and statistical outliers that may indicate data
+# collection problems or environmental anomalies.
+#
+# WHAT IT'S FOR:
+# - Detecting gaps in profile survey data coverage
+# - Identifying elevation outliers using statistical methods
+# - Assessing data quality for reliable analysis results
+# - Providing quality metrics for profile comparison workflows
+#
+# WORKFLOW POSITION:
+# This module is used in data validation and preprocessing workflows to
+# ensure data quality before performing analysis. It helps identify profiles
+# that may need additional surveying or data cleaning before inclusion in
+# comparative analyses.
+#
+# LIMITATIONS:
+# - Gap detection depends on expected point spacing assumptions
+# - Outlier detection uses statistical thresholds that may not suit all data
+# - Quality assessment is automated and may miss contextual issues
+# - Requires common range statistics for effective gap detection
+#
+# ASSUMPTIONS:
+# - Profile data follows expected spatial sampling patterns
+# - Outliers represent data quality issues rather than real features
+# - Common range statistics accurately represent expected data density
+# - Users will review flagged issues before proceeding with analysis
+#
+# =============================================================================
+
 """
 Data quality assessment module for coastal profiles.
 
@@ -136,9 +174,7 @@ def detect_gaps_and_outliers(
 
         # Detect elevation outliers using modified IQR method (less sensitive)
         elevations = [p[1] for p in sorted_points]
-        if (
-            len(elevations) >= 10
-        ):  # Need more points for reliable outlier detection
+        if len(elevations) >= 10:  # Need more points for reliable outlier detection
             # Calculate IQR for outlier detection (more conservative for coastal profiles)
             q1 = np.percentile(elevations, 25)
             q3 = np.percentile(elevations, 75)

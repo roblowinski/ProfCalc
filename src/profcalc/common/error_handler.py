@@ -140,9 +140,7 @@ class StructuredLogger:
     monitoring, debugging, and analytics. Compatible with standard logging.Logger interface.
     """
 
-    def __init__(
-        self, component: LogComponent, base_logger: logging.Logger
-    ) -> None:
+    def __init__(self, component: LogComponent, base_logger: logging.Logger) -> None:
         """Initialize the structured logger for a specific component.
 
         This method creates a new StructuredLogger instance that wraps a standard
@@ -227,9 +225,7 @@ class StructuredLogger:
             >>> logger.debug("Query execution time", {"query": "SELECT * FROM profiles", "time_ms": 150})
         """
         if self.base_logger.isEnabledFor(logging.DEBUG):
-            structured_msg = self._format_structured_message(
-                "DEBUG", message, extra
-            )
+            structured_msg = self._format_structured_message("DEBUG", message, extra)
             self.base_logger.debug(structured_msg)
 
     def info(self, message: str, extra: dict[str, Any] | None = None) -> None:
@@ -254,14 +250,10 @@ class StructuredLogger:
             >>> logger.info("API request processed", {"endpoint": "/profiles", "method": "GET", "status": 200})
         """
         if self.base_logger.isEnabledFor(logging.INFO):
-            structured_msg = self._format_structured_message(
-                "INFO", message, extra
-            )
+            structured_msg = self._format_structured_message("INFO", message, extra)
             self.base_logger.info(structured_msg)
 
-    def warning(
-        self, message: str, extra: dict[str, Any] | None = None
-    ) -> None:
+    def warning(self, message: str, extra: dict[str, Any] | None = None) -> None:
         """Log a warning message with structured format.
 
         This method logs a message at the WARNING level using structured JSON formatting.
@@ -283,9 +275,7 @@ class StructuredLogger:
             >>> logger.warning("Invalid coordinate format detected", {"field": "latitude", "value": "91.5"})
         """
         if self.base_logger.isEnabledFor(logging.WARNING):
-            structured_msg = self._format_structured_message(
-                "WARNING", message, extra
-            )
+            structured_msg = self._format_structured_message("WARNING", message, extra)
             self.base_logger.warning(structured_msg)
 
     def error(self, message: str, extra: dict[str, Any] | None = None) -> None:
@@ -311,14 +301,10 @@ class StructuredLogger:
             >>> logger.error("Database connection failed", {"error_code": "ECONNREFUSED", "host": "localhost"})
         """
         if self.base_logger.isEnabledFor(logging.ERROR):
-            structured_msg = self._format_structured_message(
-                "ERROR", message, extra
-            )
+            structured_msg = self._format_structured_message("ERROR", message, extra)
             self.base_logger.error(structured_msg)
 
-    def critical(
-        self, message: str, extra: dict[str, Any] | None = None
-    ) -> None:
+    def critical(self, message: str, extra: dict[str, Any] | None = None) -> None:
         """Log a critical message with structured format.
 
         This method logs a message at the CRITICAL level using structured JSON formatting.
@@ -340,9 +326,7 @@ class StructuredLogger:
             >>> logger.critical("Database connection lost", {"error_code": "ECONNLOST", "attempts": 5})
         """
         if self.base_logger.isEnabledFor(logging.CRITICAL):
-            structured_msg = self._format_structured_message(
-                "CRITICAL", message, extra
-            )
+            structured_msg = self._format_structured_message("CRITICAL", message, extra)
             self.base_logger.critical(structured_msg)
 
     def log(self, level: int, message: str, *args: Any, **kwargs: Any) -> None:
@@ -525,9 +509,7 @@ class StructuredLogger:
             **(extra or {}),
         }
         # Use the StructuredLogger's info method for performance messages
-        self.info(
-            f"Performance: {operation}", extra={"performance": perf_data}
-        )
+        self.info(f"Performance: {operation}", extra={"performance": perf_data})
 
     def audit(
         self,
@@ -748,9 +730,7 @@ class BeachProfileLogger:
         # Component loggers cache
         self._component_loggers: dict[LogComponent, StructuredLogger] = {}
 
-    def get_component_logger(
-        self, component: LogComponent
-    ) -> StructuredLogger:
+    def get_component_logger(self, component: LogComponent) -> StructuredLogger:
         """Get a component-specific structured logger instance.
 
         This method returns a StructuredLogger for the specified component,
@@ -1017,9 +997,7 @@ class ErrorHandler:
         # Component loggers for different types of operations
         self._component_loggers: dict[LogComponent, StructuredLogger] = {}
 
-    def get_component_logger(
-        self, component: LogComponent
-    ) -> StructuredLogger:
+    def get_component_logger(self, component: LogComponent) -> StructuredLogger:
         """Get a component-specific logger for general logging operations.
 
         This method returns a StructuredLogger for the specified component,
@@ -1339,9 +1317,7 @@ class ErrorHandler:
             "duration_ms": round(duration * 1000, 2),
             **(extra or {}),
         }
-        self.log_info(
-            f"Performance: {operation}", extra={"performance": perf_data}
-        )
+        self.log_info(f"Performance: {operation}", extra={"performance": perf_data})
 
     def audit(
         self,

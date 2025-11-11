@@ -1,3 +1,43 @@
+# =============================================================================
+# BMAP Volume Between Xon/Xoff Boundaries Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_vol_xon_xoff.py
+#
+# PURPOSE:
+# This module replicates BMAP's "Volume from Xon to Xoff" tool, computing
+# sediment volumes within specified cross-shore boundaries relative to a
+# reference elevation. It provides precise volumetric calculations for defined
+# profile segments, supporting detailed analysis of beach morphology and
+# sediment distribution.
+#
+# WHAT IT'S FOR:
+# - Calculating sediment volumes within specified cross-shore ranges
+# - Computing volumes above reference elevations between Xon/Xoff boundaries
+# - Supporting detailed volumetric analysis for beach segments
+# - Providing BMAP-compatible volume reports with statistical summaries
+# - Enabling precise volume calculations for management applications
+#
+# WORKFLOW POSITION:
+# This tool is used in detailed volumetric analysis workflows when specific
+# cross-shore ranges need to be analyzed separately. It's essential for
+# targeted assessments of beach segments, nourishment projects, and
+# morphological monitoring programs.
+#
+# LIMITATIONS:
+# - Requires accurate Xon/Xoff boundary specification
+# - Volume calculations depend on reference elevation choice
+# - Flat extension beyond profile limits may not be physically accurate
+# - Integration accuracy depends on grid spacing selection
+#
+# ASSUMPTIONS:
+# - Xon/Xoff boundaries define meaningful analysis regions
+# - Reference elevation is appropriate for volume calculations
+# - Profile data covers or can be extended to boundary regions
+# - Flat extension is acceptable for regions beyond profile extent
+#
+# =============================================================================
+
 """
 volume_xon_xoff.py
 ------------------
@@ -26,6 +66,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from typing import Any, Dict
 
 import numpy as np
 
@@ -35,7 +76,7 @@ from profcalc.common.error_handler import LogComponent, get_logger
 from profcalc.common.io_reports import write_volume_report
 
 
-def _extend_or_interp(x, z, xq):
+def _extend_or_interp(x: np.ndarray, z: np.ndarray, xq: float) -> float:
     """Interpolate within bounds or flat-extend beyond."""
     x, z = np.array(x), np.array(z)
     idx = np.argsort(x)
@@ -48,13 +89,13 @@ def _extend_or_interp(x, z, xq):
 
 
 def compute_volume_xon_xoff(
-    profile,
-    xon,
-    xoff,
-    zref,
+    profile: Any,
+    xon: float,
+    xoff: float,
+    zref: float,
     dx: float = 10.0,
     outofbounds_policy: str = "extend",
-):
+) -> Dict[str, float | None] | None:
     """Compute volume between user-specified Xon/Xoff and above Zref.
     outofbounds_policy: 'extend' (flat), 'clip' (adjust), 'skip' (remove)"""
     x, z = np.array(profile.x), np.array(profile.z)
@@ -79,7 +120,7 @@ def compute_volume_xon_xoff(
             }
 
     # Policy 1: extend (default, flat extension)
-    def interp_or_flat(x, z, xq):
+    def interp_or_flat(x: np.ndarray, z: np.ndarray, xq: float) -> float:
         if xq <= x[0]:
             return z[0]
         if xq >= x[-1]:
@@ -167,15 +208,11 @@ def compute_volume_xon_xoff(
     }
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(description="BMAP-style Volume from Xon–Xoff")
     ap.add_argument("--input", required=True, help="BMAP Free Format file")
-    ap.add_argument(
-        "--xon", type=float, required=True, help="Landward limit (ft)"
-    )
-    ap.add_argument(
-        "--xoff", type=float, required=True, help="Seaward limit (ft)"
-    )
+    ap.add_argument("--xon", type=float, required=True, help="Landward limit (ft)")
+    ap.add_argument("--xoff", type=float, required=True, help="Seaward limit (ft)")
     ap.add_argument(
         "--zref",
         type=float,

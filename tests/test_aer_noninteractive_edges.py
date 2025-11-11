@@ -11,7 +11,12 @@ from profcalc.cli.tools.data import session as data_session
 
 
 def _data_file(name: str) -> Path:
-    return Path(__file__).resolve().parents[1].joinpath("data", "temp", name)
+    return (
+        Path(__file__)
+        .resolve()
+        .parents[1]
+        .joinpath("data", "samples", "format_examples", name)
+    )
 
 
 def test_missing_files_raise_file_not_found():
@@ -35,7 +40,9 @@ def test_profile_name_fallback_to_first():
     res_name = compute_aer_noninteractive(
         data_file, data_file, profile_before="NON_EXISTENT_NAME", profile_after=0
     )
-    res_index0 = compute_aer_noninteractive(data_file, data_file, profile_before=0, profile_after=0)
+    res_index0 = compute_aer_noninteractive(
+        data_file, data_file, profile_before=0, profile_after=0
+    )
     # Numeric fields should be equal when fallback occurs
     assert pytest.approx(res_name["all_cuyd_per_ft"]) == res_index0["all_cuyd_per_ft"]
 

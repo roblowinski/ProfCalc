@@ -1,3 +1,42 @@
+# =============================================================================
+# Error Handling Compatibility Shim Module
+# =============================================================================
+#
+# FILE: src/profcalc/common/error_handling.py
+#
+# PURPOSE:
+# This module provides backwards compatibility for code that imports from
+# the old error_handling module name. It serves as a shim that re-exports
+# all functionality from the consolidated error_handler module, ensuring
+# existing code continues to work during the migration period.
+#
+# WHAT IT'S FOR:
+# - Maintaining backwards compatibility during module consolidation
+# - Re-exporting all public functions from error_handler module
+# - Providing legacy validation helpers that may be missing
+# - Ensuring smooth transition for tests and third-party code
+# - Allowing gradual migration away from old import paths
+#
+# WORKFLOW POSITION:
+# This module exists temporarily during the refactoring process. It allows
+# the codebase to evolve while maintaining compatibility. Once all imports
+# have been updated to use the new error_handler module, this shim can be
+# removed entirely.
+#
+# LIMITATIONS:
+# - This is a temporary compatibility layer, not permanent code
+# - Broad re-exports may hide import issues
+# - Legacy validation helpers are minimal implementations
+# - Should be removed once migration is complete
+#
+# ASSUMPTIONS:
+# - The error_handler module contains all the needed functionality
+# - __all__ is properly defined in the consolidated module
+# - Legacy code uses standard import patterns
+# - Migration will eventually eliminate the need for this shim
+#
+# =============================================================================
+
 """Compatibility shim: re-export everything from ``error_handler``.
 
 The package previously exposed helpers from a module named
@@ -35,9 +74,7 @@ __all__ = list(_public)
 if "check_array_lengths" not in globals():
     from typing import List, Optional
 
-    def check_array_lengths(
-        *arrays, names: Optional[List[str]] = None
-    ) -> None:
+    def check_array_lengths(*arrays, names: Optional[List[str]] = None) -> None:
         """Ensure all provided arrays have the same length.
 
         This is a lightweight backport of the historical helper used by many
@@ -52,9 +89,7 @@ if "check_array_lengths" not in globals():
 
         for i, array in enumerate(arrays[1:], 1):
             if len(array) != first_length:
-                array_name = (
-                    names[i] if names and len(names) > i else f"array_{i}"
-                )
+                array_name = names[i] if names and len(names) > i else f"array_{i}"
                 _exc = getattr(_error_handler, "ValidationError", None)
                 if _exc is None:
                     _exc = getattr(_error_handler, "BeachProfileError")

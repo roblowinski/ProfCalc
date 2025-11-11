@@ -1,3 +1,44 @@
+# =============================================================================
+# Shapefile I/O Module for GIS Beach Profile Data
+# =============================================================================
+#
+# FILE: src/profcalc/common/shapefile_io.py
+#
+# PURPOSE:
+# This module provides comprehensive GIS shapefile input/output functionality
+# for beach profile data, enabling integration with ArcGIS, QGIS, and other
+# GIS software. It handles the conversion between internal profile data
+# structures and standard GIS formats for spatial analysis and visualization.
+#
+# WHAT IT'S FOR:
+# - Exporting survey points as 3D point shapefiles (PointZ)
+# - Exporting profile lines as 3D polyline shapefiles (PolyLineZ)
+# - Reading point shapefiles and converting to profile data
+# - Reading line shapefiles and extracting profile geometry
+# - Validating shapefile export requirements and baseline data
+# - Handling coordinate transformations for GIS compatibility
+#
+# WORKFLOW POSITION:
+# This module is used for GIS integration and data exchange workflows. It
+# allows beach profile data to be exported to standard GIS formats for
+# spatial analysis, mapping, and integration with other geospatial datasets.
+#
+# LIMITATIONS:
+# - Requires geopandas and shapely libraries (optional dependencies)
+# - Limited to ESRI shapefile format (not other GIS formats)
+# - Requires baseline data for accurate geographic positioning
+# - Coordinate system assumptions may need validation
+# - Memory usage for large shapefile operations
+#
+# ASSUMPTIONS:
+# - Geopandas and shapely are installed for GIS functionality
+# - Baseline coordinates and azimuths are accurate
+# - Coordinate systems are compatible with target GIS software
+# - Shapefile size limits are not exceeded
+# - Users understand GIS coordinate system requirements
+#
+# =============================================================================
+
 """
 Shapefile input/output for coastal profile data.
 
@@ -45,9 +86,7 @@ def _ensure_geopandas() -> None:
         import geopandas as _gpd  # type: ignore
         from shapely.geometry import LineString as _LineString  # type: ignore
         from shapely.geometry import Point as _Point
-    except (
-        ImportError
-    ) as e:  # keep broad catch here to propagate import issues
+    except ImportError as e:  # keep broad catch here to propagate import issues
         GEOPANDAS_AVAILABLE = False
         raise ImportError(
             "Shapefile export requires the 'geopandas' and 'shapely' libraries.\n"
@@ -123,8 +162,7 @@ def write_survey_points_shapefile(
     # Validate profiles have Y coordinates
     for profile in profiles:
         if profile.metadata is None or (
-            "y" not in profile.metadata
-            and "y_coordinates" not in profile.metadata
+            "y" not in profile.metadata and "y_coordinates" not in profile.metadata
         ):
             raise ValueError(
                 f"Profile '{profile.name}' missing Y coordinates.\n"
@@ -153,9 +191,7 @@ def write_survey_points_shapefile(
             continue
 
         # Get Y coordinates - check both 'y' and 'y_coordinates' keys
-        y_coords = profile.metadata.get("y") or profile.metadata.get(
-            "y_coordinates"
-        )
+        y_coords = profile.metadata.get("y") or profile.metadata.get("y_coordinates")
         if y_coords is None:
             continue
 
@@ -183,9 +219,7 @@ def write_survey_points_shapefile(
 
             # Add standard attributes
             attributes["profile_id"].append(profile.name)
-            attributes["survey_dat"].append(
-                str(profile.date) if profile.date else ""
-            )
+            attributes["survey_dat"].append(str(profile.date) if profile.date else "")
             attributes["point_num"].append(idx + 1)
 
             # Calculate cross-shore distance from origin if available
@@ -344,9 +378,7 @@ def write_profile_lines_shapefile(
 
         # Populate attributes
         attributes["profile_id"].append(profile.name)
-        attributes["survey_dat"].append(
-            str(profile.date) if profile.date else ""
-        )
+        attributes["survey_dat"].append(str(profile.date) if profile.date else "")
         attributes["azimuth"].append(azimuth_deg)
         attributes["length_ft"].append(float(max(profile.x)))
         attributes["num_vertic"].append(len(coords_3d))
@@ -445,15 +477,12 @@ def validate_shapefile_export_requirements(
     missing_y = []
     for profile in profiles:
         if profile.metadata is None or (
-            "y" not in profile.metadata
-            and "y_coordinates" not in profile.metadata
+            "y" not in profile.metadata and "y_coordinates" not in profile.metadata
         ):
             missing_y.append(profile.name)
 
     if missing_y:
-        extra = (
-            f" ... and {len(missing_y) - 5} more" if len(missing_y) > 5 else ""
-        )
+        extra = f" ... and {len(missing_y) - 5} more" if len(missing_y) > 5 else ""
         issues.append(
             f"⚠️  {len(missing_y)} profile(s) missing Y coordinates:\n"
             f"   {', '.join(missing_y[:5])}{extra}\n   Cannot create point shapefile for these profiles"
@@ -537,9 +566,7 @@ def read_point_shapefile(shapefile_path: Path) -> List[Profile]:
                 x, y = geom.x, geom.y
                 z = row.get(
                     "Z",
-                    row.get(
-                        "z", row.get("elevation", row.get("Elevation", 0.0))
-                    ),
+                    row.get("z", row.get("elevation", row.get("Elevation", 0.0))),
                 )
 
             points.append((x, y, z))
@@ -638,9 +665,9 @@ def read_line_shapefile(shapefile_path: Path) -> List[Profile]:
             # LineString - try to get Z from attributes or set to 0
             x_coords = [c[0] for c in coords]
             y_coords = [c[1] for c in coords]
-            z_coords = [
-                row.get("Z", row.get("z", row.get("elevation", 0.0)))
-            ] * len(coords)
+            z_coords = [row.get("Z", row.get("z", row.get("elevation", 0.0)))] * len(
+                coords
+            )
 
         # Create profile
         profile = Profile(

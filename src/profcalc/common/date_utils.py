@@ -1,3 +1,46 @@
+# =============================================================================
+# Date Parsing, Formatting, and Validation Utilities
+# =============================================================================
+#
+# FILE: src/profcalc/common/date_utils.py
+#
+# PURPOSE:
+# This module provides comprehensive date and time handling utilities for
+# beach profile analysis, supporting both absolute and relative date parsing,
+# timezone management, and date range operations. It's designed to handle
+# the diverse date formats encountered in survey data and temporal analysis.
+#
+# WHAT IT'S FOR:
+# - Parsing various date string formats (ISO8601, relative dates like "30d")
+# - Calculating relative dates from base dates with offset strings
+# - Validating date ranges and checking if dates fall within ranges
+# - Converting between timezone-aware and naive datetime objects
+# - Formatting datetimes to strings with custom formats
+# - Safe datetime conversion with error handling
+# - Parsing date ranges from string specifications
+#
+# WORKFLOW POSITION:
+# This module is fundamental to temporal data handling throughout the beach
+# profile analysis system. It's used during data import to parse survey dates,
+# during analysis for date range filtering, and for displaying temporal
+# information to users in various formats.
+#
+# LIMITATIONS:
+# - Relative date parsing limited to days, months, years
+# - Timezone handling depends on system timezone configuration
+# - Date range parsing assumes specific string formats
+# - Month/year calculations don't account for variable month lengths
+# - ISO8601 parsing may not handle all edge cases
+#
+# ASSUMPTIONS:
+# - Input date strings follow expected formats or are relative offsets
+# - Users understand relative date notation (30d, 6m, 1y)
+# - System timezone is properly configured for local time operations
+# - Date ranges are specified in logical order (start before end)
+# - Datetime precision requirements are met by standard Python datetime
+#
+# =============================================================================
+
 """
 Date parsing, formatting, and validation utilities for general use.
 
@@ -149,9 +192,7 @@ def now_local() -> datetime:
 # ---------------------------------------------------------------------------
 
 
-def to_datetime_safe(
-    date_str: str, tz: Optional[timezone] = None
-) -> datetime | None:
+def to_datetime_safe(date_str: str, tz: Optional[timezone] = None) -> datetime | None:
     """Safely convert a date string to a datetime, returning None on failure."""
     try:
         return parse_date(date_str, tz=tz)

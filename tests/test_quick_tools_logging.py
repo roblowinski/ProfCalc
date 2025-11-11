@@ -26,7 +26,9 @@ def test_assign_logs_no_input(tmp_path):
     logging.getLogger("profcalc.quick_tools").handlers.clear()
 
     # Call execute_from_cli with a pattern that matches nothing
-    assign.execute_from_cli(["NO_FILES_MATCHING_PATTERN_*.none"])  # should log and return
+    assign.execute_from_cli(
+        ["NO_FILES_MATCHING_PATTERN_*.none"]
+    )  # should log and return
 
     assert log_file.exists(), "Log file was not created for assign"
     content = log_file.read_text(encoding="utf-8")

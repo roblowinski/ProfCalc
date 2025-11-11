@@ -1,3 +1,42 @@
+# =============================================================================
+# Menu Testing Script
+# =============================================================================
+#
+# FILE: scripts/run_menu.py
+#
+# PURPOSE:
+# This script provides a standalone execution environment for testing individual
+# menu functions from the profcalc.cli.menu_system module. It allows developers
+# and testers to exercise specific menu components without launching the full
+# application, enabling focused testing and debugging of menu functionality.
+#
+# WHAT IT'S FOR:
+# - Testing individual menu functions in isolation
+# - Debugging menu system components during development
+# - Validating menu behavior without full application startup
+# - Quick verification of menu system changes
+# - Supporting automated testing of menu workflows
+#
+# WORKFLOW POSITION:
+# This script is used during development and testing phases to validate menu
+# system functionality. It sits outside the main application workflow but
+# provides essential testing capabilities for menu components that are used
+# throughout the application.
+#
+# LIMITATIONS:
+# - Requires menu functions to be properly defined in menu_system module
+# - Does not provide full application context or state management
+# - Limited error handling compared to full application environment
+# - May not capture all integration issues between menu components
+#
+# ASSUMPTIONS:
+# - Menu functions are properly imported and available in menu_system
+# - System has necessary dependencies for menu execution
+# - User has appropriate permissions for menu operations
+# - Terminal environment supports interactive menu display
+#
+# =============================================================================
+
 """Run an individual menu from `profcalc.cli.menu_system` for interactive testing.
 
 Usage:

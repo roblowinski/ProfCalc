@@ -1,3 +1,47 @@
+# =============================================================================
+# Annual Erosion Rate (AER) Calculation Engine
+# =============================================================================
+#
+# FILE: src/profcalc/core/aer.py
+#
+# PURPOSE:
+# This module implements the core computational logic for calculating Annual
+# Erosion Rates (AER) from beach profile survey data. It provides precise
+# algorithms for comparing two cross-shore profiles, computing volume changes,
+# and deriving erosion/accretion rates over time periods.
+#
+# WHAT IT'S FOR:
+# - Computes volume changes between paired beach profile surveys
+# - Calculates cut (erosion) and fill (accretion) volumes separately
+# - Derives Annual Erosion Rates in cubic yards per foot per year
+# - Handles profile interpolation to common cross-shore grids
+# - Provides both net and directional volume change metrics
+# - Supports time-based rate calculations when survey dates are provided
+#
+# WORKFLOW POSITION:
+# This module sits at the heart of annual monitoring workflows in ProfCalc.
+# It's used by the annual monitoring tools to analyze shoreline change over
+# time, providing quantitative metrics for coastal management decisions.
+# The calculations here form the basis for erosion rate assessments and
+# beach management planning.
+#
+# LIMITATIONS:
+# - Requires paired profile surveys with consistent cross-shore coordinates
+# - Assumes profiles represent the same physical location over time
+# - Interpolation accuracy depends on profile point density and spacing
+# - Volume calculations assume consistent coordinate systems and datums
+# - Time-based rates require accurate survey date information
+#
+# ASSUMPTIONS:
+# - Input profiles have consistent coordinate systems and units
+# - Profile pairs represent the same physical cross-shore transect
+# - Elevation data is relative to a consistent vertical datum
+# - Profile spacing and point density is adequate for interpolation
+# - Time intervals between surveys are appropriate for annual rate calculations
+# - Users understand the sign conventions for cut/fill calculations
+#
+# =============================================================================
+
 """Annual Erosion Rate (AER) utilities.
 
 This module computes volume change between two
@@ -19,6 +63,7 @@ Notes on sign convention:
 This module is intentionally small and well-typed so it can be reused by
 CLI/menu code and unit tests.
 """
+
 from __future__ import annotations
 
 import datetime as _dt
@@ -190,7 +235,9 @@ def calculate_aer(
         aer_cuyd_per_ft_per_yr: AER (signed) or NaN when dates are missing
 
     """
-    x_common, z1i, z2i = interpolate_to_common_grid(x_before, z_before, x_after, z_after, dx=dx)
+    x_common, z1i, z2i = interpolate_to_common_grid(
+        x_before, z_before, x_after, z_after, dx=dx
+    )
 
     vols = cut_fill_per_ft(x_common, z1i, z2i, use_bmap_core=use_bmap_core)
 

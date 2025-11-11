@@ -1,50 +1,46 @@
-"""
-Input File Summaries for Coastal Profile Analysis Scripts:
-
-1. Project_Data_Input.csv (9 fields):
-   - Project: Project name (e.g., "Manasquan to Barnegat").
-   - Reach: Sub-division within the project (e.g., "Point Pleasant") for different geometries/templates.
-   - Sta_From: Starting station for the reach.
-   - Sta_To: Ending station for the reach.
-   - MHW_Elev: Mean High Water elevation (ft NAVD88).
-   - MLW_Elev: Mean Low Water elevation (ft NAVD88).
-   - LastNourish_Date: Date of last beach nourishment.
-   - NextNoursh_Date: Date of next scheduled nourishment.
-   - Nourish_Cycle: Nourishment cycle length in years.
-
-   Purpose: Provides project-level constants, elevations, and nourishment scheduling. Projects can have multiple reaches with different station ranges.
-
-2. ProfileLine_Data_Input.csv (10 fields):
-   - Project: Project name (matches DProject).
-   - Profile_ID: Unique profile identifier (e.g., "MA001").
-   - Station: Station number along the project.
-   - Origin_X: X-coordinate of profile origin (easting).
-   - Origin_Y: Y-coordinate of profile origin (northing).
-   - Azimuth: Profile baseline orientation in degrees.
-   - Town: Associated town/location.
-   - Xon: Landward X-bound for volume calculations.
-   - Xoff: Seaward X-bound for volume calculations.
-   - Closure: Closure depth for the profile.
-
-   Purpose: Defines spatial geometry and bounds for each profile line.
-
-3. DesignTemplate_Data_Input.csv (9 fields):
-   - Project: Project name.
-   - Profile_ID: Profile identifier.
-   - Station: Station number.
-   - Dune_Elev: Target dune elevation in design template.
-   - Berm_Elev: Target berm elevation.
-   - Shoreline_Elev: Target shoreline elevation.
-   - Dune_Width: Dune width in feet.
-   - Berm_Width: Berm width in feet.
-   - Nearshore_Slope: Nearshore slope.
-
-   Purpose: Specifies ideal profile shapes for nourishment design and comparison.
-
-Note: The 9Column_Data_Input.csv is a sample of raw survey data with fields:
-- PROFILE ID, DATE, TIME (EST), POINT #, EASTING (X), NORTHING (Y), ELEVATION (Z), TYPE, DESCRIPTION.
-This is used for parsing actual survey profiles.
-"""
+# =============================================================================
+# Bounded Volume Calculation Module
+# =============================================================================
+#
+# FILE: src/profcalc/ref_code/modules/volume_bounded.py
+#
+# PURPOSE:
+# This module provides comprehensive functionality for calculating bounded
+# sediment volumes from beach profile survey data. It computes volumes
+# between specified cross-shore limits (Xon/Xoff bounds) and elevation
+# ranges, supporting coastal engineering analysis for erosion monitoring,
+# nourishment design, and morphological change assessment.
+#
+# WHAT IT'S FOR:
+# - Calculates sediment volumes between cross-shore boundaries (Xon/Xoff)
+# - Processes BMAP free-format and CSV survey data files
+# - Handles profile metadata and survey date filtering
+# - Supports volume calculations for different time periods and purposes
+# - Generates detailed volume reports and statistics
+# - Provides command-line interface for batch processing
+# - Normalizes column names and handles field aliases
+#
+# WORKFLOW POSITION:
+# This module is used in coastal monitoring and management workflows to
+# quantify sediment volume changes over time. It's typically applied after
+# profile data collection and before trend analysis or nourishment planning.
+# The bounded volume calculations provide quantitative measures of erosion
+# or accretion within specified spatial limits.
+#
+# LIMITATIONS:
+# - Requires accurate Xon/Xoff boundary definitions for each profile
+# - Volume calculations assume linear interpolation between survey points
+# - Large datasets may require significant processing time
+# - Output formatting depends on available libraries
+#
+# ASSUMPTIONS:
+# - Survey data contains valid elevation profiles with consistent spacing
+# - Xon/Xoff boundaries are appropriately defined for the analysis objectives
+# - Profile metadata includes accurate spatial reference information
+# - Coordinate systems are consistent across survey datasets
+# - Volume calculations are meaningful for the specified cross-shore bounds
+#
+# =============================================================================
 
 import argparse
 import os
@@ -63,17 +59,25 @@ from profcalc.common.error_handler import BeachProfileError, ErrorCategory
 # Field name aliases for handling different naming conventions in input files
 FIELD_ALIASES = {
     # Profile metadata fields
-    'Profile_ID': ['Profile_ID', 'PROFILE ID', 'PROFILEID', 'ProfileID', 'profile_id'],
-    'Xon': ['Xon', 'XON', 'xon'],
-    'Xoff': ['Xoff', 'XOFF', 'xoff'],
-
+    "Profile_ID": ["Profile_ID", "PROFILE ID", "PROFILEID", "ProfileID", "profile_id"],
+    "Xon": ["Xon", "XON", "xon"],
+    "Xoff": ["Xoff", "XOFF", "xoff"],
     # Survey data fields
-    'PROFILE ID': ['PROFILE ID', 'Profile_ID', 'PROFILEID', 'ProfileID', 'profile_id'],
-    'ELEVATION (Z)': ['ELEVATION (Z)', 'ELEVATION', 'Z', 'Elevation', 'elevation', 'ELEVATION(Z)'],
+    "PROFILE ID": ["PROFILE ID", "Profile_ID", "PROFILEID", "ProfileID", "profile_id"],
+    "ELEVATION (Z)": [
+        "ELEVATION (Z)",
+        "ELEVATION",
+        "Z",
+        "Elevation",
+        "elevation",
+        "ELEVATION(Z)",
+    ],
 }
 
 
-def normalize_column_names(df: pd.DataFrame, required_fields: List[str]) -> pd.DataFrame:
+def normalize_column_names(
+    df: pd.DataFrame, required_fields: List[str]
+) -> pd.DataFrame:
     """
     Normalize column names in a DataFrame to match expected field names using aliases.
 
@@ -105,10 +109,14 @@ def normalize_column_names(df: pd.DataFrame, required_fields: List[str]) -> pd.D
         available_aliases = []
         for field in missing_fields:
             available_aliases.extend(FIELD_ALIASES.get(field, []))
-        raise ValueError(f"Required fields {missing_fields} not found. Available columns: {list(df_normalized.columns)}. Tried aliases: {available_aliases}")
+        raise ValueError(
+            f"Required fields {missing_fields} not found. Available columns: {list(df_normalized.columns)}. Tried aliases: {available_aliases}"
+        )
 
     # Rename columns
-    df_normalized = df_normalized.rename(columns={v: k for k, v in column_mapping.items()})
+    df_normalized = df_normalized.rename(
+        columns={v: k for k, v in column_mapping.items()}
+    )
 
     return df_normalized
 
@@ -161,9 +169,7 @@ class BMAPParser:
         """
         self.config = config or {}
 
-    def parse_header(
-        self, header: str
-    ) -> tuple[str, Optional[datetime], str, str]:
+    def parse_header(self, header: str) -> tuple[str, Optional[datetime], str, str]:
         """Parse a BMAP header line.
 
         Args:
@@ -333,9 +339,7 @@ class BMAPParser:
 
         return profiles
 
-    def _convert_to_profile(
-        self, profile_data: dict[str, Any]
-    ) -> Optional[Profile]:
+    def _convert_to_profile(self, profile_data: dict[str, Any]) -> Optional[Profile]:
         """Convert profile data dictionary to Profile object.
 
         Args:
@@ -387,9 +391,7 @@ class BMAPParser:
             if purpose:
                 description_parts.append(f"Purpose: {purpose}")
 
-            description = (
-                "; ".join(description_parts) if description_parts else None
-            )
+            description = "; ".join(description_parts) if description_parts else None
 
             profile = Profile(
                 name=profile_name,
@@ -408,7 +410,9 @@ class BMAPParser:
             return None
 
 
-def bmap_style_volume_above_contour(x: np.ndarray, z: np.ndarray, contour: float, dx: float = 10.0) -> float:
+def bmap_style_volume_above_contour(
+    x: np.ndarray, z: np.ndarray, contour: float, dx: float = 10.0
+) -> float:
     """Compute volume above contour using BMAP-style integration."""
     x = np.asarray(x, dtype=float)
     z = np.asarray(z, dtype=float)
@@ -418,12 +422,12 @@ def bmap_style_volume_above_contour(x: np.ndarray, z: np.ndarray, contour: float
     # Find all crossings
     crossings = []
     for i in range(1, len(x)):
-        if (z[i-1] - contour) * (z[i] - z[i-1]) < 0:
-            frac = (contour - z[i-1]) / (z[i] - z[i-1])
-            x_cross = x[i-1] + frac * (x[i] - x[i-1])
+        if (z[i - 1] - contour) * (z[i] - z[i - 1]) < 0:
+            frac = (contour - z[i - 1]) / (z[i] - z[i - 1])
+            x_cross = x[i - 1] + frac * (x[i] - x[i - 1])
             crossings.append(x_cross)
-        elif (z[i-1] - contour) == 0:
-            crossings.append(x[i-1])
+        elif (z[i - 1] - contour) == 0:
+            crossings.append(x[i - 1])
         elif (z[i] - contour) == 0:
             crossings.append(x[i])
     xon = float(x[0])
@@ -441,7 +445,9 @@ def bmap_style_volume_above_contour(x: np.ndarray, z: np.ndarray, contour: float
         mask = (x >= x_start) & (x <= x_end)
         if np.sum(mask) < 2:
             # Interpolate at boundaries if needed
-            x_region = np.linspace(x_start, x_end, int(np.ceil((x_end - x_start) / dx)) + 1)
+            x_region = np.linspace(
+                x_start, x_end, int(np.ceil((x_end - x_start) / dx)) + 1
+            )
             z_region = np.interp(x_region, x, z)
         else:
             x_region = np.asarray(x[mask], dtype=float)
@@ -454,9 +460,7 @@ def bmap_style_volume_above_contour(x: np.ndarray, z: np.ndarray, contour: float
     return float(total_area) / 27.0  # cu yd/ft
 
 
-def split_trap_area(
-    xa: float, xb: float, za: float, zb: float
-) -> tuple[float, float]:
+def split_trap_area(xa: float, xb: float, za: float, zb: float) -> tuple[float, float]:
     """Return (area_above, area_below) for trapezoid between xa..xb with end elevations za, zb.
     Splits at z=0 when crossing the datum.
     """
@@ -476,7 +480,12 @@ def split_trap_area(
             return area2, area1
 
 
-def compute_bounded_volume(x: np.ndarray, z: np.ndarray, x_bounds: Tuple[float, ...], z_bounds: Tuple[float, ...]) -> Dict[str, float]:
+def compute_bounded_volume(
+    x: np.ndarray,
+    z: np.ndarray,
+    x_bounds: Tuple[float, ...],
+    z_bounds: Tuple[float, ...],
+) -> Dict[str, float]:
     """
     Compute the volume within specified x and z bounds.
 
@@ -516,33 +525,26 @@ def compute_bounded_volume(x: np.ndarray, z: np.ndarray, x_bounds: Tuple[float, 
         volume_below += area_below
 
     return {
-        'volume_above': float(volume_above),
-        'volume_below': float(volume_below),
+        "volume_above": float(volume_above),
+        "volume_below": float(volume_below),
     }
 
-def compute_volume_change(profile1, profile2, elevation, xon, xoff):
-    """
-    Compute the volume change between two surveys above a specified elevation
-    and within common x-bounds.
 
-    Parameters:
-        profile1 (pd.DataFrame): First survey profile with columns 'x' and 'z'.
-        profile2 (pd.DataFrame): Second survey profile with columns 'x' and 'z'.
-        elevation (float): Elevation threshold (e.g., MHW).
-        xon (float): Landward x-bound.
-        xoff (float): Seaward x-bound.
-
-    Returns:
-        dict: Volume change and metadata.
-    """
+def compute_volume_change(
+    profile1: pd.DataFrame,
+    profile2: pd.DataFrame,
+    elevation: float,
+    xon: float,
+    xoff: float,
+) -> Dict[str, float]:
     # Restrict to common x bounds
-    mask1 = (profile1['x'] >= xon) & (profile1['x'] <= xoff)
-    mask2 = (profile2['x'] >= xon) & (profile2['x'] <= xoff)
+    mask1 = (profile1["x"] >= xon) & (profile1["x"] <= xoff)
+    mask2 = (profile2["x"] >= xon) & (profile2["x"] <= xoff)
 
-    x1 = np.asarray(profile1.loc[mask1, 'x'].values, dtype=float)
-    z1 = np.asarray(profile1.loc[mask1, 'z'].values, dtype=float)
-    x2 = np.asarray(profile2.loc[mask2, 'x'].values, dtype=float)
-    z2 = np.asarray(profile2.loc[mask2, 'z'].values, dtype=float)
+    x1 = np.asarray(profile1.loc[mask1, "x"].values, dtype=float)
+    z1 = np.asarray(profile1.loc[mask1, "z"].values, dtype=float)
+    x2 = np.asarray(profile2.loc[mask2, "x"].values, dtype=float)
+    z2 = np.asarray(profile2.loc[mask2, "z"].values, dtype=float)
 
     if len(x1) < 2 or len(x2) < 2:
         raise ValueError("Not enough points in common bounds to compute volume.")
@@ -567,15 +569,21 @@ def compute_volume_change(profile1, profile2, elevation, xon, xoff):
     volume_change = volume2_cuyd_per_ft - volume1_cuyd_per_ft
 
     return {
-        'xon': xon,
-        'xoff': xoff,
-        'elevation': elevation,
-        'volume1_cuyd_per_ft': volume1_cuyd_per_ft,
-        'volume2_cuyd_per_ft': volume2_cuyd_per_ft,
-        'volume_change_cuyd_per_ft': volume_change
+        "xon": xon,
+        "xoff": xoff,
+        "elevation": elevation,
+        "volume1_cuyd_per_ft": volume1_cuyd_per_ft,
+        "volume2_cuyd_per_ft": volume2_cuyd_per_ft,
+        "volume_change_cuyd_per_ft": volume_change,
     }
 
-def compute_volume_change_between_surveys(profile1, profile2, elevation_bands: List[Tuple[float, ...]], x_bounds: Tuple[float, ...]):
+
+def compute_volume_change_between_surveys(
+    profile1: pd.DataFrame,
+    profile2: pd.DataFrame,
+    elevation_bands: List[Tuple[float, ...]],
+    x_bounds: Tuple[float, ...],
+) -> List[Dict[str, float]]:
     """
     Compute volume changes between two surveys within elevation bands and x bounds.
 
@@ -592,13 +600,13 @@ def compute_volume_change_between_surveys(profile1, profile2, elevation_bands: L
     xon, xoff = x_bounds
 
     # Restrict profiles to common x bounds
-    mask1 = (profile1['x'] >= xon) & (profile1['x'] <= xoff)
-    mask2 = (profile2['x'] >= xon) & (profile2['x'] <= xoff)
+    mask1 = (profile1["x"] >= xon) & (profile1["x"] <= xoff)
+    mask2 = (profile2["x"] >= xon) & (profile2["x"] <= xoff)
 
-    x1 = np.asarray(profile1.loc[mask1, 'x'].values, dtype=float)
-    z1 = np.asarray(profile1.loc[mask1, 'z'].values, dtype=float)
-    x2 = np.asarray(profile2.loc[mask2, 'x'].values, dtype=float)
-    z2 = np.asarray(profile2.loc[mask2, 'z'].values, dtype=float)
+    x1 = np.asarray(profile1.loc[mask1, "x"].values, dtype=float)
+    z1 = np.asarray(profile1.loc[mask1, "z"].values, dtype=float)
+    x2 = np.asarray(profile2.loc[mask2, "x"].values, dtype=float)
+    z2 = np.asarray(profile2.loc[mask2, "z"].values, dtype=float)
 
     if len(x1) < 2 or len(x2) < 2:
         raise ValueError("Not enough points in common bounds to compute volume.")
@@ -620,19 +628,27 @@ def compute_volume_change_between_surveys(profile1, profile2, elevation_bands: L
         # Calculate volume change
         volume_change = volume2 - volume1
 
-        results.append({
-            'xon': xon,
-            'xoff': xoff,
-            'zmin': zmin,
-            'zmax': zmax,
-            'volume1_cuyd_per_ft': float(volume1),
-            'volume2_cuyd_per_ft': float(volume2),
-            'volume_change_cuyd_per_ft': float(volume_change),
-        })
+        results.append(
+            {
+                "xon": xon,
+                "xoff": xoff,
+                "zmin": zmin,
+                "zmax": zmax,
+                "volume1_cuyd_per_ft": float(volume1),
+                "volume2_cuyd_per_ft": float(volume2),
+                "volume_change_cuyd_per_ft": float(volume_change),
+            }
+        )
 
     return results
 
-def compute_cross_sectional_area(x, z, x_bounds, z_bounds):
+
+def compute_cross_sectional_area(
+    x: np.ndarray,
+    z: np.ndarray,
+    x_bounds: Tuple[float, float],
+    z_bounds: Tuple[float, float],
+) -> float:
     """
     Compute the cross-sectional area within specified x and z bounds.
 
@@ -668,7 +684,8 @@ def compute_cross_sectional_area(x, z, x_bounds, z_bounds):
 
     return area
 
-def validate_x_bounds(profile, xon, xoff):
+
+def validate_x_bounds(profile: pd.DataFrame, xon: float, xoff: float) -> str:
     """
     Validate that the profile extends to the specified x bounds.
 
@@ -680,10 +697,12 @@ def validate_x_bounds(profile, xon, xoff):
     Returns:
         str: User decision if bounds are out of range ('extend', 'clip', 'skip').
     """
-    x_min, x_max = profile['x'].min(), profile['x'].max()
+    x_min, x_max = profile["x"].min(), profile["x"].max()
 
     if xon < x_min or xoff > x_max:
-        print(f"Warning: Specified bounds (xon={xon}, xoff={xoff}) exceed profile range ({x_min}, {x_max}).")
+        print(
+            f"Warning: Specified bounds (xon={xon}, xoff={xoff}) exceed profile range ({x_min}, {x_max})."
+        )
         print("Options:")
         print("  1. Extend: Extrapolate profile to the specified bounds.")
         print("  2. Clip: Adjust bounds to fit within the profile range.")
@@ -691,19 +710,22 @@ def validate_x_bounds(profile, xon, xoff):
 
         while True:
             choice = input("Enter your choice (1=Extend, 2=Clip, 3=Skip): ").strip()
-            if choice == '1':
-                return 'extend'
-            elif choice == '2':
-                return 'clip'
-            elif choice == '3':
-                return 'skip'
+            if choice == "1":
+                return "extend"
+            elif choice == "2":
+                return "clip"
+            elif choice == "3":
+                return "skip"
             else:
                 print("Invalid choice. Please enter 1, 2, or 3.")
 
-    return 'valid'
+    return "valid"
+
 
 # Add functionality to compute volume above contour for design template comparison
-def compute_volume_above_contour(profile, contour, x_bounds):
+def compute_volume_above_contour(
+    profile: pd.DataFrame, contour: float, x_bounds: Tuple[float, float]
+) -> float:
     """
     Compute the volume above a specified contour within x bounds.
 
@@ -716,9 +738,9 @@ def compute_volume_above_contour(profile, contour, x_bounds):
         float: Volume above the contour in cubic yards per foot.
     """
     xon, xoff = x_bounds
-    mask = (profile['x'] >= xon) & (profile['x'] <= xoff)
-    x = profile.loc[mask, 'x'].values
-    z = profile.loc[mask, 'z'].values
+    mask = (profile["x"] >= xon) & (profile["x"] <= xoff)
+    x = profile.loc[mask, "x"].values
+    z = profile.loc[mask, "z"].values
 
     if len(x) < 2:
         raise ValueError("Not enough points within x bounds to compute volume.")
@@ -726,7 +748,7 @@ def compute_volume_above_contour(profile, contour, x_bounds):
     return bmap_style_volume_above_contour(x, z, contour)
 
 
-def load_template_from_bmap(bmap_file, profile_id):
+def load_template_from_bmap(bmap_file: str, profile_id: str) -> pd.DataFrame:
     """
     Load design template geometry for a specific profile from BMAP Free Format file.
 
@@ -743,21 +765,47 @@ def load_template_from_bmap(bmap_file, profile_id):
 
     for profile in profiles:
         if profile.name == profile_id:
-            return pd.DataFrame({'x': profile.x, 'z': profile.z})
+            return pd.DataFrame({"x": profile.x, "z": profile.z})
 
     raise ValueError(f"Profile '{profile_id}' not found in template BMAP file.")
 
-def main():
-    parser = argparse.ArgumentParser(description="Compute volume and cross-sectional area within elevation bands and x bounds.")
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Compute volume and cross-sectional area within elevation bands and x bounds."
+    )
     parser.add_argument("--menu", action="store_true", help="Open interactive menu")
-    parser.add_argument("--survey-csv", default="Input_Files/9Column_Data_Input.csv", help="Survey data CSV file.")
-    parser.add_argument("--profile-csv", default="Input_Files/ProfileLine_Data_Input.csv", help="Profile metadata CSV file.")
-    parser.add_argument("--template-bmap", default="Input_Files/DesignTemplate.bmap", help="BMAP Free Format file for design template geometry.")
+    parser.add_argument(
+        "--survey-csv",
+        default="Input_Files/9Column_Data_Input.csv",
+        help="Survey data CSV file.",
+    )
+    parser.add_argument(
+        "--profile-csv",
+        default="Input_Files/ProfileLine_Data_Input.csv",
+        help="Profile metadata CSV file.",
+    )
+    parser.add_argument(
+        "--template-bmap",
+        default="Input_Files/DesignTemplate.bmap",
+        help="BMAP Free Format file for design template geometry.",
+    )
     parser.add_argument("--profile-id", required=True, help="Profile ID to process.")
-    parser.add_argument("--input2", help="Second survey CSV file for volume change (optional).")
+    parser.add_argument(
+        "--input2", help="Second survey CSV file for volume change (optional)."
+    )
     parser.add_argument("--output", required=True, help="Output CSV file for results.")
-    parser.add_argument("--elevation-bands", nargs='+', required=True, help="Elevation bands as 'zmin,zmax'.")
-    parser.add_argument("--contour", type=float, help="Contour elevation for design template comparison.")
+    parser.add_argument(
+        "--elevation-bands",
+        nargs="+",
+        required=True,
+        help="Elevation bands as 'zmin,zmax'.",
+    )
+    parser.add_argument(
+        "--contour",
+        type=float,
+        help="Contour elevation for design template comparison.",
+    )
     args = parser.parse_args()
 
     # If interactive menu requested, open it and exit
@@ -768,41 +816,49 @@ def main():
     # Load profile metadata
     # Source: ProfileLine_Data_Input.csv - contains profile bounds and geometry
     profile_meta = pd.read_csv(args.profile_csv)
-    required_meta_columns = ['Profile_ID', 'Xon', 'Xoff']
+    required_meta_columns = ["Profile_ID", "Xon", "Xoff"]
     profile_meta = normalize_column_names(profile_meta, required_meta_columns)
     if not set(required_meta_columns).issubset(profile_meta.columns):
-        raise ValueError(f"Profile CSV must contain columns: {', '.join(required_meta_columns)}")
+        raise ValueError(
+            f"Profile CSV must contain columns: {', '.join(required_meta_columns)}"
+        )
 
-    profile_row = profile_meta[profile_meta['Profile_ID'] == args.profile_id]
+    profile_row = profile_meta[profile_meta["Profile_ID"] == args.profile_id]
     if profile_row.empty:
         raise ValueError(f"Profile '{args.profile_id}' not found in metadata.")
 
-    xon, xoff = profile_row['Xon'].iloc[0], profile_row['Xoff'].iloc[0]
+    xon, xoff = profile_row["Xon"].iloc[0], profile_row["Xoff"].iloc[0]
 
     # Load first survey data
     # Source: 9Column_Data_Input.csv - contains survey elevations
     survey_data = pd.read_csv(args.survey_csv)
-    required_survey_columns = ['PROFILE ID', 'ELEVATION (Z)']
+    required_survey_columns = ["PROFILE ID", "ELEVATION (Z)"]
     survey_data = normalize_column_names(survey_data, required_survey_columns)
     if not set(required_survey_columns).issubset(survey_data.columns):
-        raise ValueError(f"Survey CSV must contain columns: {', '.join(required_survey_columns)}")
+        raise ValueError(
+            f"Survey CSV must contain columns: {', '.join(required_survey_columns)}"
+        )
 
-    profile1_survey = survey_data[survey_data['PROFILE ID'] == args.profile_id]
+    profile1_survey = survey_data[survey_data["PROFILE ID"] == args.profile_id]
     if profile1_survey.empty:
         raise ValueError(f"No survey data for profile '{args.profile_id}'.")
 
-    profile1 = pd.DataFrame({
-        'x': range(len(profile1_survey)),  # Placeholder X
-        'z': profile1_survey['ELEVATION (Z)'],
-        'xon': xon,
-        'xoff': xoff
-    })
+    profile1 = pd.DataFrame(
+        {
+            "x": range(len(profile1_survey)),  # Placeholder X
+            "z": profile1_survey["ELEVATION (Z)"],
+            "xon": xon,
+            "xoff": xoff,
+        }
+    )
 
     # Normalize column names
-    profile1 = normalize_column_names(profile1, ['x', 'z', 'xon', 'xoff'])
+    profile1 = normalize_column_names(profile1, ["x", "z", "xon", "xoff"])
 
     # Parse elevation bands
-    elevation_bands = [tuple(map(float, band.split(','))) for band in args.elevation_bands]
+    elevation_bands = [
+        tuple(map(float, band.split(","))) for band in args.elevation_bands
+    ]
 
     results = []
 
@@ -810,19 +866,25 @@ def main():
         # Load second survey data for volume change
         # Source: Second survey file - assumed same format as first
         survey2_data = pd.read_csv(args.input2)
-        profile2_survey = survey2_data[survey2_data['PROFILE ID'] == args.profile_id]
-        profile2 = pd.DataFrame({
-            'x': range(len(profile2_survey)),
-            'z': profile2_survey['ELEVATION (Z)'],
-            'xon': xon,
-            'xoff': xoff
-        })
+        profile2_survey = survey2_data[survey2_data["PROFILE ID"] == args.profile_id]
+        profile2 = pd.DataFrame(
+            {
+                "x": range(len(profile2_survey)),
+                "z": profile2_survey["ELEVATION (Z)"],
+                "xon": xon,
+                "xoff": xoff,
+            }
+        )
 
         # Normalize column names
-        profile2 = normalize_column_names(profile2, ['x', 'z', 'xon', 'xoff'])
+        profile2 = normalize_column_names(profile2, ["x", "z", "xon", "xoff"])
 
         # Compute volume changes
-        results.extend(compute_volume_change_between_surveys(profile1, profile2, elevation_bands, (xon, xoff)))
+        results.extend(
+            compute_volume_change_between_surveys(
+                profile1, profile2, elevation_bands, (xon, xoff)
+            )
+        )
 
     if args.contour is not None:
         # Load design template from BMAP file
@@ -831,47 +893,60 @@ def main():
 
         # Compute volume above contour for design template comparison
         shortfall = compute_volume_above_contour(profile1, args.contour, (xon, xoff))
-        template_volume = compute_volume_above_contour(template, args.contour, (xon, xoff))
+        template_volume = compute_volume_above_contour(
+            template, args.contour, (xon, xoff)
+        )
 
-        results.append({
-            'comparison_type': 'survey_vs_template',
-            'xon': xon,
-            'xoff': xoff,
-            'contour': args.contour,
-            'survey_volume_cuyd_per_ft': shortfall,
-            'template_volume_cuyd_per_ft': template_volume,
-            'shortfall_cuyd_per_ft': template_volume - shortfall
-        })
+        results.append(
+            {
+                "comparison_type": "survey_vs_template",
+                "xon": xon,
+                "xoff": xoff,
+                "contour": args.contour,
+                "survey_volume_cuyd_per_ft": shortfall,
+                "template_volume_cuyd_per_ft": template_volume,
+                "shortfall_cuyd_per_ft": template_volume - shortfall,
+            }
+        )
 
     # Save results to output CSV
     results_df = pd.DataFrame(results)
     results_df.to_csv(args.output, index=False)
 
-def menu():
+
+def menu() -> None:
     """
     Menu-driven CLI for standalone_volume_bounded.py.
     Allows users to interact with the script's functions.
     """
     import sys
 
-    def print_menu():
+    def print_menu() -> None:
         print("\n--- Main Menu ---")
         print("1. Load and Parse Data")
         print("2. Compute Volume Above Contour")
         print("3. Compute Bounded Volume")
         print("4. Exit")
 
-    def load_and_parse_data():
+    def load_and_parse_data() -> None:
         print("\nLoading and parsing data...")
         try:
-            input_dir = Path('./Input_Files')
+            input_dir = Path("./Input_Files")
             files = {
-                'DesignTemplate_Data_Input.csv': pd.read_csv(input_dir / 'DesignTemplate_Data_Input.csv'),
-                'ProfileLine_Data_Input.csv': pd.read_csv(input_dir / 'ProfileLine_Data_Input.csv'),
-                'Project_Data_Input.csv': pd.read_csv(input_dir / 'Project_Data_Input.csv')
+                "DesignTemplate_Data_Input.csv": pd.read_csv(
+                    input_dir / "DesignTemplate_Data_Input.csv"
+                ),
+                "ProfileLine_Data_Input.csv": pd.read_csv(
+                    input_dir / "ProfileLine_Data_Input.csv"
+                ),
+                "Project_Data_Input.csv": pd.read_csv(
+                    input_dir / "Project_Data_Input.csv"
+                ),
             }
             bmap_parser = BMAPParser()
-            bmap_profiles = bmap_parser.parse_file(input_dir / 'ManasquanDesignTemplates.dat')
+            bmap_profiles = bmap_parser.parse_file(
+                input_dir / "ManasquanDesignTemplates.dat"
+            )
             print("\nData Loaded Successfully:")
             for name, df in files.items():
                 print(f"{name}: {len(df)} rows")
@@ -887,7 +962,7 @@ def menu():
         ) as e:
             print(f"Error loading data: {e}")
 
-    def compute_volume_above_contour():
+    def compute_volume_above_contour() -> None:
         print("\nComputing volume above contour...")
         try:
             contour = float(input("Enter contour elevation: "))
@@ -898,11 +973,15 @@ def menu():
         except (ValueError, TypeError, OSError) as e:
             print(f"Error computing volume: {e}")
 
-    def compute_bounded_volume_menu():
+    def compute_bounded_volume_menu() -> None:
         print("\nComputing bounded volume...")
         try:
-            x_bounds = tuple(map(float, input("Enter x bounds (x_min, x_max): ").split(',')))
-            z_bounds = tuple(map(float, input("Enter z bounds (z_min, z_max): ").split(',')))
+            x_bounds = tuple(
+                map(float, input("Enter x bounds (x_min, x_max): ").split(","))
+            )
+            z_bounds = tuple(
+                map(float, input("Enter z bounds (z_min, z_max): ").split(","))
+            )
             x = np.array([0, 10, 20, 30, 40])  # Example x-coordinates
             z = np.array([5, 15, 10, 20, 25])  # Example z-coordinates
             result = compute_bounded_volume(x, z, x_bounds, z_bounds)
@@ -915,17 +994,18 @@ def menu():
     while True:
         print_menu()
         choice = input("Enter your choice: ")
-        if choice == '1':
+        if choice == "1":
             load_and_parse_data()
-        elif choice == '2':
+        elif choice == "2":
             compute_volume_above_contour()
-        elif choice == '3':
+        elif choice == "3":
             compute_bounded_volume_menu()
-        elif choice == '4':
+        elif choice == "4":
             print("Exiting program. Goodbye!")
             sys.exit(0)
         else:
             print("Invalid choice. Please try again.")
+
 
 if __name__ == "__main__":
     # Uncomment the following line to run the menu by default

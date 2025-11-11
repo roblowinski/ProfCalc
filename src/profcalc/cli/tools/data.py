@@ -1,3 +1,46 @@
+# =============================================================================
+# Data Management and Session Handling Tool
+# =============================================================================
+#
+# FILE: src/profcalc/cli/tools/data.py
+#
+# PURPOSE:
+# This module provides data management functionality for the ProfCalc CLI,
+# handling dataset import, registration, and session management. It serves as
+# the interface between raw data files and the analysis tools, managing data
+# persistence and providing access to registered datasets throughout the
+# application session.
+#
+# WHAT IT'S FOR:
+# - Imports and registers beach profile datasets for analysis
+# - Manages data session state across CLI operations
+# - Provides dataset discovery and metadata management
+# - Handles data persistence and caching for performance
+# - Supports multiple data formats and sources
+# - Enables data sharing between different analysis tools
+#
+# WORKFLOW POSITION:
+# This module sits at the foundation of the data processing pipeline in ProfCalc.
+# It's used whenever data needs to be loaded, processed, or shared between
+# different analysis tools. The Data Management menu options provide the
+# primary interface for users to register datasets that can then be used
+# by all other analysis tools in the session.
+#
+# LIMITATIONS:
+# - Data persistence is limited to the current session
+# - Large datasets may impact memory usage
+# - Dataset registration requires valid file paths
+# - Some data formats may require additional processing
+#
+# ASSUMPTIONS:
+# - Data files are accessible and contain valid profile information
+# - Users have appropriate permissions to read data files
+# - Data formats are supported by the import mechanisms
+# - Session state is maintained throughout the analysis workflow
+# - Dataset metadata is sufficient for tool requirements
+#
+# =============================================================================
+
 """Data management handlers for the command-line menu.
 
 Small wrappers for dataset import, registration and session management used
@@ -54,17 +97,12 @@ def _load_prototype():
             does not exist.
     """
     proto_path = (
-        Path(__file__)
-        .resolve()
-        .parents[4]
-        .joinpath("dev_scripts/cli_prototype.py")
+        Path(__file__).resolve().parents[4].joinpath("dev_scripts/cli_prototype.py")
     )
     if proto_path.exists():
         import importlib.util
 
-        spec = importlib.util.spec_from_file_location(
-            "cli_prototype", str(proto_path)
-        )
+        spec = importlib.util.spec_from_file_location("cli_prototype", str(proto_path))
         if spec and spec.loader:
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)  # type: ignore
@@ -131,7 +169,9 @@ def import_data(
     # static input files defined in project settings (project and profile line CSVs).
     try:
         # Resolve config.json which lives at src/profcalc/settings/config.json
-        cfg_path = Path(__file__).resolve().parents[2].joinpath("settings", "config.json")
+        cfg_path = (
+            Path(__file__).resolve().parents[2].joinpath("settings", "config.json")
+        )
         if cfg_path.exists():
             with cfg_path.open("r", encoding="utf-8") as fh:
                 cfg = json.load(fh)
@@ -140,7 +180,9 @@ def import_data(
                 data_dir_path = Path(data_dir)
                 # If relative path, resolve relative to repo root
                 if not data_dir_path.is_absolute():
-                    data_dir_path = Path(__file__).resolve().parents[3].joinpath(data_dir)
+                    data_dir_path = (
+                        Path(__file__).resolve().parents[3].joinpath(data_dir)
+                    )
 
                 # Look for common supporting files
                 proj_csv = data_dir_path.joinpath("Project_Data_Input.csv")
@@ -152,7 +194,9 @@ def import_data(
                 if proj_id:
                     print(f"Auto-registered project data: {proj_csv} (id={proj_id})")
                 if prof_id:
-                    print(f"Auto-registered profile line data: {profline_csv} (id={prof_id})")
+                    print(
+                        f"Auto-registered profile line data: {profline_csv} (id={prof_id})"
+                    )
 
     except (OSError, json.JSONDecodeError):
         # Non-fatal: auto-load is best-effort and should not block import
@@ -161,7 +205,7 @@ def import_data(
     return {"status": "ok", "imported": len(rows), "sample": rows[:10]}
 
 
-def select_dataset(dataset_id: str):
+def select_dataset(dataset_id: str) -> None:
     """Select an active dataset by ID.
 
     Args:
@@ -171,7 +215,7 @@ def select_dataset(dataset_id: str):
     print(f"Dataset {dataset_id} is now active.")
 
 
-def list_datasets():
+def list_datasets() -> None:
     """Print a human-readable list of datasets registered in the session.
 
     The function is a convenience for the CLI and prints each dataset's

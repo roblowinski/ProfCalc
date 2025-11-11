@@ -1,3 +1,47 @@
+# =============================================================================
+# BMAP File Input/Output Utilities
+# =============================================================================
+#
+# FILE: src/profcalc/common/bmap_io.py
+#
+# PURPOSE:
+# This module provides comprehensive input/output functionality for BMAP
+# (Beach Morphology Analysis Package) free-format files, which are the primary
+# data format for beach profile analysis in ProfCalc. It handles parsing,
+# validation, and writing of BMAP files with full support for headers, metadata,
+# and coordinate data.
+#
+# WHAT IT'S FOR:
+# - Reads BMAP free-format files with profile survey data
+# - Parses complex headers containing survey metadata, dates, and descriptions
+# - Handles variable point counts and multiple profiles per file
+# - Validates data integrity and format consistency
+# - Writes corrected or processed BMAP files with proper formatting
+# - Extracts dates from filenames using common naming patterns
+# - Provides Profile dataclass for structured data representation
+#
+# WORKFLOW POSITION:
+# This module is fundamental to ProfCalc's data processing pipeline. It's used
+# by virtually all analysis tools that work with beach profile data, serving
+# as the bridge between raw BMAP files and the computational algorithms. It
+# ensures data quality and consistency throughout the analysis workflow.
+#
+# LIMITATIONS:
+# - Specifically designed for BMAP free-format files (not generic CSV/ASCII)
+# - Header parsing depends on consistent BMAP formatting conventions
+# - Date extraction relies on common filename patterns
+# - Memory usage scales with file size and profile count
+# - Complex error recovery for severely malformed files
+#
+# ASSUMPTIONS:
+# - Input files follow BMAP free-format specifications
+# - Profile data includes X (cross-shore) and Z (elevation) coordinates
+# - Headers contain profile metadata in expected formats
+# - Coordinate systems are consistent within files
+# - Users understand BMAP file structure and conventions
+#
+# =============================================================================
+
 """
 BMAP I/O Module for Beach Profile Data
 
@@ -18,7 +62,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -179,9 +223,7 @@ class BMAPParser:
         self.config = config or {}
         self.logger = get_logger(LogComponent.FILE_IO)
 
-    def parse_header(
-        self, header: str
-    ) -> tuple[str, Optional[datetime], str, str]:
+    def parse_header(self, header: str) -> tuple[str, Optional[datetime], str, str]:
         """Parse a BMAP header line.
 
         Args:
@@ -253,15 +295,12 @@ class BMAPParser:
 
         # Remove date if found
         if date_match:
-            remaining = (
-                remaining[: date_match.start()] + remaining[date_match.end() :]
-            )
+            remaining = remaining[: date_match.start()] + remaining[date_match.end() :]
 
         # Remove purpose if found
         if purpose_match:
             remaining = (
-                remaining[: purpose_match.start()]
-                + remaining[purpose_match.end() :]
+                remaining[: purpose_match.start()] + remaining[purpose_match.end() :]
             )
 
         # The remaining text is the profile name (may contain spaces)
@@ -369,9 +408,7 @@ class BMAPParser:
                 category=ErrorCategory.FILE_IO,
             ) from e
 
-    def _convert_to_profile(
-        self, profile_data: dict[str, Any]
-    ) -> Optional[Profile]:
+    def _convert_to_profile(self, profile_data: dict[str, Any]) -> Optional[Profile]:
         """Convert profile data dictionary to Profile object.
 
         Args:
@@ -440,9 +477,7 @@ class BMAPParser:
             if purpose:
                 description_parts.append(f"Purpose: {purpose}")
 
-            description = (
-                "; ".join(description_parts) if description_parts else None
-            )
+            description = "; ".join(description_parts) if description_parts else None
 
             profile = Profile(
                 name=profile_name,
@@ -462,9 +497,7 @@ class BMAPParser:
             IndexError,
             AttributeError,
         ) as e:
-            self.logger.error(
-                f"Failed to convert profile data to Profile object: {e}"
-            )
+            self.logger.error(f"Failed to convert profile data to Profile object: {e}")
             return None
 
 
@@ -506,9 +539,7 @@ def is_header_line(line: str) -> bool:
 
     # If only one part, check if it's a count (single integer)
     if len(parts) == 1:
-        return not parts[
-            0
-        ].isdigit()  # If it's not a digit, it might be a header
+        return not parts[0].isdigit()  # If it's not a digit, it might be a header
 
     # If exactly two parts, check if they're both numeric (coordinate pair)
     if len(parts) == 2:
@@ -524,7 +555,9 @@ def is_header_line(line: str) -> bool:
     return True
 
 
-def parse_header(line: str):
+def parse_header(
+    line: str,
+) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
     Parse a BMAP free-format header line.
 
@@ -563,9 +596,7 @@ def parse_header(line: str):
     # Remove date from line if found
     remaining = line
     if date_match:
-        remaining = (
-            remaining[: date_match.start()] + remaining[date_match.end() :]
-        )
+        remaining = remaining[: date_match.start()] + remaining[date_match.end() :]
 
     # Check for "from_filename" pattern (added by writer when no date available)
     from_pattern = r"\bfrom_\w+"
@@ -576,9 +607,7 @@ def parse_header(line: str):
         # "from_filename" becomes part of description
         desc_parts.append(from_match.group(0))
         # Remove from_filename from remaining
-        remaining = (
-            remaining[: from_match.start()] + remaining[from_match.end() :]
-        )
+        remaining = remaining[: from_match.start()] + remaining[from_match.end() :]
 
     # What's left is the profile name
     name = remaining.strip()
@@ -660,9 +689,7 @@ def read_bmap_freeformat(file_path: str) -> List[Profile]:
     Now uses the centralized format detection and parsing system.
     """
     # Use the centralized parser
-    parsed_file = parse_file_centralized(
-        Path(file_path), skip_confirmation=True
-    )
+    parsed_file = parse_file_centralized(Path(file_path), skip_confirmation=True)
 
     # Convert to legacy Profile format
     return _convert_parsed_file_to_profiles(parsed_file)
@@ -686,15 +713,11 @@ def write_bmap_profiles(
     try:
         # Try to extract date from source filename if provided
         filename_date = (
-            extract_date_from_filename(source_filename)
-            if source_filename
-            else None
+            extract_date_from_filename(source_filename) if source_filename else None
         )
         filename_identifier = None
         if source_filename and not filename_date:
-            basename = (
-                Path(source_filename).stem.replace(" ", "_").replace("-", "_")
-            )
+            basename = Path(source_filename).stem.replace(" ", "_").replace("-", "_")
             filename_identifier = f"from_{basename}"
 
         with open(file_path, "w") as f:

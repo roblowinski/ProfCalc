@@ -1,3 +1,46 @@
+# =============================================================================
+# Data Validation Utilities for Beach Profile Analysis
+# =============================================================================
+#
+# FILE: src/profcalc/common/data_validation.py
+#
+# PURPOSE:
+# This module provides comprehensive data validation utilities specifically
+# designed for beach profile analysis workflows. It ensures data integrity
+# and quality by validating arrays, coordinates, dataframes, and file paths
+# against expected formats and constraints.
+#
+# WHAT IT'S FOR:
+# - Validating numpy arrays for proper data types and value ranges
+# - Checking coordinate arrays for geographic/geometric validity
+# - Verifying dataframe structures and required columns
+# - Ensuring numeric values fall within acceptable ranges
+# - Validating file paths and accessibility
+# - Running comprehensive validation suites with error reporting
+# - Providing detailed error messages for data quality issues
+#
+# WORKFLOW POSITION:
+# This module is used throughout the data processing pipeline to validate
+# inputs and intermediate results. It's called during data import, processing,
+# and analysis phases to catch data quality issues early and provide
+# meaningful feedback to users about data problems.
+#
+# LIMITATIONS:
+# - Validation rules are specific to beach profile data characteristics
+# - Some validations assume coordinate systems and units
+# - Memory usage scales with data size during validation
+# - Custom validation rules require programming knowledge
+# - Error messages are tailored to beach profile context
+#
+# ASSUMPTIONS:
+# - Data is provided as numpy arrays, pandas dataframes, or file paths
+# - Coordinate data follows expected geographic conventions
+# - Users want detailed error reporting for data issues
+# - Validation should be configurable but have sensible defaults
+# - Data validation is performed before computationally intensive operations
+#
+# =============================================================================
+
 """
 Generic Data Validation Utilities
 
@@ -63,14 +106,10 @@ def validate_array_properties(
 
     # Check length constraints
     if min_length is not None and len(array) < min_length:
-        errors.append(
-            f"{name} length {len(array)} is below minimum {min_length}"
-        )
+        errors.append(f"{name} length {len(array)} is below minimum {min_length}")
 
     if max_length is not None and len(array) > max_length:
-        errors.append(
-            f"{name} length {len(array)} exceeds maximum {max_length}"
-        )
+        errors.append(f"{name} length {len(array)} exceeds maximum {max_length}")
 
     # Check data type
     if dtype is not None and array.dtype != dtype:
@@ -78,9 +117,7 @@ def validate_array_properties(
             # Try to cast to required dtype
             array.astype(dtype, copy=False)
         except (ValueError, TypeError):
-            errors.append(
-                f"{name} cannot be converted to required dtype {dtype}"
-            )
+            errors.append(f"{name} cannot be converted to required dtype {dtype}")
 
     # Check for NaN values
     if not allow_nan and np.any(np.isnan(array)):
@@ -90,9 +127,7 @@ def validate_array_properties(
     # Check for infinite values
     if not allow_inf and np.any(np.isinf(array)):
         inf_count = np.sum(np.isinf(array))
-        errors.append(
-            f"{name} contains {inf_count} infinite values (not allowed)"
-        )
+        errors.append(f"{name} contains {inf_count} infinite values (not allowed)")
 
     return errors
 
@@ -143,9 +178,7 @@ def validate_coordinate_arrays(
             )
         # Y coordinates should be latitude
         if y_coords is not None and np.any((y_coords < -90) | (y_coords > 90)):
-            errors.append(
-                "Y coordinates (latitude) must be between -90 and 90 degrees"
-            )
+            errors.append("Y coordinates (latitude) must be between -90 and 90 degrees")
 
     # Validate Y coordinates if provided
     if y_coords is not None:
@@ -295,25 +328,19 @@ def validate_numeric_range(
     # Check zero values
     if not allow_zero and np.any(values == 0):
         zero_count = np.sum(values == 0)
-        errors.append(
-            f"{name} contains {zero_count} zero values (not allowed)"
-        )
+        errors.append(f"{name} contains {zero_count} zero values (not allowed)")
 
     # Check minimum value
     if min_val is not None:
         below_min = np.sum(values < min_val)
         if below_min > 0:
-            errors.append(
-                f"{name} has {below_min} values below minimum {min_val}"
-            )
+            errors.append(f"{name} has {below_min} values below minimum {min_val}")
 
     # Check maximum value
     if max_val is not None:
         above_max = np.sum(values > max_val)
         if above_max > 0:
-            errors.append(
-                f"{name} has {above_max} values above maximum {max_val}"
-            )
+            errors.append(f"{name} has {above_max} values above maximum {max_val}")
 
     return errors
 
@@ -357,9 +384,7 @@ def validate_file_path(
 
         # Check file extension
         if allowed_extensions:
-            if path.suffix.lower() not in [
-                ext.lower() for ext in allowed_extensions
-            ]:
+            if path.suffix.lower() not in [ext.lower() for ext in allowed_extensions]:
                 errors.append(
                     f"File extension '{path.suffix}' not in allowed extensions: {allowed_extensions}"
                 )
@@ -460,8 +485,6 @@ def validate_and_raise(
             error_msg += f"\n  {i + 1}. {error}"
 
         if len(validation_errors) > 5:
-            error_msg += (
-                f"\n  ... and {len(validation_errors) - 5} more errors"
-            )
+            error_msg += f"\n  ... and {len(validation_errors) - 5} more errors"
 
         raise error_class(error_msg, category=ErrorCategory.VALIDATION)

@@ -1,3 +1,46 @@
+# =============================================================================
+# Unified File Parser for Beach Profile Data Formats
+# =============================================================================
+#
+# FILE: src/profcalc/common/file_parser.py
+#
+# PURPOSE:
+# This module provides centralized file parsing functionality for all supported
+# beach profile data formats in ProfCalc. It handles the complexity of parsing
+# different file types (BMAP, CSV, etc.) and converts them into standardized
+# data structures for consistent downstream processing.
+#
+# WHAT IT'S FOR:
+# - Parsing BMAP Free Format files with profile headers and data
+# - Handling delimited files (CSV/TSV) with 3-9 columns
+# - Automatic format detection and user confirmation
+# - Standardized ParsedFile output structure
+# - Support for files with and without headers
+# - Flexible column mapping for different CSV layouts
+# - Profile ID extraction and coordinate parsing
+#
+# WORKFLOW POSITION:
+# This module is the entry point for all data import operations in the beach
+# profile analysis system. It's called whenever users import survey data,
+# and it ensures that different file formats are converted to a common
+# internal representation for analysis.
+#
+# LIMITATIONS:
+# - Currently supports only BMAP and delimited text formats
+# - Format detection may require user confirmation for ambiguous cases
+# - Memory usage scales with file size during parsing
+# - Complex BMAP formats may need specialized parsing logic
+# - CSV parsing assumes consistent delimiter usage
+#
+# ASSUMPTIONS:
+# - Input files are valid and not corrupted
+# - File formats follow expected conventions for beach profile data
+# - Users can provide confirmation for format detection when needed
+# - Coordinate data is in numeric format within text files
+# - Profile IDs are either explicit or can be derived from data
+#
+# =============================================================================
+
 """
 File Parser Module - Unified parsing for all supported formats in ProfCalc.
 
@@ -79,7 +122,9 @@ def parse_file(file_path: Path, skip_confirmation: bool = False) -> ParsedFile:
 
     if detection_result.format_type == "unknown":
         error_msg = f"Cannot determine file format for: {file_path}\n"
-        error_msg += "Supported formats: BMAP free format, CSV (automatic column detection)\n"
+        error_msg += (
+            "Supported formats: BMAP free format, CSV (automatic column detection)\n"
+        )
         if detection_result.warnings:
             error_msg += f"Warnings: {', '.join(detection_result.warnings)}"
         raise ValueError(error_msg)
@@ -396,14 +441,9 @@ def parse_csv(
             profiles_dict[profile_id]["coordinates"].append(coord_data)
 
             # Extract date from first row if available
-            if (
-                not profiles_dict[profile_id]["date"]
-                and "DATE" in column_mapping
-            ):
+            if not profiles_dict[profile_id]["date"] and "DATE" in column_mapping:
                 try:
-                    profiles_dict[profile_id]["date"] = parts[
-                        column_mapping["DATE"]
-                    ]
+                    profiles_dict[profile_id]["date"] = parts[column_mapping["DATE"]]
                 except IndexError:
                     pass
 
@@ -445,9 +485,7 @@ def _is_numeric(value: str) -> bool:
         return False
 
 
-def _build_column_mapping(
-    header_line: Optional[str], delimiter: str
-) -> dict[str, int]:
+def _build_column_mapping(header_line: Optional[str], delimiter: str) -> dict[str, int]:
     """
     Build column mapping from header line with flexible column name matching.
 
@@ -469,9 +507,7 @@ def _build_column_mapping(
         return {}
 
     mapping: dict[str, int] = {}
-    headers: list[str] = [
-        h.strip().upper() for h in header_line.split(delimiter)
-    ]
+    headers: list[str] = [h.strip().upper() for h in header_line.split(delimiter)]
 
     for i, header in enumerate(headers):
         # Store original header
@@ -479,9 +515,7 @@ def _build_column_mapping(
 
         # Profile ID variants
         if header in ("PROFILE", "NAME", "PROFILE_NAME", "PROFILE_ID", "ID"):
-            if (
-                "PROFILE_ID" not in mapping or header == "PROFILE"
-            ):  # Prefer PROFILE
+            if "PROFILE_ID" not in mapping or header == "PROFILE":  # Prefer PROFILE
                 mapping["PROFILE_ID"] = i
 
         # X coordinate variants
@@ -511,9 +545,7 @@ def _build_column_mapping(
     return mapping
 
 
-def _extract_profile_id(
-    parts: list[str], column_mapping: dict[str, int]
-) -> str:
+def _extract_profile_id(parts: list[str], column_mapping: dict[str, int]) -> str:
     """
     Extract profile ID from data row using column mapping or heuristics.
 
@@ -562,21 +594,17 @@ def _extract_coordinates(
                 coord["z"] = float(parts[column_mapping["Z"]])
 
             # Add optional metadata fields
-            if "TIME" in column_mapping and column_mapping["TIME"] < len(
-                parts
-            ):
+            if "TIME" in column_mapping and column_mapping["TIME"] < len(parts):
                 coord["time"] = parts[column_mapping["TIME"]]
-            if "POINT_NUM" in column_mapping and column_mapping[
-                "POINT_NUM"
-            ] < len(parts):
-                coord["point_num"] = parts[column_mapping["POINT_NUM"]]
-            if "TYPE" in column_mapping and column_mapping["TYPE"] < len(
+            if "POINT_NUM" in column_mapping and column_mapping["POINT_NUM"] < len(
                 parts
             ):
+                coord["point_num"] = parts[column_mapping["POINT_NUM"]]
+            if "TYPE" in column_mapping and column_mapping["TYPE"] < len(parts):
                 coord["type"] = parts[column_mapping["TYPE"]]
-            if "DESCRIPTION" in column_mapping and column_mapping[
-                "DESCRIPTION"
-            ] < len(parts):
+            if "DESCRIPTION" in column_mapping and column_mapping["DESCRIPTION"] < len(
+                parts
+            ):
                 coord["description"] = parts[column_mapping["DESCRIPTION"]]
 
             return coord

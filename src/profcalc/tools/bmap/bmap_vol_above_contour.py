@@ -1,3 +1,43 @@
+# =============================================================================
+# BMAP Volume Above Contour Calculation Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_vol_above_contour.py
+#
+# PURPOSE:
+# This module computes the volume of material above a specified elevation
+# contour within a beach profile. It provides quantitative estimates of
+# sediment volumes above reference elevations, which is essential for
+# understanding beach morphology, sediment budgets, and coastal management
+# applications.
+#
+# WHAT IT'S FOR:
+# - Calculating sediment volumes above specified elevation contours
+# - Determining contour crossing locations for profile analysis
+# - Supporting volumetric analysis for beach management decisions
+# - Providing quantitative data for sediment budget calculations
+# - Enabling contour-based morphological assessments
+#
+# WORKFLOW POSITION:
+# This tool is used in volumetric analysis workflows to quantify sediment
+# volumes relative to reference elevations. It's particularly important for
+# assessing beach nourishment volumes, erosion monitoring, and sediment
+# management planning.
+#
+# LIMITATIONS:
+# - Provides single-profile volume calculations only
+# - Assumes trapezoidal integration is adequate for volume estimation
+# - Contour crossing detection depends on data resolution
+# - Does not account for three-dimensional volume considerations
+#
+# ASSUMPTIONS:
+# - Profile data is sorted and represents continuous morphology
+# - Linear interpolation between points is appropriate
+# - Contour elevations are meaningful reference levels
+# - Integration spacing provides adequate accuracy
+#
+# =============================================================================
+
 """Minimal volume_above_contour module.
 
 Provides a small, valid implementation of compute_volume_above_contour used
@@ -7,14 +47,14 @@ be imported during repository migrations without pulling heavy dependencies.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict
 
 import numpy as np
 
 
 def compute_volume_above_contour(
     profile: Any, contour: float, dx: float = 10.0
-):
+) -> Dict[str, float | None]:
     """Compute approximate volume above a contour for a single profile.
 
     Args:

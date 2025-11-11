@@ -1,3 +1,42 @@
+# =============================================================================
+# BMAP Profile Combination Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_combine.py
+#
+# PURPOSE:
+# This module provides profile combination functionality for BMAP analysis,
+# allowing users to merge two beach profiles into a single profile by aligning
+# them at specified distances or elevations. This is useful for creating
+# composite profiles from different survey segments or combining overlapping
+# profile data.
+#
+# WHAT IT'S FOR:
+# - Combining profiles aligned at specific cross-shore distances
+# - Merging profiles aligned at specific elevations
+# - Creating composite profiles from multiple survey segments
+# - Supporting profile stitching for extended cross-shore coverage
+#
+# WORKFLOW POSITION:
+# This tool is used when working with profile data that needs to be combined
+# or when creating extended profiles from multiple survey segments. It's
+# particularly useful for analyzing longshore variations or creating
+# comprehensive profile representations.
+#
+# LIMITATIONS:
+# - Simple nearest-point alignment may not be optimal for all cases
+# - No interpolation between alignment points
+# - Assumes profiles can be meaningfully combined
+# - Limited to two-profile combinations
+#
+# ASSUMPTIONS:
+# - Alignment distances or elevations are meaningful reference points
+# - Combined profiles represent continuous beach morphology
+# - Profile data is in consistent coordinate systems
+# - Users understand the implications of profile combination
+#
+# =============================================================================
+
 """
 Module: combine_profiles
 Location: profcalc.modules.profiles
@@ -119,6 +158,4 @@ def compute_combine_profiles(
     elif combine_by == "elevation":
         return combine_by_elevation(profile1, profile2, value, retain_distance)
     else:
-        raise ValueError(
-            "Invalid 'combine_by' value. Use 'distance' or 'elevation'."
-        )
+        raise ValueError("Invalid 'combine_by' value. Use 'distance' or 'elevation'.")

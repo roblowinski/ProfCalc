@@ -1,3 +1,50 @@
+# =============================================================================
+# CSV Input/Output Module for Beach Profile Data
+# =============================================================================
+#
+# FILE: src/profcalc/common/csv_io.py
+#
+# PURPOSE:
+# This module provides comprehensive CSV file handling capabilities for beach
+# profile analysis, supporting both reading and writing of profile data in
+# various CSV formats. It handles the complexities of parsing tabular survey
+# data with flexible column mappings, metadata extraction, and profile
+# organization.
+#
+# WHAT IT'S FOR:
+# - Reading beach profile data from CSV files with automatic column detection
+# - Writing profile data to CSV format with proper metadata preservation
+# - Supporting multiple CSV structures (single/multi-profile files)
+# - Flexible column mapping for different naming conventions
+# - XYZ coordinate file handling (specialized CSV format)
+# - Profile origin and azimuth data management
+# - Distance-based point assignment to profiles
+# - Comprehensive error handling and validation
+#
+# WORKFLOW POSITION:
+# This module is central to data import/export operations in the beach profile
+# analysis workflow. It's used when users need to work with CSV-formatted
+# survey data, either importing existing datasets or exporting analysis results.
+# It bridges external data sources with the internal Profile data structures.
+#
+# LIMITATIONS:
+# - Requires pandas for CSV operations
+# - Column detection is heuristic-based and may need manual mapping
+# - Large CSV files may consume significant memory
+# - Date parsing depends on consistent formatting
+# - Geographic transformations require coordinate system information
+# - Multi-profile files must have profile_id column for grouping
+#
+# ASSUMPTIONS:
+# - CSV files contain tabular data with headers
+# - Coordinate columns follow common naming patterns (x, y, z, etc.)
+# - Profile data is organized by rows (one point per row)
+# - Users understand their data's coordinate system and units
+# - File paths are accessible and files are not corrupted
+# - Memory is sufficient for loading complete datasets
+#
+# =============================================================================
+
 """
 CSV I/O Module for Beach Profile Data
 
@@ -290,9 +337,7 @@ class CSVParser:
         standard_cols = set(mapping.values())
         extra_cols = [col for col in columns if col not in standard_cols]
         if extra_cols:
-            mapping["_extra_columns"] = (
-                extra_cols  # Store list[str] under special key
-            )
+            mapping["_extra_columns"] = extra_cols  # Store list[str] under special key
 
         return mapping
 
@@ -348,18 +393,12 @@ class CSVParser:
             if "survey_date" in column_mapping and isinstance(
                 column_mapping["survey_date"], str
             ):
-                survey_date_str: Any = df[column_mapping["survey_date"]].iloc[
-                    0
-                ]  # type: ignore
+                survey_date_str: Any = df[column_mapping["survey_date"]].iloc[0]  # type: ignore
                 if pd.notna(survey_date_str):  # type: ignore
-                    metadata["survey_date"] = self._parse_date(
-                        str(survey_date_str)
-                    )
+                    metadata["survey_date"] = self._parse_date(str(survey_date_str))
 
             for col in ["surveyor", "project"]:
-                if col in column_mapping and isinstance(
-                    column_mapping[col], str
-                ):
+                if col in column_mapping and isinstance(column_mapping[col], str):
                     val: Any = df[column_mapping[col]].iloc[0]  # type: ignore
                     if pd.notna(val):  # type: ignore
                         metadata[col] = str(val)
@@ -420,15 +459,11 @@ class CSVParser:
                             extra_data.append(extra_values)
 
                 except (ValueError, TypeError) as e:
-                    self.logger.warning(
-                        f"Skipping invalid point at row {idx}: {e}"
-                    )
+                    self.logger.warning(f"Skipping invalid point at row {idx}: {e}")
                     continue
 
             if not x_coords:
-                self.logger.warning(
-                    f"No valid points found for profile {profile_id}"
-                )
+                self.logger.warning(f"No valid points found for profile {profile_id}")
                 return None
 
             # Validate coordinate arrays
@@ -637,9 +672,7 @@ def _convert_parsed_file_to_profiles(parsed_file: ParsedFile) -> List[Profile]:
                     np.array(z_vals), "z_coordinates", allow_nan=False
                 )
 
-                if (
-                    not x_validation and not z_validation
-                ):  # No validation errors
+                if not x_validation and not z_validation:  # No validation errors
                     profiles.append(
                         Profile(
                             name=name,
@@ -675,9 +708,7 @@ def read_csv_profiles(
         for robust handling of various CSV formats and automatic column detection.
     """
     # Use the centralized parser
-    parsed_file = parse_file_centralized(
-        Path(file_path), skip_confirmation=True
-    )
+    parsed_file = parse_file_centralized(Path(file_path), skip_confirmation=True)
 
     # Convert to legacy Profile format
     return _convert_parsed_file_to_profiles(parsed_file)
@@ -782,9 +813,7 @@ def _profiles_to_dataframe(profiles: List[Profile]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _format_csv_output(
-    df: pd.DataFrame, config: dict[str, Any]
-) -> pd.DataFrame:
+def _format_csv_output(df: pd.DataFrame, config: dict[str, Any]) -> pd.DataFrame:
     """Format the CSV output DataFrame based on configuration.
 
     Args:
@@ -830,7 +859,7 @@ def _format_csv_output(
 def read_xyz_profiles(
     file_path: str | Path,
     origin_azimuth_file: str
-    | Path = "src/profcalc/data/required_inputs/ProfileOriginAzimuths.csv",
+    | Path = "data/reference/baselines/ProfileOriginAzimuths.csv",
     tolerance_ft: float = 25.0,
 ) -> List[Profile]:
     """Read XYZ coordinate data and assign points to profiles based on perpendicular distance.

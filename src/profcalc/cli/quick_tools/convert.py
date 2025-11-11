@@ -1,3 +1,41 @@
+# =============================================================================
+# Convert Quick Tool Wrapper
+# =============================================================================
+#
+# FILE: src/profcalc/cli/quick_tools/convert.py
+#
+# PURPOSE:
+# This module provides format conversion utilities and a quick tool wrapper for
+# converting between different coastal profile data formats (CSV, XYZ, BMAP,
+# Shapefile). It includes lightweight conversion functions and menu integration
+# for streamlined format conversion workflows.
+#
+# WHAT IT'S FOR:
+# - Providing format conversion between coastal data formats
+# - Supporting CSV, XYZ, BMAP, and Shapefile conversions
+# - Enabling data interoperability across different systems
+# - Offering menu-integrated access to conversion tools
+# - Supporting automated format detection and conversion
+#
+# WORKFLOW POSITION:
+# This quick tool serves as the primary interface for format conversion operations
+# in the ProfCalc system. It provides both programmatic conversion utilities and
+# menu-driven conversion workflows for users working with different data formats.
+#
+# LIMITATIONS:
+# - Limited to supported format conversions
+# - Requires compatible source data structure
+# - Column mapping may need manual specification
+# - Format detection based on file extensions
+#
+# ASSUMPTIONS:
+# - Input files follow expected format conventions
+# - Output formats are compatible with target systems
+# - Column specifications are correctly provided
+# - File paths are accessible for read/write operations
+#
+# =============================================================================
+
 """Simple format conversion utilities used by tests.
 
 Lightweight CSV/XYZ conversion and a menu-only quick-tools wrapper.
@@ -11,6 +49,14 @@ from typing import Dict, Optional, Sequence, Union
 def _parse_column_order(
     s: Optional[Union[str, Dict[str, int]]],
 ) -> Dict[str, int]:
+    """Parse column order specification into a mapping dictionary.
+
+    Parameters:
+        s: Column order as string (e.g., "x=0,y=1,z=2") or dict, or None for defaults
+
+    Returns:
+        Dictionary mapping column names to indices
+    """
     if not s:
         return {"x": 0, "y": 1, "z": 2}
     if isinstance(s, dict):
@@ -28,6 +74,14 @@ def _parse_column_order(
 
 
 def _detect_format(file_path: str) -> str:
+    """Detect file format based on file extension.
+
+    Parameters:
+        file_path: Path to the file
+
+    Returns:
+        Format string: 'csv', 'xyz', or 'bmap'
+    """
     ext = Path(file_path).suffix.lower()
     if ext == ".csv":
         return "csv"
@@ -39,6 +93,14 @@ def _detect_format(file_path: str) -> str:
 def _detect_xy_columns(
     headers: Optional[Union[Sequence[str], Dict[str, int]]],
 ) -> Optional[Dict[str, str]]:
+    """Detect X/Y/Z column names from headers.
+
+    Parameters:
+        headers: Column headers as list or dict
+
+    Returns:
+        Dict mapping 'x', 'y', 'z' to column names, or None if not detected
+    """
     if not headers:
         return None
 
@@ -142,7 +204,13 @@ else:
             if impl_execute_from_menu:
                 return impl_execute_from_menu()
             raise ImportError("convert implementation has no menu entrypoint")
-        except Exception as e:  # pragma: no cover - log and re-raise
+        except (
+            ImportError,
+            AttributeError,
+            RuntimeError,
+            OSError,
+            ValueError,
+        ) as e:  # pragma: no cover - log and re-raise
             log_quick_tool_error(
                 "convert", f"Unhandled exception in convert quick tool: {e}"
             )

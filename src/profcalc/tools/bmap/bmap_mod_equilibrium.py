@@ -1,3 +1,41 @@
+# =============================================================================
+# BMAP Modified Equilibrium Profile Generation Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_mod_equilibrium.py
+#
+# PURPOSE:
+# This module generates modified equilibrium beach profiles using an enhanced
+# version of Dean's equilibrium theory that includes decay coefficients and
+# depth ratios. It provides more flexible theoretical profile generation for
+# complex beach morphologies that may not follow simple power-law relationships.
+#
+# WHAT IT'S FOR:
+# - Generating theoretical profiles with exponential decay terms
+# - Modeling complex beach morphologies with depth ratios
+# - Computing Dean A-parameter from grain size for modified profiles
+# - Supporting advanced equilibrium profile analysis
+# - Providing theoretical baselines for complex beach systems
+#
+# WORKFLOW POSITION:
+# This tool extends the basic equilibrium profile generation for cases where
+# simple Dean profiles are insufficient. It's used when beach profiles show
+# complex morphologies that require additional parameters to model accurately.
+#
+# LIMITATIONS:
+# - More complex parameterization increases uncertainty
+# - Requires knowledge of appropriate decay coefficients and depth ratios
+# - Theoretical basis may be less well-established than simple Dean profiles
+# - Parameter selection requires expertise in coastal morphodynamics
+#
+# ASSUMPTIONS:
+# - Modified equilibrium equation is appropriate for the beach system
+# - Decay coefficients and depth ratios are physically meaningful
+# - Sediment characteristics follow Dean's relationships
+# - Complex profile shapes require the additional parameters
+#
+# =============================================================================
+
 """
 Module: modified_equilibrium
 Location: profcalc.modules.profiles
@@ -74,15 +112,11 @@ def compute_modified_equilibrium(
         raise ValueError("Either A or grain_size must be provided.")
 
     if A is None:
-        assert (
-            grain_size is not None
-        )  # This should be guaranteed by the check above
+        assert grain_size is not None  # This should be guaranteed by the check above
         A = compute_A_from_grain_size(grain_size)
 
     x = np.arange(xon, xoff + dx, dx)
-    term = x + (1 / decay_coeff) * (dRatio - 1) * (
-        1 - np.exp(-decay_coeff * x)
-    )
+    term = x + (1 / decay_coeff) * (dRatio - 1) * (1 - np.exp(-decay_coeff * x))
     z = A * np.power(term, 2 / 3)
 
     profile_df = pd.DataFrame({"X": x, "Z": z})

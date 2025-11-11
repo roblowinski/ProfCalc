@@ -1,3 +1,42 @@
+# =============================================================================
+# BMAP Equilibrium Profile Generation Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_equilibrium.py
+#
+# PURPOSE:
+# This module generates theoretical equilibrium beach profiles based on Dean's
+# (1977) equilibrium profile theory. It computes the expected beach morphology
+# under stable wave conditions, providing a baseline for comparing observed
+# profiles and assessing beach state relative to theoretical equilibrium.
+#
+# WHAT IT'S FOR:
+# - Generating theoretical equilibrium profiles using Dean's equation
+# - Computing Dean's A parameter from median grain size
+# - Creating baseline profiles for morphological analysis
+# - Supporting beach state assessment and profile comparisons
+# - Providing theoretical profiles for design and planning purposes
+#
+# WORKFLOW POSITION:
+# This tool is used in profile analysis workflows to establish theoretical
+# baselines for beach morphology. It's particularly useful for assessing
+# whether observed profiles represent equilibrium conditions or are in a
+# state of adjustment due to storms or sediment supply changes.
+#
+# LIMITATIONS:
+# - Based on simplified equilibrium theory (Dean, 1977)
+# - Assumes uniform sediment characteristics and wave conditions
+# - Does not account for complex beach morphodynamic processes
+# - Theoretical profiles may not match real-world conditions exactly
+#
+# ASSUMPTIONS:
+# - Beach is in equilibrium with prevailing wave conditions
+# - Sediment is well-sorted with known median grain size
+# - Profile shape follows power-law relationship
+# - Coordinate system and units are consistent with analysis needs
+#
+# =============================================================================
+
 """
 Module: equilibrium
 Location: profcalc.modules.profiles
@@ -74,9 +113,7 @@ def compute_equilibrium(
         raise ValueError("Either A or grain_size must be provided.")
 
     if A is None:
-        assert (
-            grain_size is not None
-        )  # This should be guaranteed by the check above
+        assert grain_size is not None  # This should be guaranteed by the check above
         A = compute_A_from_grain_size(grain_size)
 
     x = np.arange(xon, xoff + dx, dx)

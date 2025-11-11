@@ -1,3 +1,47 @@
+# =============================================================================
+# ProfCalc Interactive Menu System
+# =============================================================================
+#
+# FILE: src/profcalc/cli/menu_system.py
+#
+# PURPOSE:
+# This module implements the comprehensive interactive menu system for ProfCalc,
+# providing a hierarchical, user-friendly command-line interface to all analysis
+# tools and utilities. It organizes complex coastal profile analysis workflows
+# into logical menu categories and handles user navigation, input validation,
+# and tool execution.
+#
+# WHAT IT'S FOR:
+# - Provides hierarchical menu navigation for all ProfCalc functionality
+# - Organizes tools into logical categories (Data Management, Annual Monitoring, etc.)
+# - Handles user input validation and error recovery
+# - Manages data source selection (file-based with database placeholders)
+# - Provides consistent user experience across all analysis tools
+# - Supports both guided workflows and direct tool access
+#
+# WORKFLOW POSITION:
+# This file sits at the center of the CLI user experience, bridging the gap between
+# raw command-line execution and structured analysis workflows. It coordinates
+# between data management, analysis tools, and user interaction, ensuring that
+# complex multi-step processes are presented in an intuitive, guided manner.
+#
+# LIMITATIONS:
+# - Requires interactive terminal environment for menu display
+# - Menu navigation can be slower than direct command execution
+# - Large file with many functions - could benefit from modularization
+# - Some database integration features are placeholder-only
+# - Error handling depends on user acknowledgement for continuation
+#
+# ASSUMPTIONS:
+# - Users prefer guided, menu-driven workflows over command-line arguments
+# - Terminal/console environment supports ANSI color codes for formatting
+# - Users need clear navigation and help text for complex analysis tasks
+# - File-based data sources are primary (database integration is future enhancement)
+# - Interactive input methods (like file dialogs) are available and functional
+# - Users understand basic menu navigation concepts (numbers, back/cancel options)
+#
+# =============================================================================
+
 """Interactive Menu System for ProfCalc.
 
 This module provides the command-line interface for ProfCalc, offering
@@ -12,28 +56,42 @@ The menu is organized into logical workflows:
 - Quick Tools: Utility functions for common tasks
 """
 
-import builtins
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Callable, Optional, Tuple
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     pass
 
 # Use the package-level data tools to keep dataset registration centralized
+from profcalc.cli.file_dialogs import select_input_file
 from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
 from profcalc.cli.tools import data as data_tools
+from profcalc.common.colors import (
+    menu_option,
+    print_header,
+    print_menu_title,
+    success,
+)
 
 
-@dataclass
-class AppIO:
-    input_fn: Callable[[str], str] = builtins.input
-    print_fn: Callable[..., None] = builtins.print
+def notify_and_wait(
+    message: str,
+    prompt: str = "Press Enter to continue...",
+) -> None:
+    """Print a message and wait for user acknowledgement.
 
+    This helper prints the provided message and then
+    prompts the user with a simple Enter-to-continue prompt.
 
-def _get_io(io: Optional[AppIO]) -> Tuple[Callable[[str], str], Callable[..., None]]:
-    if io is None:
-        return builtins.input, builtins.print
-    return io.input_fn, io.print_fn
+    Parameters:
+        message: The message to display before waiting
+        prompt: The prompt to show when waiting for user input
+    """
+    print(message)
+    try:
+        input(prompt)
+    except (KeyboardInterrupt, EOFError):
+        # Treat interrupt like a normal acknowledgement in interactive use
+        print("")
 
 
 # Simple session context for storing user choices
@@ -47,8 +105,9 @@ class AppState:
     """
 
     def __init__(self) -> None:
-        self.data_source: Optional[str] = None
-        self.data_source_details: Optional[str] = None
+        """Initialize the application state with default values."""
+        self.data_source: str | None = None
+        self.data_source_details: str | None = None
 
 
 app_state = AppState()
@@ -69,45 +128,49 @@ def main_menu() -> None:
     - Exit
     """
     while True:
-        print("\n=== Main Menu ===")
-        print("1. Data Management")
-        print("2. Annual Monitoring Report Analyses")
-        print("3. File Conversion Tools")
-        print("4. Profile Analysis Tools")
-        print("5. Batch Processing")
-        print("6. Configuration & Settings")
-        print("7. Quick Tools")
-        print("8. Help & Documentation")
-        print("9. Exit")
+        print_header("ProfCalc - Coastal Profile Analysis")
+        print_menu_title("Main Menu")
+        print(menu_option("1", "Data Management"))
+        print(menu_option("2", "Annual Monitoring Report Analyses"))
+        print(menu_option("3", "File Conversion Tools"))
+        print(menu_option("4", "Profile Analysis Tools"))
+        print(menu_option("5", "Batch Processing"))
+        print(menu_option("6", "Configuration & Settings"))
+        print(menu_option("7", "Quick Tools"))
+        print(menu_option("8", "Help & Documentation"))
+        print(menu_option("9", "Exit"))
+        print()
         choice = input("Select an option: ").strip()
 
         if choice == "1":
             data_management_menu()
         elif choice == "2":
             annual_monitoring_menu()
+        elif choice == "3":
+            # File Conversion Tools
+            conversion_submenu()
+        elif choice == "4":
+            # Profile Analysis Tools
+            profcalc_profcalc_menu()
         elif choice == "8":
             # Help & Documentation
             about()
         elif choice == "9":
-            print("Goodbye!")
+            print()
+            print(success("Goodbye!"))
             # Return from main_menu to allow clean shutdown of the launcher
             return
-            profcalc_profcalc_menu()
         elif choice == "5":
             print("Batch Processing - Coming Soon!")
         elif choice == "6":
             print("Configuration & Settings - Coming Soon!")
         elif choice == "7":
             quick_tools_menu()
-        elif choice == "9":
-            print("Goodbye!")
-            # Return from main_menu to allow clean shutdown of the launcher
-            return
         else:
             print("Invalid selection. Please try again.")
 
 
-def ensure_data_source(io: Optional[AppIO] = None) -> None:
+def ensure_data_source() -> None:
     """Prompt the user to select a data source if one is not already set.
 
     This convenience prompts once when entering Data Management so users
@@ -117,23 +180,21 @@ def ensure_data_source(io: Optional[AppIO] = None) -> None:
     if app_state.data_source:
         return
 
-    input_fn, print_fn = _get_io(io)
-
-    print_fn("\nNo data source configured. Select data source:")
-    print_fn("1. Load from file")
-    print_fn("2. Connect to database")
-    print_fn("3. Use in-memory session (no external source)")
-    choice = input_fn("Select a source [1/2/3]: ").strip()
+    print("\nNo data source configured. Select data source:")
+    print("1. Load from file")
+    print("2. Connect to database")
+    print("3. Use in-memory session (no external source)")
+    choice = input("Select a source [1/2/3]: ").strip()
     if choice == "1":
         app_state.data_source = "file"
-        path = input_fn(
-            "Enter path to 9-column CSV to import now (or blank to skip): "
-        ).strip()
-        if path:
+        path = select_input_file("Select 9-column data file")
+        if not path:
+            print("Import cancelled.")
+            return
             try:
                 result = data_tools.import_data(path)
                 imported = result.get("imported") if isinstance(result, dict) else "?"
-                print_fn(f"Imported {imported} rows from {path}.")
+                print(f"Imported {imported} rows from {path}.")
             except (
                 FileNotFoundError,
                 ValueError,
@@ -145,17 +206,17 @@ def ensure_data_source(io: Optional[AppIO] = None) -> None:
                     f"Import failed during ensure_data_source: {exc}",
                     exc=exc,
                 )
-                print_fn(f"Import failed: {exc}")
+                print(f"Import failed: {exc}")
     elif choice == "2":
         app_state.data_source = "database"
         app_state.data_source_details = None
-        print_fn("\n[INFO] Database mode selected. (DB connection not yet implemented)")
+        print("\n[INFO] Database mode selected. (DB connection not yet implemented)")
     else:
         app_state.data_source = "session"
-        print_fn("\n[INFO] Using in-memory session (no external source configured).")
+        print("\n[INFO] Using in-memory session (no external source configured).")
 
 
-def data_management_menu(io: Optional[AppIO] = None) -> None:
+def data_management_menu() -> None:
     """Display and handle the Data Management menu.
 
     Provides data management operations:
@@ -164,36 +225,35 @@ def data_management_menu(io: Optional[AppIO] = None) -> None:
     - View Data Summary (stub)
     """
     # Prompt for data source up-front if none selected
-    ensure_data_source(io)
-
-    input_fn, print_fn = _get_io(io)
+    ensure_data_source()
 
     while True:
-        print_fn("\n--- Data Management ---")
-        print_fn(
-            f"1. Select Data Source (Current: {app_state.data_source or 'Not Set'})"
+        print_header("Data Management")
+        print_menu_title("Data Operations")
+        print(
+            menu_option(
+                "1",
+                f"Select Data Source (Current: {app_state.data_source or 'Not Set'})",
+            )
         )
-        print("2. Import Data (9-col CSV)")
-        print("3. List Registered Datasets")
-        print("4. Select Active Dataset")
-        print("5. View Data Summary")
-        print("6. Back to Main Menu")
-        choice = input_fn("Select an option: ").strip()
+        print(menu_option("2", "Import Data (9-col CSV)"))
+        print(menu_option("3", "List Registered Datasets"))
+        print(menu_option("4", "Select Active Dataset"))
+        print(menu_option("5", "View Data Summary"))
+        print(menu_option("6", "Back to Main Menu"))
+        print()
+        choice = input("Select an option: ").strip()
         if choice == "1":
-            ensure_data_source(io)
+            ensure_data_source()
         elif choice == "2":
-            path = input_fn(
-                "Enter path to 9-column CSV file to import (or blank to cancel): "
-            ).strip()
+            path = select_input_file("Select 9-column CSV file to import")
             if not path:
-                print_fn("Import cancelled.")
+                print("Import cancelled.")
                 continue
             try:
                 result = data_tools.import_data(path)
-                imported = (
-                    result.get("imported") if isinstance(result, dict) else "?"
-                )
-                print_fn(f"Imported {imported} rows from {path}.")
+                imported = result.get("imported") if isinstance(result, dict) else "?"
+                print(f"Imported {imported} rows from {path}.")
             except (
                 FileNotFoundError,
                 ValueError,
@@ -205,15 +265,15 @@ def data_management_menu(io: Optional[AppIO] = None) -> None:
                     f"Import failed in data_management_menu: {exc}",
                     exc=exc,
                 )
-                print_fn(f"Import failed: {exc}")
+                print(f"Import failed: {exc}")
         elif choice == "3":
             data_tools.list_datasets()
         elif choice == "4":
-            dsid = input_fn(
+            dsid = input(
                 "Enter dataset ID to set active (or blank to cancel): "
             ).strip()
             if not dsid:
-                print_fn("Selection cancelled.")
+                print("Selection cancelled.")
                 continue
             try:
                 data_tools.select_dataset(dsid)
@@ -222,13 +282,13 @@ def data_management_menu(io: Optional[AppIO] = None) -> None:
                 ValueError,
                 OSError,
             ) as exc:  # pragma: no cover - interactive
-                print_fn(f"Failed to select dataset: {exc}")
+                print(f"Failed to select dataset: {exc}")
         elif choice == "5":
             data_tools.summary()
         elif choice == "6":
             break
         else:
-            print_fn("Invalid selection. Please try again.")
+            print("Invalid selection. Please try again.")
 
 
 def annual_monitoring_menu() -> None:
@@ -243,39 +303,37 @@ def annual_monitoring_menu() -> None:
     - Run XOn/XOff Volume Tool
     """
     while True:
-        print("\n--- Annual Monitoring Report Analyses ---")
-        print("1. Import Survey Data")
-        print("2. Compute Annual Erosion Rate (AER)")
-        print("3. Profile Analysis")
-        print("4. Shoreline Analysis")
-        print("5. Condition Evaluation")
-        print("6. Reporting & Export")
-        print("7. Back to Main Menu")
+        print_header("Annual Monitoring Report Analyses")
+        print_menu_title("Monitoring Tools")
+        print(menu_option("1", "Import Survey Data"))
+        print(menu_option("2", "Compute Annual Erosion Rate (AER)"))
+        print(menu_option("3", "Profile Analysis"))
+        print(menu_option("4", "Shoreline Analysis"))
+        print(menu_option("5", "Condition Evaluation"))
+        print(menu_option("6", "Reporting & Export"))
+        print(menu_option("7", "Back to Main Menu"))
+        print()
         choice = input("Select an option: ").strip()
         if choice == "1":
             # Prompt for a survey file and import using the shared data tools
-            path = input(
-                "Enter path to survey CSV to import (or blank to cancel): "
-            ).strip()
+            path = select_input_file("Select CSV file to import")
             if not path:
                 print("Import cancelled.")
                 continue
             try:
                 res = data_tools.import_data(path)
-                imported = (
-                    res.get("imported") if isinstance(res, dict) else "?"
-                )
+                imported = res.get("imported") if isinstance(res, dict) else "?"
                 print(f"Imported {imported} rows from {path}.")
+                # Make success explicit and pause so the user can see the result
+                notify_and_wait("Import successful.")
             except (
                 FileNotFoundError,
                 ValueError,
                 NotImplementedError,
                 OSError,
             ) as exc:  # pragma: no cover - interactive
-                log_quick_tool_error(
-                    "menu_system", f"Import failed: {exc}", exc=exc
-                )
-                print(f"Import failed: {exc}")
+                log_quick_tool_error("menu_system", f"Import failed: {exc}", exc=exc)
+                notify_and_wait(f"Import failed: {exc}")
         elif choice == "2":
             # Compute AER via the Annual tools handler
             try:
@@ -329,9 +387,7 @@ def shoreline_analysis_menu() -> None:
         print("5. Back to Annual Monitoring Menu")
         choice = input("Select an option: ").strip()
         if choice == "1":
-            print(
-                "[STUB] Extract & Prepare Shoreline Data - Not yet implemented."
-            )
+            print("[STUB] Extract & Prepare Shoreline Data - Not yet implemented.")
         elif choice == "2":
             print("[STUB] Calculate Shoreline Metrics - Not yet implemented.")
         elif choice == "3":
@@ -511,16 +567,17 @@ def quick_tools_menu() -> None:
     - Assign Profile Names to XYZ/CSV Files Missing Profile IDs
     """
     while True:
-        print("\n--- Quick Tools ---")
-        print("1. Correct BMAP Free Format Profile Point Count")
-        print(
-            "2. Find Common X Bounds Within a Group of Profiles in a BMap Free Format File"
-        )
-        print("3. Get an Inventory of Profiles from Multi Profile File")
-        print("4. Assign Missing Profile Names in a XYZ/CSV File Based on X/Y")
-        print("5. Modify BMAP Free Format Profile Header")
-        print("6. Retrieve Survey Dates for Profile from 9-Col File")
-        print("7. Return to Main Menu")
+        print_header("Quick Tools")
+        print_menu_title("Available Tools")
+        print(menu_option("1", "Correct BMAP Free Format Profile Point Count"))
+        print(menu_option("2", "Find Common X Bounds and Y Bounds in Profile Group"))
+        print(menu_option("3", "Inventory of Profiles from Multi-Profile File"))
+        print(menu_option("4", "Assign Missing Profile Names in a XYZ/CSV File"))
+        print(menu_option("5", "Modify BMAP Free Format Profile Headers"))
+        print(menu_option("6", "Retrieve Survey Dates for a Profile from 9-Col File"))
+        print(menu_option("7", "Scan a folder for profiles (Profile Scanner)"))
+        print(menu_option("8", "Return to Main Menu"))
+        print()
         choice = input("Select a quick tool: ").strip()
 
         if choice == "1":
@@ -541,9 +598,14 @@ def quick_tools_menu() -> None:
 
         elif choice == "2":
             try:
-                from profcalc.cli.quick_tools import bounds as bounds_tool
+                # Use importlib to ensure monkeypatched sys.modules entries (tests)
+                import importlib
 
-                bounds_tool.execute_from_menu()
+                bounds_tool = importlib.import_module("profcalc.cli.quick_tools.bounds")
+                if hasattr(bounds_tool, "execute_from_menu"):
+                    bounds_tool.execute_from_menu()
+                else:
+                    raise AttributeError("bounds tool missing execute_from_menu")
             except (
                 ImportError,
                 AttributeError,
@@ -555,11 +617,15 @@ def quick_tools_menu() -> None:
 
         elif choice == "3":
             try:
-                from profcalc.cli.quick_tools import (
-                    inventory as inventory_tool,
-                )
+                import importlib
 
-                inventory_tool.execute_from_menu()
+                inventory_tool = importlib.import_module(
+                    "profcalc.cli.quick_tools.inventory"
+                )
+                if hasattr(inventory_tool, "execute_from_menu"):
+                    inventory_tool.execute_from_menu()
+                else:
+                    raise AttributeError("inventory tool missing execute_from_menu")
             except (
                 ImportError,
                 AttributeError,
@@ -619,20 +685,45 @@ def quick_tools_menu() -> None:
                     exc=exc,
                 )
                 print(f"Failed to import get_profile_dates tool: {exc}")
-                input("\nPress Enter to continue...")
+                notify_and_wait("", prompt="\nPress Enter to continue...")
                 continue
             try:
                 get_profile_dates_tool.execute_from_menu()
-            except Exception as exc:
+            except (ImportError, AttributeError, OSError, ValueError) as exc:
+                # Catch common runtime/import errors from the tool execution
                 log_quick_tool_error(
                     "menu_system",
                     f"Failed to run get_profile_dates tool: {exc}",
                     exc=exc,
                 )
                 print(f"Failed to run get_profile_dates tool: {exc}")
-            input("\nPress Enter to continue...")
+            notify_and_wait("", prompt="\nPress Enter to continue...")
 
         elif choice == "7":
+            try:
+                from profcalc.cli.quick_tools import (
+                    profile_scanner as profile_scanner_tool,
+                )
+
+                if hasattr(profile_scanner_tool, "execute_from_menu"):
+                    profile_scanner_tool.execute_from_menu()
+                else:
+                    raise AttributeError(
+                        "profile_scanner tool missing execute_from_menu"
+                    )
+            except (
+                ImportError,
+                AttributeError,
+            ) as exc:  # pragma: no cover - interactive
+                log_quick_tool_error(
+                    "menu_system",
+                    f"Failed to run profile scanner tool: {exc}",
+                    exc=exc,
+                )
+                print(f"Failed to run profile scanner tool: {exc}")
+
+        elif choice == "8":
+            # Return to previous menu
             break
 
         else:
@@ -652,14 +743,16 @@ def conversion_submenu() -> None:
     Note: All conversion options are currently stub implementations.
     """
     while True:
-        print("\n--- File Conversion Options ---")
-        print("1. BMAP Free Format to XYZ/9-Col")
-        print("2. BMAP Free Format to Shapefile")
-        print("3. XYZ/9-Col to BMAP Free Format")
-        print("4. XYZ/9-Col to Shapefile")
-        print("5. Point Shapefile to BMAP Free Format")
-        print("6. Point Shapefile to XYZ/9-Col")
-        print("7. Return to Previous Menu")
+        print_header("File Conversion Tools")
+        print_menu_title("Conversion Options")
+        print(menu_option("1", "BMAP Free Format to XYZ/9-Col"))
+        print(menu_option("2", "BMAP Free Format to Shapefile"))
+        print(menu_option("3", "XYZ/9-Col to BMAP Free Format"))
+        print(menu_option("4", "XYZ/9-Col to Shapefile"))
+        print(menu_option("5", "Point Shapefile to BMAP Free Format"))
+        print(menu_option("6", "Point Shapefile to XYZ/9-Col"))
+        print(menu_option("7", "Return to Previous Menu"))
+        print()
         choice = input("Select a conversion: ").strip()
 
         if choice == "1":
@@ -743,7 +836,7 @@ def _retrieve_profile_date_range() -> None:
         print(f"Required bmap reader not available: {e}")
         return
 
-    input_file = input("Enter BMAP file path: ").strip()
+    input_file = select_input_file("Select BMAP Free Format File")
     if not input_file:
         print("Cancelled.")
         return
@@ -763,9 +856,7 @@ def _retrieve_profile_date_range() -> None:
     for n in names:
         print(f"  - {n}")
 
-    choice = input(
-        "Enter profile name to examine (or 'all' for whole file): "
-    ).strip()
+    choice = input("Enter profile name to examine (or 'all' for whole file): ").strip()
     targets = []
     if not choice or choice.lower() == "all":
         targets = profiles

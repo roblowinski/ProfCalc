@@ -1,3 +1,42 @@
+# =============================================================================
+# BMAP Cut and Fill Analysis Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_cut_fill.py
+#
+# PURPOSE:
+# This module replicates BMAP's "Cut and Fill" tool functionality, providing
+# detailed volumetric analysis of morphological changes between beach profile
+# surveys. It calculates erosion (cut) and accretion (fill) volumes with
+# per-cell reporting and comprehensive statistical summaries.
+#
+# WHAT IT'S FOR:
+# - Computing detailed cut and fill volumes between profile pairs
+# - Generating per-cell elevation difference tables
+# - Calculating net, cut, and fill volumes with trapezoidal integration
+# - Supporting XOn/XOff boundary restrictions for analysis regions
+# - Providing statistical summaries of volumetric changes
+# - Creating BMAP-compatible cut/fill reports
+#
+# WORKFLOW POSITION:
+# This tool is central to volumetric change analysis in beach monitoring
+# programs. It provides the detailed quantitative data needed for erosion
+# assessments, sediment budget calculations, and coastal management decisions.
+#
+# LIMITATIONS:
+# - Requires paired profiles with overlapping cross-shore ranges
+# - Volume calculations assume consistent coordinate systems and datums
+# - Interpolation may introduce artifacts in areas with sparse data
+# - Large profile datasets may require significant computational resources
+#
+# ASSUMPTIONS:
+# - Profile pairs represent the same physical cross-section over time
+# - Elevation data is relative to a consistent vertical datum
+# - Profile spacing and resolution is adequate for volumetric calculations
+# - XOn/XOff boundaries appropriately define the analysis region
+#
+# =============================================================================
+
 """
 cut_fill_detailed.py
 --------------------
@@ -31,7 +70,7 @@ from typing import Optional, Tuple
 import numpy as np
 from scipy.interpolate import UnivariateSpline  # type: ignore
 
-from profcalc.common.bmap_io import read_bmap_freeformat
+from profcalc.common.bmap_io import Profile, read_bmap_freeformat
 from profcalc.common.config_utils import get_dx
 from profcalc.common.error_handler import LogComponent, get_logger
 from profcalc.common.io_reports import write_cutfill_detailed_report
@@ -101,9 +140,7 @@ def _select_profile(profiles, selector: str):
     raise ValueError(f"No profile matched selector: '{selector}'")
 
 
-def _ensure_sorted(
-    x: np.ndarray, z: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
+def _ensure_sorted(x: np.ndarray, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     idx = np.argsort(x)
     return x[idx], z[idx]
 
@@ -114,9 +151,7 @@ def _overlap_bounds(x1: np.ndarray, x2: np.ndarray) -> Tuple[float, float]:
     x_on = max(x1min, x2min)
     x_off = min(x1max, x2max)
     if x_on >= x_off:
-        raise ValueError(
-            "Profiles do not overlap in X; cannot compute Cut/Fill."
-        )
+        raise ValueError("Profiles do not overlap in X; cannot compute Cut/Fill.")
     return x_on, x_off
 
 
@@ -145,9 +180,7 @@ def _shoreline_x(x: np.ndarray, z: np.ndarray) -> Optional[float]:
 
 
 # Module-level helper: split trapezoid area across datum (z=0)
-def split_trap_area(
-    xa: float, xb: float, za: float, zb: float
-) -> tuple[float, float]:
+def split_trap_area(xa: float, xb: float, za: float, zb: float) -> tuple[float, float]:
     """Return (area_above, area_below) for trapezoid between xa..xb with end elevations za, zb.
     Splits at z=0 when crossing the datum.
     """
@@ -173,14 +206,14 @@ def split_trap_area(
 
 
 def compute_cut_fill_detailed(
-    p1,
-    p2,
+    p1: Profile,
+    p2: Profile,
     title: str,
     output_path: str,
     dx: float = 10.0,
     smoothing: Optional[float] = None,
     use_ported_logic: bool = False,
-):
+) -> None:
     # Sort and restrict to overlapping X range
     x1, z1 = _ensure_sorted(p1.x, p1.z)
     x2, z2 = _ensure_sorted(p2.x, p2.z)
@@ -191,7 +224,7 @@ def compute_cut_fill_detailed(
     z2_smoothed = smooth_profile(x2, z2, smoothing)
 
     # Helper for BMAP-style flat extension/interp (now uses smoothed profiles)
-    def interp_or_flat(x, z, xq):
+    def interp_or_flat(x: np.ndarray, z: np.ndarray, xq: float) -> float:
         if xq <= x[0]:
             return z[0]
         if xq >= x[-1]:
@@ -217,16 +250,10 @@ def compute_cut_fill_detailed(
                 x_cross = xs_all[i - 1] + frac * (xs_all[i] - xs_all[i - 1])
                 intersection_xs.append(x_cross)
         cell_boundaries = (
-            [x_on]
-            + sorted([x for x in intersection_xs if x_on < x < x_off])
-            + [x_off]
+            [x_on] + sorted([x for x in intersection_xs if x_on < x < x_off]) + [x_off]
         )
-        z1_cb = np.array(
-            [interp_or_flat(xs1, ys1, x) for x in cell_boundaries]
-        )
-        z2_cb = np.array(
-            [interp_or_flat(xs2, ys2, x) for x in cell_boundaries]
-        )
+        z1_cb = np.array([interp_or_flat(xs1, ys1, x) for x in cell_boundaries])
+        z2_cb = np.array([interp_or_flat(xs2, ys2, x) for x in cell_boundaries])
         # The rest of the ported logic can now use cell_boundaries, z1_cb, z2_cb
         # (Replace all uses of cell_edges, y1_interp, y2_interp with these)
         # Δz and per-cell volume (variable-width cells)
@@ -249,7 +276,14 @@ def compute_cut_fill_detailed(
         gross_vol: np.ndarray = np.cumsum(np.abs(cell_vol_cuyd_per_ft))
 
         # Above and below datum volumes (z=0) with datum-splitting for each cell
-        def split_cell_at_datum(x0, x1, z1_0, z2_0, z1_1, z2_1):
+        def split_cell_at_datum(
+            x0: float,
+            x1: float,
+            z1_0: float,
+            z2_0: float,
+            z1_1: float,
+            z2_1: float,
+        ) -> list:
             # Returns list of (x_start, x_end, z1_start, z2_start, z1_end, z2_end) for sub-cells split at z=0
             # Linear interpolation for z=0 crossing
             result = []
@@ -267,7 +301,9 @@ def compute_cut_fill_detailed(
                 xa, xb = crossings[i], crossings[i + 1]
 
                 # Interpolate z1, z2 at xa, xb
-                def interp_z(z0, z1, x0, x1, x):
+                def interp_z(
+                    z0: float, z1: float, x0: float, x1: float, x: float
+                ) -> float:
                     if x1 == x0:
                         return z0
                     return z0 + (z1 - z0) * (x - x0) / (x1 - x0)
@@ -282,7 +318,7 @@ def compute_cut_fill_detailed(
         # BMAP-style: For each segment (split at datum if needed),
         #   Above datum: (Template above datum) - (BD above datum)
         #   Below datum: (BD below datum) - (Template below datum)
-        def area_above(z0, z1, x0, x1):
+        def area_above(z0: float, z1: float, x0: float, x1: float) -> float:
             if z0 > 0 and z1 > 0:
                 return 0.5 * (z0 + z1) * (x1 - x0)
             elif z0 > 0 and z1 <= 0:
@@ -296,7 +332,7 @@ def compute_cut_fill_detailed(
             else:
                 return 0.0
 
-        def area_below(z0, z1, x0, x1):
+        def area_below(z0: float, z1: float, x0: float, x1: float) -> float:
             if z0 < 0 and z1 < 0:
                 return 0.5 * (z0 + z1) * (x1 - x0)
             elif z0 < 0 and z1 >= 0:
@@ -319,13 +355,9 @@ def compute_cut_fill_detailed(
             # BD (profile 2)
             zb0, zb1 = z2_cb[i], z2_cb[i + 1]
             # Above datum: (Template above datum) - (BD above datum)
-            above_sum += area_above(zt0, zt1, x0, x1) - area_above(
-                zb0, zb1, x0, x1
-            )
+            above_sum += area_above(zt0, zt1, x0, x1) - area_above(zb0, zb1, x0, x1)
             # Below datum: (BD below datum) - (Template below datum)
-            below_sum += area_below(zb0, zb1, x0, x1) - area_below(
-                zt0, zt1, x0, x1
-            )
+            below_sum += area_below(zb0, zb1, x0, x1) - area_below(zt0, zt1, x0, x1)
         above_cuyd_per_ft = above_sum / 27.0
         below_cuyd_per_ft = below_sum / 27.0
 
@@ -412,9 +444,7 @@ def compute_cut_fill_detailed(
                 frac = -dz_all[i - 1] / (dz_all[i] - dz_all[i - 1])
                 x_cross = xs_all[i - 1] + frac * (xs_all[i] - xs_all[i - 1])
                 intersection_xs.append(x_cross)
-        use_datum_only = getattr(
-            sys.modules[__name__], "hybrid_datum_only", False
-        )
+        use_datum_only = getattr(sys.modules[__name__], "hybrid_datum_only", False)
         if use_intersections_only:
             cell_boundaries = (
                 [x_on]
@@ -427,9 +457,7 @@ def compute_cut_fill_detailed(
                 for i in range(1, len(xs_all)):
                     if arr[i - 1] * arr[i] < 0.0:
                         frac = -arr[i - 1] / (arr[i] - arr[i - 1])
-                        x_cross = xs_all[i - 1] + frac * (
-                            xs_all[i] - xs_all[i - 1]
-                        )
+                        x_cross = xs_all[i - 1] + frac * (xs_all[i] - xs_all[i - 1])
                         datum_xs.append(x_cross)
             cell_boundaries = (
                 [x_on]
@@ -443,27 +471,17 @@ def compute_cut_fill_detailed(
                 for i in range(1, len(xs_all)):
                     if arr[i - 1] * arr[i] < 0.0:
                         frac = -arr[i - 1] / (arr[i] - arr[i - 1])
-                        x_cross = xs_all[i - 1] + frac * (
-                            xs_all[i] - xs_all[i - 1]
-                        )
+                        x_cross = xs_all[i - 1] + frac * (xs_all[i] - xs_all[i - 1])
                         datum_xs.append(x_cross)
             cell_boundaries = (
                 [x_on]
                 + sorted(
-                    [
-                        x
-                        for x in set(intersection_xs + datum_xs)
-                        if x_on < x < x_off
-                    ]
+                    [x for x in set(intersection_xs + datum_xs) if x_on < x < x_off]
                 )
                 + [x_off]
             )
-        z1_cb = np.array(
-            [interp_or_flat(xs1, ys1, x) for x in cell_boundaries]
-        )
-        z2_cb = np.array(
-            [interp_or_flat(xs2, ys2, x) for x in cell_boundaries]
-        )
+        z1_cb = np.array([interp_or_flat(xs1, ys1, x) for x in cell_boundaries])
+        z2_cb = np.array([interp_or_flat(xs2, ys2, x) for x in cell_boundaries])
         dz_cb = z2_cb - z1_cb
         nseg = len(cell_boundaries) - 1
         cell_vol_ft3_per_ft = np.empty(nseg, dtype=float)
@@ -481,9 +499,7 @@ def compute_cut_fill_detailed(
         gross_vol = np.cumsum(np.abs(cell_vol_cuyd_per_ft))
         above_datum = 0.0
         below_datum = 0.0
-        reverse_sign = getattr(
-            sys.modules[__name__], "hybrid_reverse_sign", False
-        )
+        reverse_sign = getattr(sys.modules[__name__], "hybrid_reverse_sign", False)
         total_volume = 0.0
         cumulative_volume = 0.0
         gross_volume = 0.0
@@ -643,7 +659,7 @@ def compute_cut_fill_detailed(
 # ---------------------------------------------------------------------
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(
         description="BMAP-style Cut & Fill (detailed) for two selected profiles."
     )
@@ -724,9 +740,7 @@ def main():
         args.hybrid_intersections_only,
     )
     setattr(sys.modules[__name__], "hybrid_datum_only", args.hybrid_datum_only)
-    setattr(
-        sys.modules[__name__], "hybrid_reverse_sign", args.hybrid_reverse_sign
-    )
+    setattr(sys.modules[__name__], "hybrid_reverse_sign", args.hybrid_reverse_sign)
     compute_cut_fill_detailed(
         p1,
         p2,

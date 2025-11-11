@@ -1,3 +1,45 @@
+# =============================================================================
+# 9-Column ASCII I/O Module for Beach Profile Survey Data
+# =============================================================================
+#
+# FILE: src/profcalc/common/ninecol_io.py
+#
+# PURPOSE:
+# This module provides specialized input/output functionality for 9-column
+# ASCII format files commonly used in beach profile surveying. It handles
+# the parsing and generation of survey data with comprehensive metadata
+# including profile IDs, dates, coordinates, and survey information.
+#
+# WHAT IT'S FOR:
+# - Reading 9-column ASCII files with survey point data
+# - Writing profile data to 9-column format for export
+# - Parsing multiple profiles from single files
+# - Handling survey metadata (dates, times, point numbers)
+# - Converting between 9-column format and internal Profile objects
+# - Validating 9-column file structure and data integrity
+#
+# WORKFLOW POSITION:
+# This module is used for importing survey data from specialized surveying
+# equipment that outputs 9-column ASCII format. It's part of the data
+# import pipeline and ensures that detailed survey metadata is preserved
+# during the conversion to internal data structures.
+#
+# LIMITATIONS:
+# - Specific to 9-column ASCII format (not general-purpose CSV)
+# - Requires exact column structure and naming conventions
+# - Memory usage scales with number of survey points
+# - Date/time parsing depends on consistent formatting
+# - Limited to coordinate-based survey data
+#
+# ASSUMPTIONS:
+# - Input files follow standard 9-column format specifications
+# - Coordinate data is in consistent units and coordinate systems
+# - Profile IDs and dates are properly formatted and unique
+# - Survey points are ordered appropriately for profile creation
+# - Users understand 9-column format requirements
+#
+# =============================================================================
+
 """
 9-Column I/O Module for Beach Profile Data
 
@@ -108,9 +150,7 @@ class NineColumnParser:
         # resulting in column names with leading/trailing whitespace (e.g., ' DATE').
         # Strip whitespace from column names to ensure robust matching with required columns.
         # Use Index.map to preserve the pandas Index type (avoids mypy complaint).
-        df.columns = df.columns.map(
-            lambda c: c.strip() if isinstance(c, str) else c
-        )
+        df.columns = df.columns.map(lambda c: c.strip() if isinstance(c, str) else c)
 
         # Check for required columns
         missing_columns = set(self.required_columns) - set(df.columns)
@@ -143,9 +183,7 @@ class NineColumnParser:
             grouped = df.groupby(["PROFILE ID", "DATE"])
 
             for (profile_id, date_str), profile_points in grouped:
-                profile = self._convert_to_profile(
-                    profile_id, date_str, profile_points
-                )
+                profile = self._convert_to_profile(profile_id, date_str, profile_points)
                 if profile:
                     profiles.append(profile)
 
@@ -179,14 +217,9 @@ class NineColumnParser:
             # Parse date
             date_obj = None
             try:
-                if (
-                    len(str(date_str).strip()) == 8
-                    and str(date_str).strip().isdigit()
-                ):
+                if len(str(date_str).strip()) == 8 and str(date_str).strip().isdigit():
                     # YYYYMMDD format
-                    date_obj = pd.to_datetime(
-                        str(date_str).strip(), format="%Y%m%d"
-                    )
+                    date_obj = pd.to_datetime(str(date_str).strip(), format="%Y%m%d")
                 else:
                     date_obj = pd.to_datetime(date_str)
             except (ValueError, TypeError) as e:
@@ -194,23 +227,15 @@ class NineColumnParser:
                     f"Could not parse date '{date_str}' for profile {profile_name}: {e}"
                 )
 
-            date_str_formatted = (
-                date_obj.strftime("%Y-%m-%d") if date_obj else None
-            )
+            date_str_formatted = date_obj.strftime("%Y-%m-%d") if date_obj else None
 
             # Sort points by point number
             profile_points = profile_points.sort_values("POINT #")
 
             # Extract coordinates
-            x_coords = np.array(
-                profile_points["EASTING (X)"].values, dtype=float
-            )
-            y_coords = np.array(
-                profile_points["NORTHING (Y)"].values, dtype=float
-            )
-            z_coords = np.array(
-                profile_points["ELEVATION (Z)"].values, dtype=float
-            )
+            x_coords = np.array(profile_points["EASTING (X)"].values, dtype=float)
+            y_coords = np.array(profile_points["NORTHING (Y)"].values, dtype=float)
+            z_coords = np.array(profile_points["ELEVATION (Z)"].values, dtype=float)
 
             if len(x_coords) == 0:
                 self.logger.warning(
@@ -248,10 +273,7 @@ class NineColumnParser:
 
             if "DESCRIPTION" in profile_points.columns:
                 descriptions = (
-                    profile_points["DESCRIPTION"]
-                    .fillna("")
-                    .astype(str)
-                    .tolist()
+                    profile_points["DESCRIPTION"].fillna("").astype(str).tolist()
                 )
                 metadata["point_descriptions"] = descriptions
 
@@ -278,9 +300,7 @@ class NineColumnParser:
             IndexError,
             AttributeError,
         ) as e:
-            self.logger.error(
-                f"Failed to convert 9-column data to Profile object: {e}"
-            )
+            self.logger.error(f"Failed to convert 9-column data to Profile object: {e}")
             return None
 
 
@@ -303,9 +323,7 @@ def read_9col_profiles(
     return parser.parse_file(file_path)
 
 
-def write_9col_profiles(
-    profiles: List[Profile], file_path: str | Path
-) -> None:
+def write_9col_profiles(profiles: List[Profile], file_path: str | Path) -> None:
     """Write beach profile data to a 9-column ASCII file.
 
     Args:
@@ -345,12 +363,8 @@ def write_9col_profiles(
                         "point_types" in profile.metadata
                         and profile.metadata["point_types"]
                     ):
-                        point_types = profile.metadata["point_types"][
-                            : len(profile.x)
-                        ]
-                        point_types.extend(
-                            [""] * (len(profile.x) - len(point_types))
-                        )
+                        point_types = profile.metadata["point_types"][: len(profile.x)]
+                        point_types.extend([""] * (len(profile.x) - len(point_types)))
 
                     if (
                         "point_descriptions" in profile.metadata
@@ -359,19 +373,13 @@ def write_9col_profiles(
                         descriptions = profile.metadata["point_descriptions"][
                             : len(profile.x)
                         ]
-                        descriptions.extend(
-                            [""] * (len(profile.x) - len(descriptions))
-                        )
+                        descriptions.extend([""] * (len(profile.x) - len(descriptions)))
 
                 # Format date
-                date_str = (
-                    profile.date or "19000101"
-                )  # Default date if none provided
+                date_str = profile.date or "19000101"  # Default date if none provided
 
                 # Write each point
-                for i, (x, y, z) in enumerate(
-                    zip(profile.x, y_coords, profile.z)
-                ):
+                for i, (x, y, z) in enumerate(zip(profile.x, y_coords, profile.z)):
                     point_type = point_types[i] if i < len(point_types) else ""
                     desc = descriptions[i] if i < len(descriptions) else ""
 

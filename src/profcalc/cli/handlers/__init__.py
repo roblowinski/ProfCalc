@@ -1,3 +1,41 @@
+# =============================================================================
+# CLI Handlers Package Initialization
+# =============================================================================
+#
+# FILE: src/profcalc/cli/handlers/__init__.py
+#
+# PURPOSE:
+# This module initializes the CLI handlers package, which contains the bridge
+# functions between the menu system and the core analysis functionality. It
+# provides dynamic loading of development prototypes and ensures proper package
+# structure for menu handler resolution.
+#
+# WHAT IT'S FOR:
+# - Initializing the handlers package structure
+# - Providing dynamic loading of development prototype modules
+# - Supporting menu system handler resolution
+# - Enabling smooth transition between prototype and production code
+# - Maintaining package exports for menu loading
+#
+# WORKFLOW POSITION:
+# This module sits between the menu system and the actual handler implementations.
+# It provides the package-level infrastructure that allows the menu engine to
+# dynamically resolve and load handler functions during menu navigation.
+#
+# LIMITATIONS:
+# - Prototype loading depends on specific file system structure
+# - Handler resolution may fail if package structure changes
+# - Limited error handling for prototype loading failures
+# - Placeholder functions may confuse static analysis tools
+#
+# ASSUMPTIONS:
+# - Package structure follows expected hierarchy
+# - Prototype files are in standard locations when present
+# - Menu system uses proper handler key resolution
+# - Development and production code have compatible interfaces
+#
+# =============================================================================
+
 """CLI handlers package for profcalc.
 
 This package exposes a collection of simple callable handlers used by the
@@ -13,10 +51,7 @@ Utilities:
 from pathlib import Path
 
 _PROTOTYPE_PATH = (
-    Path(__file__)
-    .resolve()
-    .parents[4]
-    .joinpath("dev_scripts/cli_prototype.py")
+    Path(__file__).resolve().parents[4].joinpath("dev_scripts/cli_prototype.py")
 )
 
 
@@ -40,7 +75,7 @@ def _load_prototype_module():
     return None
 
 
-def data():
+def data() -> None:
     """Placeholder symbol to satisfy package exports used by the menu loader.
 
     The real handlers live in modules such as ``data.py`` and ``annual.py``.

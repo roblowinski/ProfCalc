@@ -1,3 +1,44 @@
+# =============================================================================
+# Profile Smoothing and Filtering Utilities
+# =============================================================================
+#
+# FILE: src/profcalc/common/smoothing_utils.py
+#
+# PURPOSE:
+# This module provides various smoothing and filtering algorithms for beach
+# profile data. It offers multiple techniques to reduce noise and outliers
+# in survey data while preserving important morphological features like
+# dunes, bars, and shoreline transitions.
+#
+# WHAT IT'S FOR:
+# - Applying Savitzky-Golay filtering for local smoothing
+# - Gaussian filtering for global noise reduction
+# - Moving average smoothing for simple noise reduction
+# - Cubic spline interpolation for smooth curve fitting
+# - Unified interface for applying different smoothing methods
+#
+# WORKFLOW POSITION:
+# This module is used in data preprocessing workflows to clean survey data
+# before analysis. It's applied when raw survey data contains noise or
+# outliers that could affect volumetric calculations or morphological
+# feature detection.
+#
+# LIMITATIONS:
+# - Requires scipy for advanced filtering algorithms
+# - Smoothing can mask real morphological features
+# - Parameter selection requires domain knowledge
+# - Different methods have different edge effect behaviors
+# - Memory usage scales with profile length
+#
+# ASSUMPTIONS:
+# - Input data is sorted by X-coordinate
+# - Noise is random and not systematic
+# - Smoothing parameters are appropriate for data characteristics
+# - Users understand the trade-offs between smoothing methods
+# - Morphological features are preserved at chosen smoothing levels
+#
+# =============================================================================
+
 import numpy as np
 from scipy.interpolate import (
     CubicSpline,  # type: ignore  # scipy lacks complete type stubs
@@ -39,9 +80,7 @@ def smooth_savgol(
     return savgol_filter(z, window_length, polyorder)
 
 
-def smooth_gaussian(
-    x: np.ndarray, z: np.ndarray, sigma: float = 1.0
-) -> np.ndarray:
+def smooth_gaussian(x: np.ndarray, z: np.ndarray, sigma: float = 1.0) -> np.ndarray:
     """
     Smoothes a profile using a Gaussian filter.
 

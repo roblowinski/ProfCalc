@@ -1,3 +1,45 @@
+# =============================================================================
+# Logging Utilities for Beach Profile Analysis
+# =============================================================================
+#
+# FILE: src/profcalc/common/logging_utils.py
+#
+# PURPOSE:
+# This module provides comprehensive logging utilities specifically designed
+# for beach profile analysis operations. It offers structured logging with
+# operation tracking, performance monitoring, and consistent formatting
+# to support debugging, monitoring, and analysis of profile processing workflows.
+#
+# WHAT IT'S FOR:
+# - Setting up standardized loggers for different modules
+# - Tracking operation start/completion with context information
+# - Performance timing and benchmarking of analysis functions
+# - Logging data statistics and array properties
+# - File-based logging with configurable output
+# - Operation stack management for nested operations
+# - Global log level configuration
+#
+# WORKFLOW POSITION:
+# This module is used throughout the analysis pipeline to provide visibility
+# into processing operations. It helps track the progress of complex analyses,
+# identify performance bottlenecks, and debug issues in data processing.
+#
+# LIMITATIONS:
+# - Logging overhead may impact performance in high-frequency operations
+# - Memory usage for operation stacks and timers
+# - Console logging may clutter output in interactive environments
+# - File logging requires write permissions to specified directories
+# - Log formatting is fixed and not highly customizable
+#
+# ASSUMPTIONS:
+# - Logging is primarily for development and debugging purposes
+# - Users have appropriate permissions for file system operations
+# - Log levels are appropriately set for different environments
+# - Operation context information is meaningful to developers
+# - Performance timing provides useful insights into bottlenecks
+#
+# =============================================================================
+
 """
 Generic Logging Utilities
 
@@ -17,7 +59,7 @@ import logging
 import time
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Generator, Optional, Union
 
 import numpy as np
 
@@ -108,9 +150,7 @@ class ProfileAnalysisLogger:
             message += f" [{results_str}]"
 
         log_level = logging.INFO if success else logging.ERROR
-        log_message = (
-            f"[{operation_id}] {message}" if operation_id else message
-        )
+        log_message = f"[{operation_id}] {message}" if operation_id else message
 
         self.logger.log(log_level, log_message)
 
@@ -229,7 +269,9 @@ def setup_file_logging(
 
 
 @contextmanager
-def log_operation(logger: ProfileAnalysisLogger, operation: str, **context):
+def log_operation(
+    logger: ProfileAnalysisLogger, operation: str, **context
+) -> Generator[None, None, None]:
     """Context manager for logging operation start/completion.
 
     Args:
@@ -280,9 +322,7 @@ def create_operation_logger(
     return setup_module_logger(f"operation.{operation_name}", log_level)
 
 
-def log_performance_stats(
-    func_name: str, execution_time: float, **metrics
-) -> None:
+def log_performance_stats(func_name: str, execution_time: float, **metrics) -> None:
     """Log performance statistics for an operation.
 
     Args:
@@ -319,7 +359,7 @@ def benchmark_function(
     """
 
     def decorator(func: Callable) -> Callable:
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Any:
             nonlocal logger
             if logger is None:
                 logger = setup_module_logger("benchmark")

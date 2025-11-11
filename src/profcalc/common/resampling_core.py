@@ -1,3 +1,44 @@
+# =============================================================================
+# Profile Resampling and Interpolation Core Utilities
+# =============================================================================
+#
+# FILE: src/profcalc/common/resampling_core.py
+#
+# PURPOSE:
+# This module provides core interpolation and resampling functionality for
+# beach profile analysis. It handles the critical task of resampling profile
+# data to common grids, enabling accurate comparisons between surveys taken
+# at different spatial resolutions or with different point densities.
+#
+# WHAT IT'S FOR:
+# - Interpolating profile data to uniform spatial grids
+# - Creating common X-coordinate grids for profile comparison
+# - Handling overlapping profile ranges automatically
+# - Linear interpolation of elevation data between survey points
+# - Supporting configurable grid spacing for different analysis needs
+#
+# WORKFLOW POSITION:
+# This module is fundamental to comparative analysis workflows where profiles
+# from different surveys need to be compared. It's used whenever profile
+# data must be resampled to enable volumetric calculations, change detection,
+# or statistical comparisons between surveys.
+#
+# LIMITATIONS:
+# - Uses simple linear interpolation (no advanced interpolation methods)
+# - Requires profile overlap in X-range for resampling
+# - Assumes profiles have 'X' and 'Z' columns with appropriate units
+# - Grid spacing is uniform (not adaptive to data density)
+# - No handling of data gaps or outliers during interpolation
+#
+# ASSUMPTIONS:
+# - Profile data is sorted by X-coordinate
+# - Elevation data is continuous and suitable for linear interpolation
+# - Overlapping regions represent the same physical locations
+# - Grid spacing is appropriate for the analysis resolution needed
+# - Coordinate systems are consistent between profiles
+#
+# =============================================================================
+
 """
 Core Utility: interpolation
 ---------------------------

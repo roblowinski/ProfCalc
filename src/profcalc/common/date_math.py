@@ -1,3 +1,46 @@
+# =============================================================================
+# Date Mathematics and Time Calculations for Beach Profile Analysis
+# =============================================================================
+#
+# FILE: src/profcalc/common/date_math.py
+#
+# PURPOSE:
+# This module provides specialized date and time calculation utilities for
+# beach profile monitoring and temporal analysis. It handles the complex
+# time-based calculations needed for comparing survey dates, computing
+# monitoring intervals, and formatting temporal information.
+#
+# WHAT IT'S FOR:
+# - Calculating time differences between survey dates in various units
+# - Date arithmetic operations (adding days, hours to datetimes)
+# - Computing average dates from multiple survey timestamps
+# - Rounding datetimes to nearest time intervals
+# - Clipping dates within specified ranges
+# - Determining leap years and days in year calculations
+# - Formatting time durations as human-readable strings
+#
+# WORKFLOW POSITION:
+# This module is essential for temporal analysis in beach profile monitoring
+# workflows. It's used when comparing surveys across time, calculating
+# monitoring frequencies, determining seasonal patterns, and presenting
+# time-based results to users.
+#
+# LIMITATIONS:
+# - All calculations assume Gregorian calendar
+# - Timezone handling depends on input datetime objects
+# - Leap year calculations follow standard Gregorian rules
+# - Rounding operations are basic (nearest interval, not sophisticated)
+# - Duration formatting is simplified for common use cases
+#
+# ASSUMPTIONS:
+# - Input datetimes are valid and properly constructed
+# - Users understand time units (days, hours, minutes, etc.)
+# - Timezone information is consistent across related dates
+# - Date ranges are reasonable (not spanning millennia)
+# - Floating point precision is sufficient for time calculations
+#
+# =============================================================================
+
 """
 Date math utilities for time difference and interval calculations.
 
@@ -15,36 +58,28 @@ from typing import List
 # ---------------------------------------------------------------------------
 
 
-def days_between(
-    date1: datetime, date2: datetime, abs_value: bool = True
-) -> float:
+def days_between(date1: datetime, date2: datetime, abs_value: bool = True) -> float:
     """Return the number of days between two datetime objects."""
     delta = date2 - date1
     days = delta.total_seconds() / 86400.0
     return abs(days) if abs_value else days
 
 
-def hours_between(
-    date1: datetime, date2: datetime, abs_value: bool = True
-) -> float:
+def hours_between(date1: datetime, date2: datetime, abs_value: bool = True) -> float:
     """Return the number of hours between two datetime objects."""
     delta = date2 - date1
     hours = delta.total_seconds() / 3600.0
     return abs(hours) if abs_value else hours
 
 
-def minutes_between(
-    date1: datetime, date2: datetime, abs_value: bool = True
-) -> float:
+def minutes_between(date1: datetime, date2: datetime, abs_value: bool = True) -> float:
     """Return the number of minutes between two datetime objects."""
     delta = date2 - date1
     minutes = delta.total_seconds() / 60.0
     return abs(minutes) if abs_value else minutes
 
 
-def weeks_between(
-    date1: datetime, date2: datetime, abs_value: bool = True
-) -> float:
+def weeks_between(date1: datetime, date2: datetime, abs_value: bool = True) -> float:
     """Return the number of weeks between two datetime objects."""
     return days_between(date1, date2, abs_value=abs_value) / 7.0
 
@@ -120,11 +155,7 @@ def clip_datetime(dt: datetime, start: datetime, end: datetime) -> datetime:
 
 def days_in_year(year: int) -> int:
     """Return 365 or 366 depending on leap year."""
-    return (
-        366
-        if (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0))
-        else 365
-    )
+    return 366 if (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)) else 365
 
 
 # ---------------------------------------------------------------------------

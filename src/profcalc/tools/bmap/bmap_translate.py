@@ -1,3 +1,42 @@
+# =============================================================================
+# BMAP Profile Translation Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_translate.py
+#
+# PURPOSE:
+# This module replicates BMAP's "Translate" tool functionality, providing
+# uniform horizontal and vertical shifting of beach profile coordinates.
+# It enables profile alignment, datum adjustments, and coordinate system
+# transformations by applying consistent offsets to all profile points.
+#
+# WHAT IT'S FOR:
+# - Applying horizontal shifts to align profiles at specific locations
+# - Making vertical datum adjustments (e.g., tide corrections)
+# - Transforming coordinate systems with uniform offsets
+# - Supporting profile registration and alignment workflows
+# - Enabling comparative analysis with adjusted coordinates
+#
+# WORKFLOW POSITION:
+# This tool is used in profile preprocessing and alignment workflows when
+# profiles need coordinate adjustments. It's particularly important when
+# working with data from different surveys, coordinate systems, or tidal
+# conditions that require uniform corrections.
+#
+# LIMITATIONS:
+# - Applies only uniform (constant) shifts across the entire profile
+# - Cannot handle non-uniform transformations or warping
+# - Assumes all points require the same coordinate adjustments
+# - Does not validate the physical meaningfulness of transformations
+#
+# ASSUMPTIONS:
+# - Translation offsets are appropriate for all profile points
+# - Coordinate adjustments maintain profile shape integrity
+# - Users understand the implications of coordinate transformations
+# - Translation preserves relative profile morphology
+#
+# =============================================================================
+
 """
 Module: translate
 Location: profcalc.modules.profiles

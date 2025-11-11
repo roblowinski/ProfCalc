@@ -1,3 +1,48 @@
+# =============================================================================
+# Annual Monitoring Analysis Tools
+# =============================================================================
+#
+# FILE: src/profcalc/cli/tools/annual.py
+#
+# PURPOSE:
+# This module provides specialized handlers for annual monitoring workflows in
+# ProfCalc, focusing on shoreline analysis, survey data processing, and reporting
+# tools. It handles AER (Annual Erosion Rate) computations, survey import
+# summaries, and other annual monitoring tasks that are critical for coastal
+# management and beach morphology studies.
+#
+# WHAT IT'S FOR:
+# - Processes annual survey data for shoreline change analysis
+# - Computes Annual Erosion Rates (AER) and accretion rates
+# - Generates summary reports for annual monitoring programs
+# - Handles survey data import and validation for annual workflows
+# - Provides tools for comparing survey data across time periods
+# - Supports both programmatic use and interactive menu-driven workflows
+#
+# WORKFLOW POSITION:
+# This module sits in the "Annual Monitoring" section of the ProfCalc menu system.
+# It's used when analysts need to process yearly survey data, track shoreline
+# changes over time, and generate reports for coastal management decisions.
+# It works with survey data that has been collected at regular intervals and
+# needs to be analyzed for trends and changes.
+#
+# LIMITATIONS:
+# - Designed specifically for annual monitoring workflows (not ad-hoc analysis)
+# - Requires properly formatted survey data with temporal information
+# - AER calculations assume consistent survey methodologies across years
+# - May not handle irregular survey intervals optimally
+# - Depends on core AER calculation modules for accuracy
+#
+# ASSUMPTIONS:
+# - Survey data is collected at regular annual intervals
+# - Coordinate systems and datums are consistent across survey years
+# - Profile locations remain relatively stable between surveys
+# - Users understand shoreline change analysis concepts and terminology
+# - Data quality has been validated before annual processing
+# - Temporal analysis requires at least 2 years of survey data
+#
+# =============================================================================
+
 """Annual monitoring handlers
 
 Small CLI-facing handlers used by the interactive menu for annual
@@ -14,13 +59,14 @@ Usage examples:
 
 import datetime as _dt
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import profcalc.cli.menu_system as menu_system
+from profcalc.cli.file_dialogs import select_input_file, select_output_file
 from profcalc.cli.quick_tools.quick_tool_logger import log_quick_tool_error
 from profcalc.cli.tools.data import import_data
 from profcalc.cli.tools.data import session as data_session
-from profcalc.common.bmap_io import BMAPImportError
+from profcalc.common.bmap_io import BMAPImportError, Profile
 from profcalc.common.error_handler import BeachProfileError
 from profcalc.common.ninecol_io import read_9col_profiles
 from profcalc.core import aer as aer_mod
@@ -47,29 +93,36 @@ def import_survey() -> Optional[dict]:
 
     if active_dataset:
         print(f"Using active dataset: {active_dataset.get('info')}")
+        print()
         return active_dataset
 
     print("No active dataset found. Prompting user to import data...")
-    file_path = input("Enter the path to the survey data file: ")
+    print()
+    file_path = select_input_file("Select survey data file")
+
+    if not file_path:
+        print("No file selected. Import cancelled.")
+        return None
 
     try:
         result = import_data(file_path)
         print(f"Data imported successfully: {result['imported']} rows.")
+        print()
         return result
     except FileNotFoundError as e:
         print(f"File not found: {e}")
-        log_quick_tool_error(
-            "annual", f"File not found during import_survey: {e}"
-        )
+        print()
+        log_quick_tool_error("annual", f"File not found during import_survey: {e}")
         return None
     except ValueError as e:
         print(f"Value error: {e}")
-        log_quick_tool_error(
-            "annual", f"Value error during import_survey: {e}"
-        )
+        print()
+        log_quick_tool_error("annual", f"Value error during import_survey: {e}")
         return None
     except (OSError, IOError) as e:  # Catch file-related errors
+        print()
         print(f"An unexpected file-related error occurred: {e}")
+        print()
         log_quick_tool_error(
             "annual", f"Unexpected file error during import_survey: {e}"
         )
@@ -118,7 +171,7 @@ def compute_aer() -> Optional[dict]:
                     print("Invalid selection; falling back to file import.")
 
         # Fall back to prompting for a file path
-        pth = input(f"Path to {label} survey (9-col CSV) (blank to cancel):").strip()
+        pth = select_input_file(f"Select {label} survey (9-col CSV)")
         if not pth:
             return None
         p = Path(pth)
@@ -160,7 +213,7 @@ def compute_aer() -> Optional[dict]:
         print(f"Failed to read 9-col profiles: {exc}")
         return None
 
-    def choose_profile(profiles, label: str):
+    def choose_profile(profiles: List[Profile], label: str) -> Optional[Profile]:
         if not profiles:
             print(f"No profiles found in {label} file.")
             return None
@@ -169,7 +222,9 @@ def compute_aer() -> Optional[dict]:
         print(f"Multiple profiles found in {label} file:")
         for i, p in enumerate(profiles):
             print(f"{i + 1}. {p.name} ({p.date}) - {len(p.x)} pts")
-        sel = input(f"Select profile number from {label} file (1-{len(profiles)}), blank=1: ").strip()
+        sel = input(
+            f"Select profile number from {label} file (1-{len(profiles)}), blank=1: "
+        ).strip()
         if not sel:
             idx = 0
         else:
@@ -208,7 +263,7 @@ def compute_aer() -> Optional[dict]:
         dx = 0.1
 
     use_bmap = input("Use BMAP core splitting logic? (Y/n) [Y]: ").strip().lower()
-    use_bmap_core = (use_bmap != "n")
+    use_bmap_core = use_bmap != "n"
 
     # Compute AER
     try:
@@ -228,9 +283,7 @@ def compute_aer() -> Optional[dict]:
     ) as exc:  # pragma: no cover - interactive
         # calculate_aer can raise ValueError or other numeric errors; in
         # interactive mode present a message and abort.
-        log_quick_tool_error(
-            "annual", f"AER computation failed: {exc}", exc=exc
-        )
+        log_quick_tool_error("annual", f"AER computation failed: {exc}", exc=exc)
         print(f"AER computation failed: {exc}")
         return None
 
@@ -248,7 +301,7 @@ def compute_aer() -> Optional[dict]:
     else:
         print("Dates not available or invalid; AER not computed.")
 
-    save = input("Save summary CSV? (enter path or blank to skip): ").strip()
+    save = select_output_file("Save summary CSV", "annual_summary.csv")
     if save:
         try:
             import csv
@@ -329,7 +382,7 @@ def compute_aer_noninteractive(
     profile_after: int | str | None = None,
     dx: float = 0.1,
     use_bmap_core: bool = True,
-):
+) -> Dict[str, Any]:
     """Non-interactive AER wrapper for automation/tests.
 
     Args:

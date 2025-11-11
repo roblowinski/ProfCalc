@@ -1,3 +1,46 @@
+# =============================================================================
+# ProfCalc Common Utilities Package
+# =============================================================================
+#
+# FILE: src/profcalc/common/__init__.py
+#
+# PURPOSE:
+# This is the central hub for all shared utilities and common functionality
+# used across the ProfCalc framework. It provides a unified interface to
+# essential tools for data I/O, validation, coordinate transformations,
+# error handling, and other cross-cutting concerns that are needed by
+# multiple analysis modules.
+#
+# WHAT IT'S FOR:
+# - Provides unified access to all common utility functions
+# - Centralizes imports for frequently used functionality
+# - Ensures consistent interfaces across different analysis tools
+# - Supports data I/O operations for multiple file formats (BMAP, CSV, 9-column, etc.)
+# - Offers coordinate transformation and baseline management utilities
+# - Provides data validation and error handling frameworks
+# - Enables consistent logging and reporting across the application
+#
+# WORKFLOW POSITION:
+# This package sits at the foundation of the ProfCalc architecture, providing
+# essential building blocks that are used by all higher-level analysis tools.
+# It's imported by both CLI tools and core analysis modules, ensuring that
+# common functionality is implemented once and reused consistently.
+#
+# LIMITATIONS:
+# - Large package with many dependencies - imports may be slow if not selective
+# - Some legacy modules (io_freeformat) are deprecated but still included
+# - Requires careful management of __all__ exports to avoid namespace pollution
+# - Some utilities assume specific data formats and coordinate systems
+#
+# ASSUMPTIONS:
+# - All submodules are properly implemented and compatible with each other
+# - Coordinate systems and data formats are consistent across tools
+# - Error handling patterns are followed by all calling code
+# - Logging configuration is established before using logging utilities
+# - File I/O operations have appropriate permissions and valid file paths
+#
+# =============================================================================
+
 """
 Common utilities and shared logic for all analysis tools.
 

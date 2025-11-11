@@ -42,7 +42,12 @@ def test_quick_tool_logger_writes():
     p = Path(__file__).resolve().parents[1].joinpath("src/profcalc/QuickToolErrors.log")
     # allow either repo path or package-relative
     if not p.exists():
-        p = Path(__file__).resolve().parents[2].joinpath("src/profcalc/QuickToolErrors.log")
+        p = (
+            Path(__file__)
+            .resolve()
+            .parents[2]
+            .joinpath("src/profcalc/QuickToolErrors.log")
+        )
 
     assert p.exists()
     content = p.read_text(encoding="utf-8")

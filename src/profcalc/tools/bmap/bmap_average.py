@@ -1,3 +1,42 @@
+# =============================================================================
+# BMAP Profile Averaging Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_average.py
+#
+# PURPOSE:
+# This module replicates BMAP's "Average" tool functionality, computing
+# statistical profiles from multiple beach profile surveys. It generates
+# average profiles along with envelope profiles (min/max) and variability
+# measures (standard deviation) to characterize profile morphology.
+#
+# WHAT IT'S FOR:
+# - Computing average beach profiles from multiple surveys
+# - Generating minimum and maximum envelope profiles
+# - Calculating standard deviation profiles to show variability
+# - Supporting statistical analysis of beach profile datasets
+# - Providing envelope boundaries for profile comparison
+#
+# WORKFLOW POSITION:
+# This tool is used in multi-profile analysis workflows to characterize
+# typical beach morphology and variability across multiple surveys. It's
+# particularly useful for understanding seasonal or inter-annual changes
+# in beach profiles.
+#
+# LIMITATIONS:
+# - Currently limited to two-profile averaging
+# - Requires profiles to have overlapping cross-shore ranges
+# - Interpolation assumes linear relationships between points
+# - Statistical measures may not be meaningful for small sample sizes
+#
+# ASSUMPTIONS:
+# - Input profiles represent the same physical cross-section
+# - Profile data is in consistent coordinate systems
+# - Interpolation spacing is appropriate for the data resolution
+# - Users understand statistical interpretation of envelope profiles
+#
+# =============================================================================
+
 """
 Module: average_profiles
 ------------------------

@@ -1,53 +1,47 @@
-"""
-Input File Summaries for Coastal Profile Analysis Scripts:
-
-1. Project_Data_Input.csv (9 fields):
-   - Project: Project name (e.g., "Manasquan to Barnegat").
-   - Reach: Sub-division within the project (e.g., "Point Pleasant") for different geometries/templates.
-   - Sta_From: Starting station for the reach.
-   - Sta_To: Ending station for the reach.
-   - MHW_Elev: Mean High Water elevation (ft NAVD88).
-   - MLW_Elev: Mean Low Water elevation (ft NAVD88).
-   - LastNourish_Date: Date of last beach nourishment.
-   - NextNoursh_Date: Date of next scheduled nourishment.
-   - Nourish_Cycle: Nourishment cycle length in years.
-
-   Purpose: Provides project-level constants, elevations, and nourishment scheduling. Projects can have multiple reaches with different station ranges.
-
-2. ProfileLine_Data_Input.csv (10 fields):
-   - Project: Project name (matches DProject).
-   - Profile_ID: Unique profile identifier (e.g., "MA001").
-   - Station: Station number along the project.
-   - Origin_X: X-coordinate of profile origin (easting).
-   - Origin_Y: Y-coordinate of profile origin (northing).
-   - Azimuth: Profile baseline orientation in degrees.
-   - Town: Associated town/location.
-   - Xon: Landward X-bound for volume calculations.
-   - Xoff: Seaward X-bound for volume calculations.
-   - Closure: Closure depth for the profile.
-
-   Purpose: Defines spatial geometry and bounds for each profile line.
-
-3. DesignTemplate_Data_Input.csv (9 fields):
-   - Project: Project name.
-   - Profile_ID: Profile identifier.
-   - Station: Station number.
-   - Dune_Elev: Target dune elevation in design template.
-   - Berm_Elev: Target berm elevation.
-   - Shoreline_Elev: Target shoreline elevation.
-   - Dune_Width: Dune width in feet.
-   - Berm_Width: Berm width in feet.
-   - Nearshore_Slope: Nearshore slope.
-
-   Purpose: Specifies ideal profile shapes for nourishment design and comparison.
-
-Note: The 9Column_Data_Input.csv is a sample of raw survey data with fields:
-- PROFILE ID, DATE, TIME (EST), POINT #, EASTING (X), NORTHING (Y), ELEVATION (Z), TYPE, DESCRIPTION.
-This is used for parsing actual survey profiles.
-"""
+# =============================================================================
+# Beach Profile Analysis Module
+# =============================================================================
+#
+# FILE: src/profcalc/ref_code/modules/profile_analysis.py
+#
+# PURPOSE:
+# This module provides core functionality for analyzing beach profile data,
+# including azimuth calculations, profile geometry processing, and data
+# parsing for coastal engineering applications. It serves as a reference
+# implementation for profile analysis workflows.
+#
+# WHAT IT'S FOR:
+# - Calculates orthogonal and average azimuths from profile coordinate data
+# - Parses BMAP free-format files and CSV metadata files
+# - Processes project data and profile line geometry information
+# - Provides command-line interface for profile analysis workflows
+# - Implements MATLAB-compatible azimuth calculation logic
+# - Supports profile metadata validation and processing
+#
+# WORKFLOW POSITION:
+# This module is used in the early stages of coastal profile analysis to
+# establish baseline profile geometry and orientation. It's typically used
+# before detailed morphological analysis or volume calculations, providing
+# the foundational data structures needed for subsequent processing steps.
+#
+# LIMITATIONS:
+# - Currently implements placeholder azimuth calculation logic
+# - Requires specific input file formats and naming conventions
+# - File path validation is interactive (requires user input for missing files)
+# - Limited error handling for malformed input data
+#
+# ASSUMPTIONS:
+# - Input files follow expected naming conventions and directory structure
+# - Coordinate data is in appropriate units and coordinate system
+# - Profile data contains sufficient points for reliable azimuth calculations
+# - Users can provide correct file paths when prompted
+# - CSV and BMAP parsers are properly configured for the data formats
+#
+# =============================================================================
 
 import math
 import os
+from typing import Dict, List, Tuple
 
 # Import the package-local parsers from the profcalc package
 from profcalc.common.csv_io import CSVParser
@@ -56,8 +50,11 @@ from profcalc.common.ninecol_io import NineColumnParser
 # Initialize the NineColumnParser
 nine_col_parser = NineColumnParser()
 
+
 # Placeholder for azimuth calculation logic
-def calculate_azimuths(data):
+def calculate_azimuths(
+    data: List[Tuple[float, float]],
+) -> Dict[str, List[float]]:
     """
     Calculate orthogonal and average azimuths.
     This function mimics the MATLAB `orthogonalangle` logic.
@@ -77,8 +74,8 @@ def calculate_azimuths(data):
     # Iterate through data to calculate azimuths (placeholder logic)
     for i in range(len(data) - 1):
         # Calculate azimuth between two points (example logic)
-        dx = data[i+1][0] - data[i][0]
-        dy = data[i+1][1] - data[i][1]
+        dx = data[i + 1][0] - data[i][0]
+        dy = data[i + 1][1] - data[i][1]
         azimuth = math.atan2(dy, dx) * (180 / math.pi)  # Convert to degrees
         azimuths.append(azimuth)
 
@@ -91,10 +88,11 @@ def calculate_azimuths(data):
         "azimuths": azimuths,
         "orthogonals": orthogonals,
         "avg_azimuth": avg_azimuth,
-        "diff_angles": diff_angles
+        "diff_angles": diff_angles,
     }
 
-def main():
+
+def main() -> None:
     """Run the profile analysis CLI/main routine.
 
     This function wraps the previous top-level script behavior so the module can be
@@ -104,8 +102,12 @@ def main():
 
     # Define paths for the three static files
     bmap_free_format_path = "Input_Files/Bmap_FreeFormat.txt"  # BMAP Free Format File
-    project_data_csv_path = "Input_Files/Project_Data_Input.csv"  # Project Data CSV File
-    profile_line_data_csv_path = "Input_Files/ProfileLine_Data_Input.csv"  # Profile Line Data CSV File
+    project_data_csv_path = (
+        "Input_Files/Project_Data_Input.csv"  # Project Data CSV File
+    )
+    profile_line_data_csv_path = (
+        "Input_Files/ProfileLine_Data_Input.csv"  # Profile Line Data CSV File
+    )
 
     # Check if the three static files exist
     for file_path, description in [
@@ -166,12 +168,16 @@ def main():
     try:
         # Validate the file path
         if not os.path.isfile(survey_file_path):
-            raise FileNotFoundError(f"The specified 9-column file does not exist: {survey_file_path}")
+            raise FileNotFoundError(
+                f"The specified 9-column file does not exist: {survey_file_path}"
+            )
 
         # Parse the 9-column file
         profiles = nine_col_parser.parse_file(survey_file_path)
         if not profiles:
-            raise ValueError("No profiles were found in the 9-column file. Please check the file content.")
+            raise ValueError(
+                "No profiles were found in the 9-column file. Please check the file content."
+            )
 
         print("9-column file parsed successfully.")
 
@@ -180,7 +186,9 @@ def main():
             if not profile.x or not profile.metadata.get("y_coordinates"):
                 raise ValueError(f"Profile {profile.name} is missing coordinate data.")
 
-            profile_data = list(zip(profile.x, profile.metadata.get("y_coordinates", [])))
+            profile_data = list(
+                zip(profile.x, profile.metadata.get("y_coordinates", []))
+            )
             azimuth_results = calculate_azimuths(profile_data)
             print(f"Azimuth results for profile {profile.name}: {azimuth_results}")
 

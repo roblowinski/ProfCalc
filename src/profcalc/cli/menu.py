@@ -1,3 +1,41 @@
+# =============================================================================
+# Interactive Menu Engine
+# =============================================================================
+#
+# FILE: src/profcalc/cli/menu.py
+#
+# PURPOSE:
+# This module implements the core interactive menu engine for the ProfCalc CLI
+# interface. It loads hierarchical menu structures from JSON configuration files
+# and dispatches user selections to appropriate handler functions, providing
+# the foundation for the entire menu-driven user interface.
+#
+# WHAT IT'S FOR:
+# - Loading and displaying hierarchical menu structures from JSON
+# - Handling user input and menu navigation
+# - Dispatching menu selections to handler functions
+# - Supporting both production handlers and development prototypes
+# - Providing consistent menu interaction patterns
+#
+# WORKFLOW POSITION:
+# This module serves as the central controller for all CLI menu interactions.
+# It sits between the menu configuration (JSON) and the handler implementations,
+# routing user selections to the appropriate functionality throughout the application.
+#
+# LIMITATIONS:
+# - Requires JSON menu configuration files
+# - Handler resolution depends on specific module structure
+# - Limited to text-based menu interactions
+# - Prototype fallback may not cover all development scenarios
+#
+# ASSUMPTIONS:
+# - Menu JSON files follow expected structure
+# - Handler modules are properly organized under profcalc.cli.handlers
+# - Prototype mapping covers common development needs
+# - Users interact through text-based menu selections
+#
+# =============================================================================
+
 """Interactive menu engine for ProfCalc CLI.
 
 This module provides MenuEngine, a small interactive menu system that loads a
@@ -56,8 +94,13 @@ class MenuEngine:
             FileNotFoundError: If the resolved menu file does not exist.
         """
         if menu_path is None:
-            # locate package-relative menu_data.json
-            menu_path = Path(__file__).parent.joinpath("menu_data.json")
+            # locate menu_data.json in config/menu_system/
+            menu_path = (
+                Path(__file__).resolve().parents[3]
+                / "config"
+                / "menu_system"
+                / "menu_data.json"
+            )
         self.menu_path = Path(menu_path)
         self.menu = self._load_menu()
 
@@ -133,9 +176,7 @@ class MenuEngine:
             if choice.lower() == "b":
                 return
 
-            selected = next(
-                (node for key, node in options if key == choice), None
-            )
+            selected = next((node for key, node in options if key == choice), None)
 
             if selected is None:
                 print("Invalid selection, try again.")
@@ -264,9 +305,19 @@ def main() -> None:
     import argparse
 
     ap = argparse.ArgumentParser(description="ProfCalc menu CLI")
-    ap.add_argument("--menu-path", "-m", help="Path to menu JSON file (overrides package default)")
-    ap.add_argument("--list", action="store_true", help="Print the menu tree and exit (non-interactive)")
-    ap.add_argument("--no-interactive", action="store_true", help="Do not start the interactive menu loop")
+    ap.add_argument(
+        "--menu-path", "-m", help="Path to menu JSON file (overrides package default)"
+    )
+    ap.add_argument(
+        "--list",
+        action="store_true",
+        help="Print the menu tree and exit (non-interactive)",
+    )
+    ap.add_argument(
+        "--no-interactive",
+        action="store_true",
+        help="Do not start the interactive menu loop",
+    )
     ap.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     args = ap.parse_args()
 

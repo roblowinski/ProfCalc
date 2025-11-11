@@ -1,3 +1,46 @@
+# =============================================================================
+# File Format Detection and Analysis Module
+# =============================================================================
+#
+# FILE: src/profcalc/common/format_detection.py
+#
+# PURPOSE:
+# This module provides intelligent content-based file format detection for
+# beach profile data files. It analyzes file structure and content to
+# automatically identify supported formats (BMAP, CSV, etc.) without relying
+# on file extensions, ensuring accurate format recognition for data import.
+#
+# WHAT IT'S FOR:
+# - Detecting BMAP Free Format files with profile headers and coordinate pairs
+# - Identifying CSV/delimited files with 3-9 columns and various delimiters
+# - Providing confidence levels and detailed detection results
+# - Analyzing file content structure rather than extensions
+# - Supporting user confirmation for ambiguous format detection
+# - Determining if CSV files have header rows
+# - Auto-detecting delimiters in delimited text files
+#
+# WORKFLOW POSITION:
+# This module is used early in the data import process to determine how to
+# parse incoming files. It ensures that the appropriate parser is selected
+# and provides users with confidence information about format detection
+# before proceeding with data processing.
+#
+# LIMITATIONS:
+# - Detection accuracy depends on file content following expected patterns
+# - May require user confirmation for files with ambiguous structure
+# - Limited to supported formats (BMAP, delimited text)
+# - Memory usage for reading file samples during detection
+# - Complex or corrupted files may not be detected correctly
+#
+# ASSUMPTIONS:
+# - Files contain valid beach profile data structures
+# - File content is text-based and readable
+# - Supported formats have distinctive structural patterns
+# - Users can interpret confidence levels and detection details
+# - File samples provide representative content for analysis
+#
+# =============================================================================
+
 """
 File Format Detection Module - Content-based format detection for ProfCalc.
 
@@ -42,9 +85,7 @@ class FormatDetectionResult:
     def get_summary(self) -> str:
         """Get human-readable summary for user confirmation."""
         lines = []
-        lines.append(
-            f"Detected Format: {get_format_description(self.format_type)}"
-        )
+        lines.append(f"Detected Format: {get_format_description(self.format_type)}")
         lines.append(f"Confidence: {self.confidence.upper()}")
 
         if self.details:
@@ -145,9 +186,7 @@ def detect_file_format_detailed(file_path: Path) -> FormatDetectionResult:
     )
 
 
-def _check_bmap_format(
-    lines: list[str], file_path: Path
-) -> FormatDetectionResult:
+def _check_bmap_format(lines: list[str], file_path: Path) -> FormatDetectionResult:
     """
     Check if file content matches BMAP free format structure with detailed analysis.
 
@@ -243,9 +282,7 @@ def _check_bmap_format(
     return FormatDetectionResult("unknown", confidence="low")
 
 
-def _check_delimited_format(
-    lines: list[str], file_path: Path
-) -> FormatDetectionResult:
+def _check_delimited_format(lines: list[str], file_path: Path) -> FormatDetectionResult:
     """
     Check if file content matches delimited format (CSV/TSV/space-delimited) with detailed analysis.
 
@@ -336,9 +373,7 @@ def _check_delimited_format(
 
     details["columns"] = col_count
     details["delimiter"] = delimiter  # Store actual delimiter character
-    details["delimiter_name"] = (
-        delimiter_name  # Also store human-readable name
-    )
+    details["delimiter_name"] = delimiter_name  # Also store human-readable name
     details["extension"] = file_path.suffix or "no extension"
     details["data_rows_sampled"] = checked
     details["consistent_rows"] = consistent_count

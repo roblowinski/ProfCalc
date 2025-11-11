@@ -24,5 +24,7 @@ def test_no_broad_except_exception_in_src():
                 offenders.append(f"{p.relative_to(repo_root)}:{i}: {line.strip()}")
 
     if offenders:
-        msg = "Found broad except Exception clauses in source files:\n" + "\n".join(offenders)
+        msg = "Found broad except Exception clauses in source files:\n" + "\n".join(
+            offenders
+        )
         raise AssertionError(msg)

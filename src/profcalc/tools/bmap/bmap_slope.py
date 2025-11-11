@@ -1,3 +1,43 @@
+# =============================================================================
+# BMAP Linear Slope Profile Generation Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_slope.py
+#
+# PURPOSE:
+# This module generates synthetic beach profiles with linear slope characteristics
+# between specified endpoints. It creates uniform slope profiles that can serve
+# as baselines, design templates, or simplified representations for analysis
+# when detailed survey data is not available or when linear approximations are
+# appropriate.
+#
+# WHAT IT'S FOR:
+# - Generating synthetic profiles with constant linear slopes
+# - Creating baseline profiles for design and planning purposes
+# - Providing simplified profile representations for analysis
+# - Supporting profile reconstruction from limited endpoint data
+# - Enabling slope-based morphological studies
+#
+# WORKFLOW POSITION:
+# This tool is used when simple linear profile approximations are needed,
+# either for design purposes, as reference profiles, or when working with
+# limited data points. It's particularly useful for creating idealized
+# profiles for comparison with observed data.
+#
+# LIMITATIONS:
+# - Generates only linear (constant slope) profiles
+# - Cannot represent complex beach morphologies
+# - Requires accurate endpoint elevations and positions
+# - May not be appropriate for natural beach profile representation
+#
+# ASSUMPTIONS:
+# - Linear slope is appropriate for the intended application
+# - Endpoint coordinates and elevations are accurately specified
+# - Profile spacing is suitable for the intended use
+# - Constant slope adequately represents the profile segment
+#
+# =============================================================================
+
 """
 Module: slope_profile
 Location: profcalc.modules.profiles

@@ -7,7 +7,9 @@ import pytest
 from profcalc.core.aer import calculate_aer
 
 
-def _linear_profile(x0: float, x1: float, n: int, z_offset: float = 0.0) -> tuple[List[float], List[float]]:
+def _linear_profile(
+    x0: float, x1: float, n: int, z_offset: float = 0.0
+) -> tuple[List[float], List[float]]:
     xs = np.linspace(x0, x1, num=n).tolist()
     zs = (np.zeros(n) + z_offset).tolist()
     return xs, zs
@@ -48,7 +50,10 @@ def test_small_dx_converges_to_same_area():
     res_coarse = calculate_aer(xs, za, xs, zb, None, None, dx=5.0)
     res_fine = calculate_aer(xs, za, xs, zb, None, None, dx=0.01)
 
-    assert pytest.approx(res_coarse["cut_cuyd_per_ft"], rel=1e-3) == res_fine["cut_cuyd_per_ft"]
+    assert (
+        pytest.approx(res_coarse["cut_cuyd_per_ft"], rel=1e-3)
+        == res_fine["cut_cuyd_per_ft"]
+    )
 
 
 def test_two_point_sparse_profiles_ok():

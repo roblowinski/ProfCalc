@@ -1,3 +1,45 @@
+# =============================================================================
+# I/O Reports Module for Analysis Output Generation
+# =============================================================================
+#
+# FILE: src/profcalc/common/io_reports.py
+#
+# PURPOSE:
+# This module generates standardized BMAP-style ASCII reports for various
+# beach profile analysis outputs. It provides consistent formatting and
+# export functionality for volume calculations, cut/fill analysis, and
+# morphological feature reports.
+#
+# WHAT IT'S FOR:
+# - Generating Profile Volume Reports with contour levels and volumes
+# - Creating detailed cut/fill analysis reports
+# - Producing bar properties reports for morphological features
+# - Formatting analysis results in BMAP-compatible ASCII format
+# - Exporting tabular data with proper headers and units
+# - Supporting various engineering report formats
+#
+# WORKFLOW POSITION:
+# This module is used at the end of analysis workflows to export results
+# in human-readable and machine-parseable formats. It takes analysis
+# results and converts them into standardized reports that can be
+# shared with stakeholders or imported into other systems.
+#
+# LIMITATIONS:
+# - Output limited to ASCII text format (no binary or graphical output)
+# - Reports follow BMAP conventions which may not suit all audiences
+# - Formatting assumes imperial units (feet, cubic yards)
+# - No built-in plotting or visualization capabilities
+# - Report structure is fixed and not highly customizable
+#
+# ASSUMPTIONS:
+# - Analysis results contain required fields (name, date, volumes, etc.)
+# - Contour levels and units are appropriate for the analysis
+# - Output directories exist or can be created
+# - Users understand BMAP report format conventions
+# - ASCII text format is sufficient for report distribution
+#
+# =============================================================================
+
 """
 io_reports.py
 --------------
@@ -7,7 +49,7 @@ Generates BMAP-style ASCII reports for tool outputs (e.g., Profile Volume Report
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 
@@ -17,7 +59,7 @@ def write_volume_report(
     results: list[dict],
     contour_level: float = 0.0,
     title: Optional[str] = "Untitled",
-):
+) -> None:
     """
     Writes a BMAP-style 'Profile Volume Report' to ASCII.
     results: list of dicts with keys:
@@ -34,9 +76,7 @@ def write_volume_report(
         f.write(f"{title}\n")
         f.write("Profile Volume Report\n")
         f.write(f"Contour Level:\t{contour_level:.2f} ft\t\t\t\n\n")
-        f.write(
-            "Profile\tXOn(ft)\tXOff(ft)\tVolume(cu. yd/ft)\tContour Location(ft)\n"
-        )
+        f.write("Profile\tXOn(ft)\tXOff(ft)\tVolume(cu. yd/ft)\tContour Location(ft)\n")
 
         for r in results:
             name_parts = [r.get("name", "")]
@@ -72,7 +112,7 @@ def write_cutfill_detailed_report(
     shoreline_to_x: float,
     shoreline_change: float,
     cells: list[dict],
-):
+) -> None:
     """
     Writes a BMAP-style 'Cut and Fill Report' including the per-cell table.
 
@@ -94,23 +134,15 @@ def write_cutfill_detailed_report(
         f.write(f"XOn:\t{x_on:.2f} ft\t\t\t\t\t\n")
         f.write(f"XOff:\t{x_off:.2f} ft\t\t\t\t\t\n")
         f.write("Volume Change:\t\t\t\t\t\t\n")
-        f.write(
-            f"   Above Datum:\t{above_datum_cuyd_per_ft:.3f} cu. yd/ft\t\t\t\t\t\n"
-        )
-        f.write(
-            f"   Below Datum:\t{below_datum_cuyd_per_ft:.3f} cu.yd/ft\t\t\t\t\t\n"
-        )
-        f.write(
-            f"Total Volume:\t{total_volume_cuyd_per_ft:.3f} cu.yd/ft\t\t\t\t\t\n"
-        )
+        f.write(f"   Above Datum:\t{above_datum_cuyd_per_ft:.3f} cu. yd/ft\t\t\t\t\t\n")
+        f.write(f"   Below Datum:\t{below_datum_cuyd_per_ft:.3f} cu.yd/ft\t\t\t\t\t\n")
+        f.write(f"Total Volume:\t{total_volume_cuyd_per_ft:.3f} cu.yd/ft\t\t\t\t\t\n")
 
         # Shoreline section
         if (shoreline_from_x == shoreline_from_x) and (
             shoreline_to_x == shoreline_to_x
         ):  # not NaN
-            f.write(
-                f"Shoreline Change:\t{shoreline_change:.2f} ft\t\t\t\t\t\n"
-            )
+            f.write(f"Shoreline Change:\t{shoreline_change:.2f} ft\t\t\t\t\t\n")
             f.write(f"   From:\t{shoreline_from_x:.2f} ft\t\t\t\t\t\n")
             f.write(f"   To:\t{shoreline_to_x:.2f} ft\t\t\t\t\t\n")
         else:
@@ -155,7 +187,7 @@ def write_bar_properties_report(
     bar_volume_cuyd_per_ft: float,
     bar_length_ft: float,
     center_of_mass_x_ft: float,
-):
+) -> None:
     """
     Writes an ASCII report like BMAP's Bar Properties output.
 
@@ -165,7 +197,7 @@ def write_bar_properties_report(
     - Center of Mass is the centroid X of volume (ft).
     """
 
-    def fmt(v, nd=2):
+    def fmt(v: Optional[Union[float, str]], nd: int = 2) -> str:
         if v is None:
             return ""
         if isinstance(v, float):

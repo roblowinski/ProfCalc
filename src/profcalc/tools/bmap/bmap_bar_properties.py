@@ -1,3 +1,43 @@
+# =============================================================================
+# BMAP Bar Properties Analysis Tool
+# =============================================================================
+#
+# FILE: src/profcalc/tools/bmap/bmap_bar_properties.py
+#
+# PURPOSE:
+# This module implements BMAP-style bar properties analysis, providing
+# detailed characterization of sandbar morphology by comparing reference
+# and specific beach profiles. It identifies bar locations, measures
+# dimensions, and calculates volumetric properties of nearshore sandbars.
+#
+# WHAT IT'S FOR:
+# - Detecting sandbar locations through profile crossing analysis
+# - Measuring bar dimensions (length, height, depth)
+# - Calculating bar volumes above trough baselines
+# - Determining center of mass locations for bars
+# - Supporting manual and automatic bar boundary detection
+# - Generating detailed bar properties reports
+#
+# WORKFLOW POSITION:
+# This tool is used in morphological analysis workflows to quantify
+# sandbar characteristics and changes over time. It's essential for
+# understanding nearshore sediment transport and beach morphodynamic
+# processes.
+#
+# LIMITATIONS:
+# - Requires reference and specific profiles for automatic detection
+# - Bar detection depends on profile resolution and crossing identification
+# - Manual window specification may be needed for complex bar systems
+# - Volume calculations assume horizontal trough baselines
+#
+# ASSUMPTIONS:
+# - Profile pairs represent the same physical cross-section over time
+# - Bar features are identifiable through elevation differences
+# - Crossing pairs correctly identify bar boundaries
+# - Users can select appropriate bar pairs for analysis
+#
+# =============================================================================
+
 """
 bar_properties.py
 -----------------
@@ -43,7 +83,7 @@ from typing import List, Tuple
 
 import numpy as np
 
-from profcalc.common.bmap_io import read_bmap_freeformat
+from profcalc.common.bmap_io import Profile, read_bmap_freeformat
 from profcalc.common.config_utils import get_dx
 from profcalc.common.error_handler import LogComponent, get_logger
 from profcalc.common.io_reports import write_bar_properties_report
@@ -62,16 +102,12 @@ def _label(p) -> str:
     return " ".join(parts).strip()
 
 
-def _ensure_sorted(
-    x: np.ndarray, z: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
+def _ensure_sorted(x: np.ndarray, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     idx = np.argsort(x)
     return x[idx], z[idx]
 
 
-def _interp1d_flat_extend(
-    x: np.ndarray, z: np.ndarray, xg: np.ndarray
-) -> np.ndarray:
+def _interp1d_flat_extend(x: np.ndarray, z: np.ndarray, xg: np.ndarray) -> np.ndarray:
     """
     Linear interpolation with flat extension beyond native bounds.
     """
@@ -96,9 +132,7 @@ def _build_common_grid(p1, p2, dx: float) -> np.ndarray:
     return np.arange(xmin, xmax + dx, dx)
 
 
-def _zero_crossings(
-    xg: np.ndarray, yr: np.ndarray, ys: np.ndarray
-) -> List[float]:
+def _zero_crossings(xg: np.ndarray, yr: np.ndarray, ys: np.ndarray) -> List[float]:
     """
     Find zero crossings of (yr - ys) along xg using linear interpolation.
     Returns a sorted list of crossing X locations (landward->seaward).
@@ -159,9 +193,7 @@ class BarProps:
     centroid_x_ft: float  # NaN if volume ~ 0
 
 
-def _interp_clip(
-    x: np.ndarray, z: np.ndarray, x1: float, x2: float, dx: float
-):
+def _interp_clip(x: np.ndarray, z: np.ndarray, x1: float, x2: float, dx: float):
     x, z = _ensure_sorted(x, z)
     if x2 <= x1:
         raise ValueError("xend must be greater than xstart")
@@ -171,7 +203,7 @@ def _interp_clip(
 
 
 def compute_bar_properties_specific(
-    profile, xstart: float, xend: float, dx: float
+    profile: Profile, xstart: float, xend: float, dx: float
 ) -> BarProps:
     """
     Compute bar properties within [xstart, xend] using SPECIFIC profile elevations.
@@ -222,7 +254,7 @@ def compute_bar_properties_specific(
 # ----------------------------
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(
         description="BMAP-style Bar Properties (with crossing pairs)."
     )
@@ -343,9 +375,7 @@ def main():
     else:
         # Manual window mode (Reference=None)
         if args.xstart is None or args.xend is None:
-            raise SystemExit(
-                "Reference=None mode requires --xstart and --xend."
-            )
+            raise SystemExit("Reference=None mode requires --xstart and --xend.")
         xstart, xend = float(args.xstart), float(args.xend)
 
     # Compute properties on Specific within [xstart, xend]

@@ -1,3 +1,41 @@
+# =============================================================================
+# CLI Session and Context Management
+# =============================================================================
+#
+# FILE: src/profcalc/cli/context.py
+#
+# PURPOSE:
+# This module provides session and context management for the ProfCalc CLI
+# interface, enabling tracking and management of datasets during interactive
+# sessions. It maintains a lightweight in-memory registry of loaded datasets
+# with unique identifiers for easy reference and switching.
+#
+# WHAT IT'S FOR:
+# - Managing dataset sessions during CLI operations
+# - Providing unique identifiers for loaded datasets
+# - Enabling dataset switching and selection
+# - Supporting interactive workflow state management
+# - Facilitating dataset reference in menu operations
+#
+# WORKFLOW POSITION:
+# This module sits at the core of CLI operations, providing the session
+# management layer that other CLI components use to track and reference
+# datasets. It's used throughout the menu system and tool operations.
+#
+# LIMITATIONS:
+# - In-memory only, no persistence across sessions
+# - Limited to basic dataset registration and selection
+# - No dataset validation or preprocessing
+# - Single active dataset at a time
+#
+# ASSUMPTIONS:
+# - Dataset paths are valid and accessible
+# - UUID generation provides sufficient uniqueness
+# - In-memory storage is adequate for session duration
+# - Dataset metadata is minimal and doesn't require complex storage
+#
+# =============================================================================
+
 """Session/Context management for dataset tracking."""
 
 import uuid
@@ -46,6 +84,9 @@ class Session:
 
     def set_active(self, dataset_id: str) -> None:
         """Set the active dataset by its id.
+
+        Parameters:
+            dataset_id: The dataset ID to set as active.
 
         Raises:
             ValueError: If the provided ``dataset_id`` is not registered.
